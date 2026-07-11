@@ -14,7 +14,7 @@ from app.db.collections import CollectionName
 from app.models.enums import MedicationStatus
 from app.models.medication import MedicationDocument
 from app.models.object_id import to_object_id
-from app.repositories.base import BaseRepository
+from app.repositories.base import BaseRepository, to_bson_safe
 from app.repositories.errors import map_pymongo_error
 from app.repositories.exceptions import (
     RepositoryConflictError,
@@ -155,6 +155,7 @@ class MedicationRepository(BaseRepository[MedicationDocument]):
                 payload[key] = value
 
         payload["updated_at"] = utc_now()
+        payload = to_bson_safe(payload)
         filters = self._merge_filters(
             {
                 "_id": to_object_id(medication_id),

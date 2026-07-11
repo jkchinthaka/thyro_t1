@@ -33,17 +33,18 @@ Set in the Cloudflare build environment (not committed):
 
 | Variable            | Required when             | Notes                                                             |
 | ------------------- | ------------------------- | ----------------------------------------------------------------- |
-| `VITE_API_BASE_URL` | `VITE_APP_ENV=production` | Public HTTPS API base ending with `/api/v1`. **Never localhost.** |
-| `VITE_APP_NAME`     | optional                  | Defaults to ThyroCare AI                                          |
-| `VITE_APP_ENV`      | optional                  | Use `production` only when a real API URL is configured           |
+| `VITE_API_BASE_URL` | yes for production | `https://thyro-t1.onrender.com/api/v1` (**Never localhost.**) |
+| `VITE_APP_NAME`     | recommended        | `ThyroCare AI`                                                  |
+| `VITE_APP_ENV`      | yes for production | `production`                                                    |
 
 Vite embeds these into the JS bundle at **build** time. Changing them requires a new build and deploy.
 
 See `.env.production.example`. Do not commit `.env.production`.
 
-### Frontend-only status
+### Production API
 
-Until a public backend exists, builds may omit `VITE_APP_ENV=production`. Production bundles **never** fall back to localhost. API features will not work until a public `VITE_API_BASE_URL` is set and the app is rebuilt.
+Backend: `https://thyro-t1.onrender.com` (Render Web Service, root directory `backend`).
+Frontend builds must set `VITE_API_BASE_URL=https://thyro-t1.onrender.com/api/v1`. Production bundles **never** fall back to localhost.
 
 ## SPA fallback
 
