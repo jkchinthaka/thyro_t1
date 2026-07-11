@@ -175,8 +175,22 @@ def main() -> int:
             "symptom_type": "fatigue",
             "severity": "mild",
             "status": "active",
-            "frequency": "daily",
+            "frequency": "occasional",
             "started_at": "2026-07-01T08:00:00+00:00",
+            "timezone": "UTC",
+            "description": "",
+            "notes": "",
+            "safety_answers": {
+                "breathing_emergency": False,
+                "severe_chest_discomfort": False,
+                "loss_of_consciousness": False,
+                "severe_or_rapid_neck_swelling": False,
+                "unable_to_swallow": False,
+                "uncontrolled_bleeding": False,
+                "severe_new_confusion": False,
+                "rapidly_worsening_condition": False,
+                "feels_immediately_unsafe": False,
+            },
         },
     )
     check("symptom create", code in {200, 201}, f"code={code}")

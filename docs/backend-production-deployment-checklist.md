@@ -39,4 +39,12 @@ See `docs/production-auth-cookie-and-cors.md` for SameSite / Secure combinations
 
 ## Current status
 
-FastAPI is **not** deployed as part of the Cloudflare static Worker. Treat backend as undeployed until a host is provisioned and health checks pass.
+| Item                   | Value                                              |
+| ---------------------- | -------------------------------------------------- |
+| Backend URL            | `https://thyro-t1.onrender.com`                    |
+| Health                 | `GET /health`, `GET /api/v1/health`                |
+| Frontend origin (CORS) | `https://thyrot1.chinthakajayaweera1.workers.dev`  |
+| Root directory         | `backend`                                          |
+| Start command          | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
+
+After each `main` push, confirm Render deployed the matching commit (Manual Deploy if auto-deploy is delayed). Medication create requires the BSON date/time serialization fix (`to_bson_safe`).
