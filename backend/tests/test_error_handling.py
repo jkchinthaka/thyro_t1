@@ -22,7 +22,7 @@ async def _fake_close() -> None:
     mongodb_module.mongo_state.connected = False
 
 
-async def _fake_indexes() -> None:
+async def _fake_initialize(_settings: Any) -> None:
     return None
 
 
@@ -41,7 +41,7 @@ async def test_unknown_route_safe_404(client: AsyncClient) -> None:
 async def test_validation_error_format(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(mongodb_module, "connect_to_mongo", _fake_connect)
     monkeypatch.setattr(mongodb_module, "close_mongo_connection", _fake_close)
-    monkeypatch.setattr("app.main.ensure_indexes", _fake_indexes)
+    monkeypatch.setattr("app.main.initialize_database", _fake_initialize)
 
     app = create_application()
 
@@ -63,7 +63,7 @@ async def test_validation_error_format(monkeypatch: pytest.MonkeyPatch) -> None:
 async def test_unhandled_exception_hides_stack(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setattr(mongodb_module, "connect_to_mongo", _fake_connect)
     monkeypatch.setattr(mongodb_module, "close_mongo_connection", _fake_close)
-    monkeypatch.setattr("app.main.ensure_indexes", _fake_indexes)
+    monkeypatch.setattr("app.main.initialize_database", _fake_initialize)
 
     app = create_application()
 
@@ -71,8 +71,6 @@ async def test_unhandled_exception_hides_stack(monkeypatch: pytest.MonkeyPatch) 
     async def boom() -> None:
         raise RuntimeError("secret-stack-trace-should-not-leak")
 
-    # Starlette ServerErrorMiddleware always re-raises after the handler for
-    # server/test logging; disable transport re-raise to assert the HTTP body.
     transport = ASGITransport(app=app, raise_app_exceptions=False)
     async with AsyncClient(transport=transport, base_url="http://testserver") as ac:
         response = await ac.get("/__test/boom")

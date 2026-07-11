@@ -9,70 +9,47 @@
 
 ## Phase status
 
-| Phase | Title                         | Status       | Date       |
-| ----- | ----------------------------- | ------------ | ---------- |
-| 0     | Project discovery and safety  | **Complete** | 2026-07-11 |
-| 1     | Frontend structural refactor  | **Complete** | 2026-07-11 |
-| 2     | Routing and application shell | **Complete** | 2026-07-11 |
-| 3     | Frontend quality foundation   | **Complete** | 2026-07-11 |
-| 4     | FastAPI backend foundation    | **Complete** | 2026-07-11 |
-| 5–22  | Remaining roadmap             | Not started  | —          |
-
----
-
-## Phase 0 — Completion report
-
-- Baseline audit, backups, build/dev validation, commit `2d69852`.
-
----
-
-## Phase 1 — Completion report
-
-- Modular pages/components; UI preserved; commit `197382c`.
-
----
-
-## Phase 2 — Completion report
-
-- React Router, protected layouts, lazy pages; commit `2175a82`.
-- Authentication remains **mock-only**.
-
----
-
-## Phase 3 — Completion report
-
-- Strict TypeScript, ESLint/Prettier, env, Axios foundation, forms, a11y; commit `7443b8b`.
-- Lint: 0 errors, 2 documented react-refresh warnings.
+| Phase | Title                                  | Status       | Date       |
+| ----- | -------------------------------------- | ------------ | ---------- |
+| 0     | Project discovery and safety           | **Complete** | 2026-07-11 |
+| 1     | Frontend structural refactor           | **Complete** | 2026-07-11 |
+| 2     | Routing and application shell          | **Complete** | 2026-07-11 |
+| 3     | Frontend quality foundation            | **Complete** | 2026-07-11 |
+| 4     | FastAPI backend foundation             | **Complete** | 2026-07-11 |
+| 5     | MongoDB models & repository foundation | **Complete** | 2026-07-11 |
+| 6–22  | Remaining roadmap                      | Not started  | —          |
 
 ---
 
 ## Phase 4 — Completion report
 
+- FastAPI foundation; commit `79323f7`.
+
+---
+
+## Phase 5 — Completion report
+
 ### What was done
 
-1. Wrote `docs/phase-4-backend-plan.md` before implementation.
-2. Created `backend/` FastAPI package with config, logging, exceptions, middleware, Mongo foundation, health routes.
-3. Added pytest suite (10 tests), Ruff, Dockerfile, `.env.example`.
-4. Documented Mongo degraded/unhealthy behavior; no domain collections.
-5. Validated ruff, pytest, uvicorn health/OpenAPI, and frontend regression.
+1. Planned in `docs/phase-5-database-plan.md`.
+2. Migrated Motor → PyMongo `AsyncMongoClient`.
+3. Added collections, ObjectId helpers, enums, persistence models, public schemas.
+4. Implemented BaseRepository + domain repositories with ownership filters.
+5. Defined named indexes (including TTL), initialization, and migration registry.
+6. Documented privacy, design, indexes, repository architecture, validation strategy.
+7. Added unit tests (35) and optional integration marker.
 
 ### Validation
 
-- Backend ruff / pytest: **PASS** (10 tests)
-- Uvicorn `/health`, `/api/v1/health`, `/docs`, `/redoc`, `/openapi.json`: **PASS**
-- Frontend typecheck / lint / format:check / build: **PASS**
-- Phase 5: **not started**
-
-### Artifacts
-
-- `docs/phase-4-backend-plan.md`
-- `docs/phase-4-backend-foundation.md`
-- `docs/phase-4-validation.md`
-- `backend/README.md`
+- Backend ruff / pytest: **PASS** (35 unit tests)
+- Integration: skipped without index privileges (safe)
+- Health / OpenAPI regression: **PASS**
+- Frontend regression: **PASS**
+- Phase 6: **not started**
 
 ### Next phase
 
-Phase 5 — database schema / domain collections. Do not start until approved.
+Phase 6 — authentication. Do not start until approved.
 
 ---
 
@@ -80,8 +57,5 @@ Phase 5 — database schema / domain collections. Do not start until approved.
 
 | Date       | Change                                         |
 | ---------- | ---------------------------------------------- |
-| 2026-07-11 | Phase 0 baseline established                   |
-| 2026-07-11 | Phase 1 frontend modularization complete       |
-| 2026-07-11 | Phase 2 routing and protected layouts complete |
-| 2026-07-11 | Phase 3 frontend quality foundation complete   |
-| 2026-07-11 | Phase 4 FastAPI backend foundation complete    |
+| 2026-07-11 | Phase 0–4 complete                             |
+| 2026-07-11 | Phase 5 MongoDB repository foundation complete |

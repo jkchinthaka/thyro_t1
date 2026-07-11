@@ -1,4 +1,4 @@
-"""Shared pytest fixtures — no real MongoDB required."""
+"""Shared pytest fixtures — no real MongoDB required for the default suite."""
 
 from __future__ import annotations
 
@@ -17,6 +17,9 @@ os.environ.setdefault("RATE_LIMIT_ENABLED", "false")
 os.environ.setdefault("ALLOWED_ORIGINS", "http://localhost:5173")
 os.environ.setdefault("MONGODB_URI", "mongodb://localhost:27017")
 os.environ.setdefault("MONGODB_DATABASE", "thyrocare_ai_test")
+os.environ.setdefault("DATABASE_TEST_NAME", "thyrocare_ai_test")
+os.environ.setdefault("DATABASE_AUTO_INITIALIZE", "false")
+os.environ.setdefault("DATABASE_RUN_MIGRATIONS", "false")
 os.environ.setdefault("LOG_LEVEL", "WARNING")
 
 from app.core.config import get_settings
@@ -43,21 +46,24 @@ async def client(monkeypatch: pytest.MonkeyPatch) -> AsyncIterator[AsyncClient]:
         mongodb_module.mongo_state.client = None
         mongodb_module.mongo_state.database = None
         mongodb_module.mongo_state.last_error = "test_skipped"
+        mongodb_module.mongo_state.initialized = False
 
     async def fake_close() -> None:
         mongodb_module.mongo_state.connected = False
         mongodb_module.mongo_state.client = None
+        mongodb_module.mongo_state.database = None
+        mongodb_module.mongo_state.initialized = False
 
     async def fake_ping() -> dict[str, Any]:
         return {"connected": False, "status": "disconnected", "error": "test_skipped"}
 
-    async def fake_indexes() -> None:
+    async def fake_initialize(_settings: Any) -> None:
         return None
 
     monkeypatch.setattr(mongodb_module, "connect_to_mongo", fake_connect)
     monkeypatch.setattr(mongodb_module, "close_mongo_connection", fake_close)
     monkeypatch.setattr(mongodb_module, "ping_mongo", fake_ping)
-    monkeypatch.setattr("app.main.ensure_indexes", fake_indexes)
+    monkeypatch.setattr("app.main.initialize_database", fake_initialize)
 
     application = create_application()
     transport = ASGITransport(app=application)

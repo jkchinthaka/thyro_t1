@@ -1,10 +1,15 @@
-"""MongoDB connection foundation (Motor). No domain collections in Phase 4."""
+"""MongoDB connection foundation using PyMongo AsyncMongoClient.
+
+One AsyncMongoClient per application event loop (FastAPI lifespan).
+Motor is not used.
+"""
 
 from __future__ import annotations
 
 from typing import Any
 
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from pymongo import AsyncMongoClient
+from pymongo.asynchronous.database import AsyncDatabase
 
 from app.core.config import Settings
 from app.core.logging import get_logger
@@ -13,10 +18,11 @@ logger = get_logger(__name__)
 
 
 class MongoState:
-    client: AsyncIOMotorClient | None = None
-    database: AsyncIOMotorDatabase | None = None
+    client: AsyncMongoClient | None = None
+    database: AsyncDatabase | None = None
     connected: bool = False
     last_error: str | None = None
+    initialized: bool = False
 
 
 mongo_state = MongoState()
@@ -25,11 +31,13 @@ mongo_state = MongoState()
 async def connect_to_mongo(settings: Settings) -> None:
     """Attempt MongoDB connection. Development may continue degraded if unavailable."""
     mongo_state.last_error = None
+    mongo_state.initialized = False
     try:
-        client: AsyncIOMotorClient = AsyncIOMotorClient(
+        client: AsyncMongoClient = AsyncMongoClient(
             settings.mongodb_uri,
-            serverSelectionTimeoutMS=3000,
-            connectTimeoutMS=3000,
+            serverSelectionTimeoutMS=settings.mongodb_server_selection_timeout_ms,
+            connectTimeoutMS=settings.mongodb_connect_timeout_ms,
+            socketTimeoutMS=settings.mongodb_socket_timeout_ms,
         )
         await client.admin.command("ping")
         mongo_state.client = client
@@ -45,17 +53,18 @@ async def connect_to_mongo(settings: Settings) -> None:
             "MongoDB unavailable (%s). API will report degraded health until Mongo is reachable.",
             type(exc).__name__,
         )
-        if settings.is_production:
-            logger.error("Production MongoDB connection failed — health will be unhealthy")
+        if settings.is_production or settings.database_require_connection:
+            logger.error("MongoDB connection failed — health will be unhealthy")
 
 
 async def close_mongo_connection() -> None:
     if mongo_state.client is not None:
-        mongo_state.client.close()
+        await mongo_state.client.close()
         logger.info("MongoDB connection closed")
     mongo_state.client = None
     mongo_state.database = None
     mongo_state.connected = False
+    mongo_state.initialized = False
 
 
 async def ping_mongo() -> dict[str, Any]:
@@ -81,5 +90,9 @@ async def ping_mongo() -> dict[str, Any]:
         }
 
 
-def get_database() -> AsyncIOMotorDatabase | None:
+def get_database() -> AsyncDatabase | None:
     return mongo_state.database
+
+
+def get_client() -> AsyncMongoClient | None:
+    return mongo_state.client

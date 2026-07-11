@@ -15,7 +15,8 @@ Educational patient-support prototype for differentiated thyroid cancer survivor
 - **Phase 2:** Complete (React Router, protected layouts, lazy pages)
 - **Phase 3:** Complete (TypeScript strictness, ESLint/Prettier, env, Axios foundation, forms, a11y)
 - **Phase 4:** Complete (FastAPI backend foundation — health/infra only)
-- **Phase 5+:** Not started
+- **Phase 5:** Complete (PyMongo Async models, repositories, indexes — no public CRUD)
+- **Phase 6+:** Not started
 
 Mock data remains under `src/data/mock/` and is **not** live clinical data.
 
@@ -25,7 +26,7 @@ Mock data remains under `src/data/mock/` and is **not** live clinical data.
 
 Accessibility improvements move toward WCAG 2.1 AA practices; formal certification has not been performed. See [`docs/accessibility-improvements.md`](docs/accessibility-improvements.md).
 
-Docs: [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md) · [`docs/phase-4-backend-foundation.md`](docs/phase-4-backend-foundation.md) · [`docs/phase-4-validation.md`](docs/phase-4-validation.md)
+Docs: [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md) · [`docs/phase-5-database-foundation.md`](docs/phase-5-database-foundation.md) · [`docs/phase-5-validation.md`](docs/phase-5-validation.md)
 
 ---
 
@@ -44,7 +45,7 @@ Docs: [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md) · [`docs/phase-4-backend-fou
 | Charts   | Recharts                            |
 | Icons    | lucide-react                        |
 | Backend  | FastAPI + Uvicorn (Phase 4)         |
-| Database | MongoDB via Motor (connection only) |
+| Database | MongoDB via PyMongo AsyncMongoClient |
 
 ---
 
@@ -77,7 +78,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 See [`backend/README.md`](backend/README.md).
 
-**Phase 4 limitations:** no user registration, login, JWT, domain collections, medications, appointments, symptoms, chatbot, or AI endpoints.
+**Phase 4–5 limitations:** no user registration, login, JWT, password hashing, or public domain CRUD endpoints. Persistence models/repositories exist for later phases.
 
 ### Developer scripts (frontend)
 
@@ -156,9 +157,9 @@ src/
 
 1. Modular frontend + routing ← done (Phases 1–2)
 2. Quality / accessibility foundation ← done (Phase 3)
-3. FastAPI backend foundation ← **done (Phase 4)**
-4. Database schema / domain collections (Phase 5 — not started)
-5. Auth, profiles, clinical support modules
+3. FastAPI backend foundation ← done (Phase 4)
+4. MongoDB models & repositories ← **done (Phase 5)**
+5. Auth, profiles, clinical support modules (Phase 6 — not started)
 6. Governed medical knowledge + safe RAG chatbot
 7. Admin / medical expert workflows
 8. Tests, security, Docker Compose, deployment docs

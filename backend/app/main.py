@@ -18,7 +18,7 @@ from app.api.v1.router import api_router
 from app.core.config import Settings, get_settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import configure_logging, get_logger
-from app.db.indexes import ensure_indexes
+from app.db.initialize import initialize_database
 from app.db.mongodb import close_mongo_connection, connect_to_mongo
 from app.middleware.request_id import RequestIdMiddleware
 from app.middleware.security import SecurityHeadersMiddleware
@@ -33,8 +33,8 @@ ThyroCare AI API — patient-support research system for post-thyroidectomy thyr
 **Medical disclaimer:** This system provides informational support only. It does **not** replace
 professional medical advice, diagnosis, or emergency care.
 
-**Phase 4 scope:** infrastructure endpoints only (health, middleware, configuration).
-Medical, user, authentication, and AI endpoints are **not** implemented yet.
+**Phase 4–5 scope:** infrastructure and persistence foundation only.
+Medical, user authentication, and AI HTTP endpoints are **not** implemented yet.
 """
 
 
@@ -59,7 +59,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
         settings.app_environment,
     )
     await connect_to_mongo(settings)
-    await ensure_indexes()
+    await initialize_database(settings)
     yield
     await close_mongo_connection()
     logger.info("Shutdown complete")
