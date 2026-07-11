@@ -1,11 +1,12 @@
 import { useState } from "react";
-import { AlertTriangle, CheckCircle, Plus } from "lucide-react";
+import { AlertTriangle } from "lucide-react";
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import { Card, Badge, Btn } from "@/components/common";
+import { MedicationCard } from "@/components/medication";
 import { DashboardLayout } from "@/layouts";
-import { TEAL, GREEN } from "@/constants/colors";
+import { TEAL, GREEN, GRAY } from "@/constants/colors";
 import type { SetScreen } from "@/types";
 import {
   mockMedications,
@@ -32,34 +33,13 @@ export function MedicationPage({ setScreen }: { setScreen: SetScreen }) {
 
           {meds.map(med => {
             const isTaken = taken.includes(med.id);
-            const Icon = med.icon;
             return (
-              <Card key={med.id} className={`border-l-4 transition-all ${isTaken ? "opacity-70" : ""}`} style={{ borderLeftColor: med.color }}>
-                <div className="flex items-center gap-4">
-                  <div className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0" style={{ background: `${med.color}18` }}>
-                    <Icon className="w-6 h-6" style={{ color: med.color }} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <h3 className="font-bold text-foreground" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{med.name}</h3>
-                      <Badge color={isTaken ? "green" : "blue"}>{isTaken ? "Taken" : "Pending"}</Badge>
-                    </div>
-                    <p className="text-sm text-muted-foreground">{med.dose} · {med.time}</p>
-                    <p className="text-xs text-muted-foreground mt-0.5">{med.instruction}</p>
-                  </div>
-                  <button
-                    onClick={() => setTaken(t => isTaken ? t.filter(x => x !== med.id) : [...t, med.id])}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition cursor-pointer ${
-                      isTaken
-                        ? "bg-green-100 text-green-700 hover:bg-green-200"
-                        : "text-white hover:opacity-90"
-                    }`}
-                    style={!isTaken ? { background: `linear-gradient(135deg, ${med.color}, ${TEAL})` } : {}}
-                  >
-                    {isTaken ? <><CheckCircle className="w-4 h-4" /> Taken</> : <><Plus className="w-4 h-4" /> Mark Taken</>}
-                  </button>
-                </div>
-              </Card>
+              <MedicationCard
+                key={med.id}
+                med={med}
+                isTaken={isTaken}
+                onToggle={() => setTaken(t => isTaken ? t.filter(x => x !== med.id) : [...t, med.id])}
+              />
             );
           })}
 
