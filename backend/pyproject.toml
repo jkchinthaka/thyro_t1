@@ -1,7 +1,7 @@
 [project]
 name = "thyrocare-ai-backend"
 version = "0.1.0"
-description = "ThyroCare AI FastAPI backend (Phase 5 persistence foundation)"
+description = "ThyroCare AI FastAPI backend (Phase 6 authentication)"
 requires-python = ">=3.11"
 readme = "README.md"
 
