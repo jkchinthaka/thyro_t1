@@ -20,9 +20,15 @@ export function RouteErrorPage() {
     : "An unexpected error occurred.";
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center px-6" style={{ fontFamily: "'Inter', sans-serif" }}>
+    <div
+      className="min-h-screen bg-background flex flex-col items-center justify-center px-6"
+      style={{ fontFamily: "'Inter', sans-serif" }}
+    >
       <BrandLogo size="md" className="mb-6" />
-      <h1 className="text-2xl font-bold text-foreground mb-2" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+      <h1
+        className="text-2xl font-bold text-foreground mb-2"
+        style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
+      >
         Unable to load page
       </h1>
       <p className="text-muted-foreground text-center max-w-md mb-6">{message}</p>

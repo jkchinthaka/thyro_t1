@@ -8,12 +8,12 @@
 
 ## Build result
 
-| Check | Result |
-|-------|--------|
-| `npm run build` | **PASS** |
-| Build duration (final) | ~6.0s |
-| `npm run typecheck` | Script not present (deferred to Phase 3) |
-| `npm run lint` | Script not present (deferred to Phase 3) |
+| Check                  | Result                                   |
+| ---------------------- | ---------------------------------------- |
+| `npm run build`        | **PASS**                                 |
+| Build duration (final) | ~6.0s                                    |
+| `npm run typecheck`    | Script not present (deferred to Phase 3) |
+| `npm run lint`         | Script not present (deferred to Phase 3) |
 
 ---
 
@@ -21,24 +21,24 @@
 
 ### Before (Phase 1 screen-state shell)
 
-| Asset | Size | Gzip |
-|-------|------|------|
+| Asset   | Size          | Gzip      |
+| ------- | ------------- | --------- |
 | Main JS | **654.81 kB** | 183.18 kB |
-| CSS | 104.44 kB | 16.84 kB |
+| CSS     | 104.44 kB     | 16.84 kB  |
 
 Warning: chunks larger than 500 kB.
 
 ### After (Phase 2 lazy routes)
 
-| Asset | Size | Gzip |
-|-------|------|------|
-| Main JS (`index-*.js`) | **255.36 kB** | 83.48 kB |
-| Recharts shared chunk | 384.35 kB | 106.12 kB |
-| AnalyticsPage lazy | 29.77 kB | 8.26 kB |
-| ChatPage lazy | 8.58 kB | 3.21 kB |
-| LandingPage lazy | 6.71 kB | 2.26 kB |
-| Other page chunks | ~0.8–7 kB each | — |
-| CSS | 104.61 kB | 16.90 kB |
+| Asset                  | Size           | Gzip      |
+| ---------------------- | -------------- | --------- |
+| Main JS (`index-*.js`) | **255.36 kB**  | 83.48 kB  |
+| Recharts shared chunk  | 384.35 kB      | 106.12 kB |
+| AnalyticsPage lazy     | 29.77 kB       | 8.26 kB   |
+| ChatPage lazy          | 8.58 kB        | 3.21 kB   |
+| LandingPage lazy       | 6.71 kB        | 2.26 kB   |
+| Other page chunks      | ~0.8–7 kB each | —         |
+| CSS                    | 104.61 kB      | 16.90 kB  |
 
 **Initial main bundle decreased** from ~655 kB to ~255 kB (confirmed by build output). Recharts remains a large shared async chunk when chart pages load.
 
@@ -48,65 +48,65 @@ Warning: chunks larger than 500 kB.
 
 ### Public
 
-| URL | Expected | Result |
-|-----|----------|--------|
-| `/` | Landing | PASS (route configured + build) |
-| `/login` | Login | PASS |
-| `/register` | Register | PASS |
-| `/emergency` | Emergency | PASS |
+| URL          | Expected  | Result                          |
+| ------------ | --------- | ------------------------------- |
+| `/`          | Landing   | PASS (route configured + build) |
+| `/login`     | Login     | PASS                            |
+| `/register`  | Register  | PASS                            |
+| `/emergency` | Emergency | PASS                            |
 
 ### Patient (protected)
 
-| URL | Expected | Result |
-|-----|----------|--------|
-| `/dashboard` | Dashboard (auth) / redirect login | PASS |
-| `/chat` | Chat | PASS |
-| `/medications` | Medication | PASS |
-| `/diet` | Diet | PASS |
-| `/symptoms` | Symptoms | PASS |
-| `/follow-ups` | Follow-up | PASS |
-| `/analytics` | Analytics | PASS |
-| `/resources` | Resources | PASS |
-| `/profile` | Profile | PASS |
+| URL            | Expected                          | Result |
+| -------------- | --------------------------------- | ------ |
+| `/dashboard`   | Dashboard (auth) / redirect login | PASS   |
+| `/chat`        | Chat                              | PASS   |
+| `/medications` | Medication                        | PASS   |
+| `/diet`        | Diet                              | PASS   |
+| `/symptoms`    | Symptoms                          | PASS   |
+| `/follow-ups`  | Follow-up                         | PASS   |
+| `/analytics`   | Analytics                         | PASS   |
+| `/resources`   | Resources                         | PASS   |
+| `/profile`     | Profile                           | PASS   |
 
 ### System
 
-| URL | Expected | Result |
-|-----|----------|--------|
-| `/unauthorized` | Unauthorized page | PASS |
-| `/this-does-not-exist` | NotFound | PASS |
+| URL                    | Expected          | Result |
+| ---------------------- | ----------------- | ------ |
+| `/unauthorized`        | Unauthorized page | PASS   |
+| `/this-does-not-exist` | NotFound          | PASS   |
 
 ---
 
 ## Navigation / history
 
-| Scenario | Result |
-|----------|--------|
-| Landing CTAs → login/register/emergency/chat | PASS (useNavigate + ROUTES) |
-| Login → dashboard (mock auth) | PASS |
-| Register → dashboard (mock auth) | PASS |
-| Sidebar NavLink active state from URL | PASS |
-| Logo → dashboard | PASS |
-| Logout → `/` + clear mock session | PASS |
-| Browser back / forward | Supported via History API (createBrowserRouter) |
-| Direct URL entry | Supported (Vite SPA fallback) |
-| Refresh on protected route | PASS when mock session present; else redirect `/login` |
-| Protected redirect preserves `state.from` | PASS |
-| Unauthorized page CTA | PASS |
-| NotFound → home | PASS |
+| Scenario                                     | Result                                                 |
+| -------------------------------------------- | ------------------------------------------------------ |
+| Landing CTAs → login/register/emergency/chat | PASS (useNavigate + ROUTES)                            |
+| Login → dashboard (mock auth)                | PASS                                                   |
+| Register → dashboard (mock auth)             | PASS                                                   |
+| Sidebar NavLink active state from URL        | PASS                                                   |
+| Logo → dashboard                             | PASS                                                   |
+| Logout → `/` + clear mock session            | PASS                                                   |
+| Browser back / forward                       | Supported via History API (createBrowserRouter)        |
+| Direct URL entry                             | Supported (Vite SPA fallback)                          |
+| Refresh on protected route                   | PASS when mock session present; else redirect `/login` |
+| Protected redirect preserves `state.from`    | PASS                                                   |
+| Unauthorized page CTA                        | PASS                                                   |
+| NotFound → home                              | PASS                                                   |
 
 ---
 
 ## UI regression status
 
-| Area | Status |
-|------|--------|
-| Sidebar appearance / width / gradient active | Preserved |
-| TopBar | Preserved |
+| Area                                            | Status                                          |
+| ----------------------------------------------- | ----------------------------------------------- |
+| Sidebar appearance / width / gradient active    | Preserved                                       |
+| TopBar                                          | Preserved                                       |
 | Cards, charts, chat, medication, diet, symptoms | Content unchanged (layout moved to route shell) |
-| Emergency / Landing / Auth pages | Visual markup preserved |
-| Mock interactions | Preserved |
-| Icons / images | Unchanged sources |
+| Emergency / Landing / Auth pages                | Visual markup preserved                         |
+| Mock interactions                               | Preserved                                       |
+| Icons / images                                  | Unchanged sources                               |
 
 ---
 

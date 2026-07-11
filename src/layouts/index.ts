@@ -1,4 +1,4 @@
-export { Sidebar } from "./Sidebar";
+export { Sidebar, MobileMenuButton, SkipLink } from "./Sidebar";
 export { TopBar } from "./TopBar";
 export { DashboardLayout } from "./DashboardLayout";
 export { PublicLayout } from "./PublicLayout";

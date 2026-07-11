@@ -21,10 +21,26 @@ export const mockFoodsToAvoid = [
 ];
 
 export const mockMeals = [
-  { meal: "Breakfast", items: ["Oatmeal with fresh berries", "Sliced apple", "Water or herbal tea"], cals: 320 },
-  { meal: "Lunch", items: ["Grilled chicken breast (unsalted)", "Brown rice", "Steamed broccoli with lemon"], cals: 480 },
-  { meal: "Dinner", items: ["Beef stir-fry with fresh vegetables", "Plain pasta", "Fresh fruit salad"], cals: 550 },
-  { meal: "Snacks", items: ["Handful of unsalted almonds", "Fresh orange", "Apple slices"], cals: 180 },
+  {
+    meal: "Breakfast",
+    items: ["Oatmeal with fresh berries", "Sliced apple", "Water or herbal tea"],
+    cals: 320,
+  },
+  {
+    meal: "Lunch",
+    items: ["Grilled chicken breast (unsalted)", "Brown rice", "Steamed broccoli with lemon"],
+    cals: 480,
+  },
+  {
+    meal: "Dinner",
+    items: ["Beef stir-fry with fresh vegetables", "Plain pasta", "Fresh fruit salad"],
+    cals: 550,
+  },
+  {
+    meal: "Snacks",
+    items: ["Handful of unsalted almonds", "Fresh orange", "Apple slices"],
+    cals: 180,
+  },
 ];
 
 export const mockDietStatus = {

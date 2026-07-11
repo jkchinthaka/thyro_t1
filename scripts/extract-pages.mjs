@@ -170,7 +170,10 @@ import {
 };
 
 for (const [oldName, newName, file, start, end] of ranges) {
-  let body = lines.slice(start - 1, end).join("\n").trimEnd();
+  let body = lines
+    .slice(start - 1, end)
+    .join("\n")
+    .trimEnd();
   // Drop trailing blank / comment separators
   body = body.replace(/\n\/\/ ─+.*$/s, "").trimEnd();
   body = body.replace("function " + oldName, "export function " + newName);
@@ -195,7 +198,9 @@ for (const [oldName, newName, file, start, end] of ranges) {
   const out = pageImports[newName] + "\n" + body + "\n";
   fs.writeFileSync("src/pages/" + file, out, "utf8");
   const lineCount = out.split("\n").length;
-  console.log(`Wrote ${file} (${lineCount} lines) endsWith: ${body.slice(-40).replace(/\n/g, "\\n")}`);
+  console.log(
+    `Wrote ${file} (${lineCount} lines) endsWith: ${body.slice(-40).replace(/\n/g, "\\n")}`,
+  );
 }
 
 fs.writeFileSync(

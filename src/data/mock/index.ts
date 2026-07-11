@@ -6,11 +6,7 @@ export {
   mockPrescriptionInfo,
   mockInitialTaken,
 } from "./medications.mock";
-export {
-  mockAppointments,
-  mockTshHistory,
-  mockNextAppointment,
-} from "./appointments.mock";
+export { mockAppointments, mockTshHistory, mockNextAppointment } from "./appointments.mock";
 export {
   mockWeeklyHealthData,
   mockDashboardWeekData,
@@ -19,12 +15,7 @@ export {
   mockProgressStats,
   mockHealthScore,
 } from "./analytics.mock";
-export {
-  mockFoodsToEat,
-  mockFoodsToAvoid,
-  mockMeals,
-  mockDietStatus,
-} from "./diet.mock";
+export { mockFoodsToEat, mockFoodsToAvoid, mockMeals, mockDietStatus } from "./diet.mock";
 export {
   mockInitialMessages,
   mockQuickActions,

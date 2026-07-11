@@ -4,21 +4,45 @@ import { ScrollToTop, PageLoader, ProtectedRoute, RouteErrorPage } from "@/compo
 import { PublicLayout, AuthLayout, DashboardLayout } from "@/layouts";
 import { ROUTES } from "@/constants/routes";
 
-const LandingPage = lazy(() => import("@/pages/LandingPage").then(m => ({ default: m.LandingPage })));
-const LoginPage = lazy(() => import("@/pages/LoginPage").then(m => ({ default: m.LoginPage })));
-const RegisterPage = lazy(() => import("@/pages/RegisterPage").then(m => ({ default: m.RegisterPage })));
-const EmergencyPage = lazy(() => import("@/pages/EmergencyPage").then(m => ({ default: m.EmergencyPage })));
-const DashboardPage = lazy(() => import("@/pages/DashboardPage").then(m => ({ default: m.DashboardPage })));
-const ChatPage = lazy(() => import("@/pages/ChatPage").then(m => ({ default: m.ChatPage })));
-const MedicationPage = lazy(() => import("@/pages/MedicationPage").then(m => ({ default: m.MedicationPage })));
-const DietPage = lazy(() => import("@/pages/DietPage").then(m => ({ default: m.DietPage })));
-const SymptomsPage = lazy(() => import("@/pages/SymptomsPage").then(m => ({ default: m.SymptomsPage })));
-const FollowUpPage = lazy(() => import("@/pages/FollowUpPage").then(m => ({ default: m.FollowUpPage })));
-const AnalyticsPage = lazy(() => import("@/pages/AnalyticsPage").then(m => ({ default: m.AnalyticsPage })));
-const ResourcesPage = lazy(() => import("@/pages/ResourcesPage").then(m => ({ default: m.ResourcesPage })));
-const ProfilePage = lazy(() => import("@/pages/ProfilePage").then(m => ({ default: m.ProfilePage })));
-const UnauthorizedPage = lazy(() => import("@/pages/UnauthorizedPage").then(m => ({ default: m.UnauthorizedPage })));
-const NotFoundPage = lazy(() => import("@/pages/NotFoundPage").then(m => ({ default: m.NotFoundPage })));
+const LandingPage = lazy(() =>
+  import("@/pages/LandingPage").then((m) => ({ default: m.LandingPage })),
+);
+const LoginPage = lazy(() => import("@/pages/LoginPage").then((m) => ({ default: m.LoginPage })));
+const RegisterPage = lazy(() =>
+  import("@/pages/RegisterPage").then((m) => ({ default: m.RegisterPage })),
+);
+const EmergencyPage = lazy(() =>
+  import("@/pages/EmergencyPage").then((m) => ({ default: m.EmergencyPage })),
+);
+const DashboardPage = lazy(() =>
+  import("@/pages/DashboardPage").then((m) => ({ default: m.DashboardPage })),
+);
+const ChatPage = lazy(() => import("@/pages/ChatPage").then((m) => ({ default: m.ChatPage })));
+const MedicationPage = lazy(() =>
+  import("@/pages/MedicationPage").then((m) => ({ default: m.MedicationPage })),
+);
+const DietPage = lazy(() => import("@/pages/DietPage").then((m) => ({ default: m.DietPage })));
+const SymptomsPage = lazy(() =>
+  import("@/pages/SymptomsPage").then((m) => ({ default: m.SymptomsPage })),
+);
+const FollowUpPage = lazy(() =>
+  import("@/pages/FollowUpPage").then((m) => ({ default: m.FollowUpPage })),
+);
+const AnalyticsPage = lazy(() =>
+  import("@/pages/AnalyticsPage").then((m) => ({ default: m.AnalyticsPage })),
+);
+const ResourcesPage = lazy(() =>
+  import("@/pages/ResourcesPage").then((m) => ({ default: m.ResourcesPage })),
+);
+const ProfilePage = lazy(() =>
+  import("@/pages/ProfilePage").then((m) => ({ default: m.ProfilePage })),
+);
+const UnauthorizedPage = lazy(() =>
+  import("@/pages/UnauthorizedPage").then((m) => ({ default: m.UnauthorizedPage })),
+);
+const NotFoundPage = lazy(() =>
+  import("@/pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage })),
+);
 
 function RootLayout() {
   return (

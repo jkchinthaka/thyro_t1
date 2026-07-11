@@ -8,7 +8,12 @@ const sizeClassMap: Record<number, string> = {
 };
 
 export function Avatar({ name, size = 8, src }: { name: string; size?: number; src?: string }) {
-  const initials = name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+  const initials = name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
   const sizeClass = sizeClassMap[size] ?? sizeClassMap[8];
   return src ? (
     <img src={src} alt={name} className={`${sizeClass} rounded-full object-cover`} />

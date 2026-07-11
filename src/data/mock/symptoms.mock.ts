@@ -1,14 +1,5 @@
 ﻿/** Demo symptom options and assessment copy — not clinical decision support. */
-import {
-  Droplets,
-  Eye,
-  Coffee,
-  Thermometer,
-  Zap,
-  Wind,
-  Activity,
-  Heart,
-} from "lucide-react";
+import { Droplets, Eye, Coffee, Thermometer, Zap, Wind, Activity, Heart } from "lucide-react";
 
 export const mockSymptoms = [
   { id: "dry-mouth", label: "Dry Mouth", icon: Droplets },

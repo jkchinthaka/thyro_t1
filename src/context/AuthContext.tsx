@@ -5,14 +5,7 @@
  * boolean + role string for refresh-safe protected routing demos.
  */
 
-import {
-  createContext,
-  useCallback,
-  useContext,
-  useMemo,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
 import { mockUser } from "@/data/mock";
 
 export type UserRole = "PATIENT" | "ADMIN" | "MEDICAL_EXPERT";

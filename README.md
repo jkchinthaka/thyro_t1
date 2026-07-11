@@ -13,31 +13,35 @@ Educational patient-support prototype for differentiated thyroid cancer survivor
 - **Phase 0:** Complete (baseline + backups + build verified)
 - **Phase 1:** Complete (modular pages/components; UI preserved)
 - **Phase 2:** Complete (React Router, protected layouts, lazy pages)
-- **Phase 3+:** Not started
+- **Phase 3:** Complete (TypeScript strictness, ESLint/Prettier, env, Axios foundation, forms, a11y)
+- **Phase 4+:** Not started
 
 Mock data remains under `src/data/mock/` and is **not** live clinical data.
 
 **Authentication is mock-only** for routing demos. Real JWT auth is deferred to Phase 6.
 
-Baseline audit: [`docs/baseline-audit.md`](docs/baseline-audit.md)  
-Phase 1 validation: [`docs/phase-1-validation.md`](docs/phase-1-validation.md)  
-Phase 2 architecture: [`docs/phase-2-routing-architecture.md`](docs/phase-2-routing-architecture.md)  
-Phase 2 validation: [`docs/phase-2-validation.md`](docs/phase-2-validation.md)  
-Progress log: [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
+**API client is mock-ready only** (`src/services/api.ts`) — no real backend is connected.
+
+Accessibility improvements move toward WCAG 2.1 AA practices; formal certification has not been performed. See [`docs/accessibility-improvements.md`](docs/accessibility-improvements.md).
+
+Docs: [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md) · [`docs/phase-3-quality-foundation.md`](docs/phase-3-quality-foundation.md) · [`docs/phase-3-validation.md`](docs/phase-3-validation.md)
 
 ---
 
 ## Tech stack (frontend baseline)
 
-| Layer | Technology |
-|-------|------------|
-| UI | React 18.3 |
-| Language | TypeScript |
-| Bundler | Vite 6 |
-| Routing | react-router 7 |
-| Styling | Tailwind CSS 4 |
-| Charts | Recharts |
-| Icons | lucide-react |
+| Layer    | Technology              |
+| -------- | ----------------------- |
+| UI       | React 18.3              |
+| Language | TypeScript (strict)     |
+| Bundler  | Vite 6                  |
+| Routing  | react-router 7          |
+| Forms    | react-hook-form + Zod   |
+| HTTP     | Axios (foundation only) |
+| Toasts   | sonner                  |
+| Styling  | Tailwind CSS 4          |
+| Charts   | Recharts                |
+| Icons    | lucide-react            |
 
 ---
 
@@ -45,16 +49,25 @@ Progress log: [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
 
 ```bash
 npm install
+cp .env.example .env   # optional local overrides
 npm run dev
 ```
 
 Open `http://localhost:5173/`.
 
-Production build:
+### Developer scripts
 
 ```bash
-npm run build
+npm run dev            # Vite dev server
+npm run build          # Production build
+npm run preview        # Preview production build
+npm run typecheck      # TypeScript project build check
+npm run lint           # ESLint
+npm run format         # Prettier write
+npm run format:check   # Prettier check
 ```
+
+Environment variables (browser-safe `VITE_*` only) are documented in `.env.example` and read via `src/config/env.ts`.
 
 ---
 
@@ -62,61 +75,62 @@ npm run build
 
 ### Public
 
-| URL | Screen |
-|-----|--------|
-| `/` | Landing |
-| `/login` | Login |
-| `/register` | Register |
+| URL          | Screen    |
+| ------------ | --------- |
+| `/`          | Landing   |
+| `/login`     | Login     |
+| `/register`  | Register  |
 | `/emergency` | Emergency |
 
 ### Patient (mock-auth protected)
 
-| URL | Screen |
-|-----|--------|
-| `/dashboard` | Dashboard |
-| `/chat` | AI Chat |
-| `/medications` | Medication |
-| `/diet` | Diet |
-| `/symptoms` | Symptoms |
-| `/follow-ups` | Follow-up |
-| `/analytics` | Progress / Analytics |
-| `/resources` | Resources |
-| `/profile` | Profile |
+| URL            | Screen               |
+| -------------- | -------------------- |
+| `/dashboard`   | Dashboard            |
+| `/chat`        | AI Chat              |
+| `/medications` | Medication           |
+| `/diet`        | Diet                 |
+| `/symptoms`    | Symptoms             |
+| `/follow-ups`  | Follow-up            |
+| `/analytics`   | Progress / Analytics |
+| `/resources`   | Resources            |
+| `/profile`     | Profile              |
 
 ### System
 
-| URL | Screen |
-|-----|--------|
+| URL             | Screen       |
+| --------------- | ------------ |
 | `/unauthorized` | Unauthorized |
-| unknown paths | Not Found |
+| unknown paths   | Not Found    |
 
 Sign in / register uses **temporary mock authentication** (sessionStorage flag). It is not secure and must be replaced in Phase 6.
 
-Vite local development supports SPA fallback automatically. Production hosts will need rewrite-to-`index.html` configuration during deployment.
-
 ---
 
-## Project structure (after Phase 2)
+## Project structure (after Phase 3)
 
 ```
 src/
   app/App.tsx              # Providers + RouterProvider shell
-  app/providers.tsx        # Mock AuthProvider
+  app/providers.tsx        # ErrorBoundary, Auth, Toast
   app/router.tsx           # createBrowserRouter route table
+  config/env.ts            # Typed Vite env
+  services/api.ts          # Axios client foundation (no real calls)
+  schemas/                 # Zod validation schemas
+  hooks/                   # useDocumentTitle, useToast
   pages/                   # Lazy-loaded route pages
-  layouts/                 # Public, Auth, Dashboard (Outlet)
+  layouts/                 # Public, Auth, Dashboard (+ mobile drawer)
   context/AuthContext.tsx  # Temporary mock auth
-  components/common/       # Guards, ScrollToTop, UI atoms
+  components/common/       # Guards, states, ErrorBoundary, UI atoms
   data/mock/               # Explicit demo datasets (*.mock.ts)
-  constants/routes.ts      # Central path constants
 ```
 
 ---
 
 ## Roadmap (high level)
 
-1. Modular frontend + routing ← **done through Phase 2**
-2. Quality / accessibility foundation
+1. Modular frontend + routing ← done (Phases 1–2)
+2. Quality / accessibility foundation ← **done (Phase 3)**
 3. FastAPI + MongoDB backend
 4. Auth, profiles, clinical support modules
 5. Governed medical knowledge + safe RAG chatbot

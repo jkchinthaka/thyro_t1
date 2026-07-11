@@ -11,8 +11,13 @@ export const mockWeeklyHealthData = [
 ];
 
 export const mockDashboardWeekData = [
-  { day: "Mon", score: 78 }, { day: "Tue", score: 82 }, { day: "Wed", score: 79 },
-  { day: "Thu", score: 85 }, { day: "Fri", score: 88 }, { day: "Sat", score: 84 }, { day: "Sun", score: 87 },
+  { day: "Mon", score: 78 },
+  { day: "Tue", score: 82 },
+  { day: "Wed", score: 79 },
+  { day: "Thu", score: 85 },
+  { day: "Fri", score: 88 },
+  { day: "Sat", score: 84 },
+  { day: "Sun", score: 87 },
 ];
 
 export const mockWellnessBreakdown = [

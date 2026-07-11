@@ -9,12 +9,13 @@
 
 ## Phase status
 
-| Phase | Title | Status | Date |
-|-------|-------|--------|------|
-| 0 | Project discovery and safety | **Complete** | 2026-07-11 |
-| 1 | Frontend structural refactor | **Complete** | 2026-07-11 |
-| 2 | Routing and application shell | **Complete** | 2026-07-11 |
-| 3–22 | Remaining roadmap | Not started | — |
+| Phase | Title                         | Status       | Date       |
+| ----- | ----------------------------- | ------------ | ---------- |
+| 0     | Project discovery and safety  | **Complete** | 2026-07-11 |
+| 1     | Frontend structural refactor  | **Complete** | 2026-07-11 |
+| 2     | Routing and application shell | **Complete** | 2026-07-11 |
+| 3     | Frontend quality foundation   | **Complete** | 2026-07-11 |
+| 4–22  | Remaining roadmap             | Not started  | —          |
 
 ---
 
@@ -26,71 +27,56 @@
 
 ## Phase 1 — Completion report
 
-### What was done
-
-1. Wrote `docs/phase-1-refactor-plan.md` before code changes.
-2. Ensured scalable `src/` folder structure (including feature component folders).
-3. Expanded shared types; kept constants; renamed mocks to `*.mock.ts`.
-4. Fixed Avatar dynamic Tailwind sizes via explicit size map.
-5. Extracted BrandLogo; chat + medication feature components.
-6. Split all 13 screens into `src/pages/*`.
-7. Reduced `App.tsx` to screen-state shell (~51 lines) with `AppProviders`.
-8. Validated `npm run build` (PASS).
-9. Documented validation + dependency cleanup recommendations.
-
-### Validation
-
-- Production build: **PASS**
-- typecheck/lint scripts: deferred to Phase 3
-- React Router: **not implemented** (Phase 2)
-
-### Artifacts
-
-- `docs/phase-1-refactor-plan.md`
-- `docs/phase-1-validation.md`
-- `docs/dependency-cleanup-recommendations.md`
+- Modular pages/components; UI preserved; commit `197382c`.
 
 ---
 
 ## Phase 2 — Completion report
 
+- React Router, protected layouts, lazy pages; commit `2175a82`.
+- Authentication remains **mock-only**.
+
+---
+
+## Phase 3 — Completion report
+
 ### What was done
 
-1. Wrote `docs/phase-2-routing-plan.md` before routing code changes.
-2. Used existing `react-router@7.13.0` (`createBrowserRouter` + `RouterProvider`).
-3. Added centralized `ROUTES` path constants.
-4. Added temporary mock `AuthContext` (sessionStorage flag only — not real auth).
-5. Added `ProtectedRoute`, `RoleProtectedRoute`, `ScrollToTop`, `PageLoader`, `RouteErrorPage`.
-6. Nested Public / Auth / Dashboard layouts with `Outlet`.
-7. Lazy-loaded all pages; removed per-page `DashboardLayout` duplication.
-8. Replaced all `setScreen` navigation with URL navigation.
-9. Added Unauthorized + NotFound pages.
-10. Reduced `App.tsx` to providers + `RouterProvider` (~14 lines).
-11. Validated `npm run build` (PASS); main bundle ~255 kB (was ~655 kB).
+1. Wrote `docs/phase-3-quality-plan.md` before source changes.
+2. Strict TypeScript project references + `npm run typecheck`.
+3. ESLint flat config + Prettier + standardized scripts.
+4. `.env.example` + typed `src/config/env.ts`.
+5. Axios API client foundation (no real calls) + `toAppError`.
+6. Global `ErrorBoundary`, loading/empty/error states, Sonner toasts.
+7. React Hook Form + Zod for login, register, profile, appointments, symptoms.
+8. Accessibility and keyboard improvements; skip link; mobile sidebar drawer.
+9. Document titles via `useDocumentTitle`.
+10. Validated typecheck, lint, format:check, and build.
 
 ### Validation
 
-- Production build: **PASS**
-- Direct URLs / refresh / history: supported via SPA router
-- Authentication: **mock-only** (Phase 6 will replace)
-- Phase 3: **not started**
+- `typecheck` / `lint` / `format:check` / `build`: **PASS**
+- Lint warnings: 2 low-risk react-refresh export warnings (documented)
+- Phase 4: **not started**
 
 ### Artifacts
 
-- `docs/phase-2-routing-plan.md`
-- `docs/phase-2-routing-architecture.md`
-- `docs/phase-2-validation.md`
+- `docs/phase-3-quality-plan.md`
+- `docs/phase-3-quality-foundation.md`
+- `docs/phase-3-validation.md`
+- `docs/accessibility-improvements.md`
 
 ### Next phase
 
-Phase 3 — tooling / lint / quality foundation. Do not start until approved.
+Phase 4 — backend foundation. Do not start until approved.
 
 ---
 
 ## Change log
 
-| Date | Change |
-|------|--------|
-| 2026-07-11 | Phase 0 baseline established |
-| 2026-07-11 | Phase 1 frontend modularization complete |
-| 2026-07-11 | Phase 2 React Router + protected layouts complete |
+| Date       | Change                                                 |
+| ---------- | ------------------------------------------------------ |
+| 2026-07-11 | Phase 0 baseline established                           |
+| 2026-07-11 | Phase 1 frontend modularization complete               |
+| 2026-07-11 | Phase 2 React Router + protected layouts complete      |
+| 2026-07-11 | Phase 3 quality, a11y, and tooling foundation complete |

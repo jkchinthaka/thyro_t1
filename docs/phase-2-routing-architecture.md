@@ -8,10 +8,10 @@
 
 ## Routing library and version
 
-| Package | Version | Notes |
-|---------|---------|-------|
-| `react-router` | **7.13.0** | Already installed in Phase 1. DOM APIs (`createBrowserRouter`, `RouterProvider`, `Link`, `NavLink`, `Outlet`, etc.) ship from `react-router` in v7. |
-| `react-router-dom` | Not installed | Not required for RR v7. |
+| Package            | Version       | Notes                                                                                                                                               |
+| ------------------ | ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `react-router`     | **7.13.0**    | Already installed in Phase 1. DOM APIs (`createBrowserRouter`, `RouterProvider`, `Link`, `NavLink`, `Outlet`, etc.) ship from `react-router` in v7. |
+| `react-router-dom` | Not installed | Not required for RR v7.                                                                                                                             |
 
 **API:** `createBrowserRouter` + `RouterProvider` (single approach; no `BrowserRouter` mix).
 
@@ -50,14 +50,14 @@ Path constants: `src/constants/routes.ts` (`ROUTES`, `SCREEN_PATH`, `ROUTE_TITLE
 
 ## Public routes
 
-| Path | Page |
-|------|------|
-| `/` | LandingPage |
-| `/login` | LoginPage |
-| `/register` | RegisterPage |
-| `/emergency` | EmergencyPage |
+| Path            | Page             |
+| --------------- | ---------------- |
+| `/`             | LandingPage      |
+| `/login`        | LoginPage        |
+| `/register`     | RegisterPage     |
+| `/emergency`    | EmergencyPage    |
 | `/unauthorized` | UnauthorizedPage |
-| `*` | NotFoundPage |
+| `*`             | NotFoundPage     |
 
 ---
 
@@ -65,26 +65,26 @@ Path constants: `src/constants/routes.ts` (`ROUTES`, `SCREEN_PATH`, `ROUTE_TITLE
 
 Require mock `isAuthenticated`. Otherwise redirect to `/login` with `state.from`.
 
-| Path | Page |
-|------|------|
-| `/dashboard` | DashboardPage |
-| `/chat` | ChatPage |
+| Path           | Page           |
+| -------------- | -------------- |
+| `/dashboard`   | DashboardPage  |
+| `/chat`        | ChatPage       |
 | `/medications` | MedicationPage |
-| `/diet` | DietPage |
-| `/symptoms` | SymptomsPage |
-| `/follow-ups` | FollowUpPage |
-| `/analytics` | AnalyticsPage |
-| `/resources` | ResourcesPage |
-| `/profile` | ProfilePage |
+| `/diet`        | DietPage       |
+| `/symptoms`    | SymptomsPage   |
+| `/follow-ups`  | FollowUpPage   |
+| `/analytics`   | AnalyticsPage  |
+| `/resources`   | ResourcesPage  |
+| `/profile`     | ProfilePage    |
 
 ---
 
 ## Layout nesting
 
-| Layout | File | Behavior |
-|--------|------|----------|
-| PublicLayout | `src/layouts/PublicLayout.tsx` | Pass-through `Outlet` (pages keep own chrome) |
-| AuthLayout | `src/layouts/AuthLayout.tsx` | Pass-through `Outlet` |
+| Layout          | File                              | Behavior                                                |
+| --------------- | --------------------------------- | ------------------------------------------------------- |
+| PublicLayout    | `src/layouts/PublicLayout.tsx`    | Pass-through `Outlet` (pages keep own chrome)           |
+| AuthLayout      | `src/layouts/AuthLayout.tsx`      | Pass-through `Outlet`                                   |
 | DashboardLayout | `src/layouts/DashboardLayout.tsx` | Sidebar + TopBar + `Outlet`; titles from `ROUTE_TITLES` |
 
 Patient pages no longer wrap themselves in `DashboardLayout` (duplication removed without visual change).
@@ -130,13 +130,13 @@ Shared chrome (Sidebar, TopBar, guards, common atoms) remains eagerly loaded.
 
 ## Navigation migration
 
-| Before | After |
-|--------|-------|
-| `useState<Screen>` in App | URL routes |
-| `setScreen(...)` | `useNavigate` / `NavLink` / `Link` |
-| `SetScreen` props | Removed |
-| Sidebar `current` prop | `NavLink` `isActive` |
-| Per-page `DashboardLayout` | Nested layout route |
+| Before                     | After                              |
+| -------------------------- | ---------------------------------- |
+| `useState<Screen>` in App  | URL routes                         |
+| `setScreen(...)`           | `useNavigate` / `NavLink` / `Link` |
+| `SetScreen` props          | Removed                            |
+| Sidebar `current` prop     | `NavLink` `isActive`               |
+| Per-page `DashboardLayout` | Nested layout route                |
 
 ---
 

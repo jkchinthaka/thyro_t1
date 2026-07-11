@@ -18,21 +18,21 @@
 
 ### Screen → page mapping (Phase 1)
 
-| Screen id | Page component | Layout today | Access |
-|-----------|----------------|--------------|--------|
-| `landing` | LandingPage | Full-page (self) | Public |
-| `login` | LoginPage | Full-page (self) | Public |
-| `register` | RegisterPage | Full-page (self) | Public |
-| `emergency` | EmergencyPage | Full-page (self) | Public |
-| `dashboard` | DashboardPage | DashboardLayout | Patient app |
-| `chat` | ChatPage | DashboardLayout | Patient app |
-| `medication` | MedicationPage | DashboardLayout | Patient app |
-| `diet` | DietPage | DashboardLayout | Patient app |
-| `symptoms` | SymptomsPage | DashboardLayout | Patient app |
-| `followup` | FollowUpPage | DashboardLayout | Patient app |
-| `progress` | AnalyticsPage | DashboardLayout | Patient app |
-| `education` | ResourcesPage | DashboardLayout | Patient app |
-| `profile` | ProfilePage | DashboardLayout | Patient app |
+| Screen id    | Page component | Layout today     | Access      |
+| ------------ | -------------- | ---------------- | ----------- |
+| `landing`    | LandingPage    | Full-page (self) | Public      |
+| `login`      | LoginPage      | Full-page (self) | Public      |
+| `register`   | RegisterPage   | Full-page (self) | Public      |
+| `emergency`  | EmergencyPage  | Full-page (self) | Public      |
+| `dashboard`  | DashboardPage  | DashboardLayout  | Patient app |
+| `chat`       | ChatPage       | DashboardLayout  | Patient app |
+| `medication` | MedicationPage | DashboardLayout  | Patient app |
+| `diet`       | DietPage       | DashboardLayout  | Patient app |
+| `symptoms`   | SymptomsPage   | DashboardLayout  | Patient app |
+| `followup`   | FollowUpPage   | DashboardLayout  | Patient app |
+| `progress`   | AnalyticsPage  | DashboardLayout  | Patient app |
+| `education`  | ResourcesPage  | DashboardLayout  | Patient app |
+| `profile`    | ProfilePage    | DashboardLayout  | Patient app |
 
 ### Callbacks to replace
 
@@ -49,8 +49,8 @@
 
 ## 2. Router dependency
 
-| Package | Version | Notes |
-|---------|---------|-------|
+| Package        | Version                        | Notes                                                                                         |
+| -------------- | ------------------------------ | --------------------------------------------------------------------------------------------- |
 | `react-router` | **7.13.0** (already installed) | Includes DOM APIs (`BrowserRouter`, `createBrowserRouter`, `Link`, `NavLink`, `Outlet`, etc.) |
 
 **Decision:** Use existing `react-router@7.13.0`. Do **not** install `react-router-dom` — React Router v7 ships DOM exports from `react-router`.
@@ -113,19 +113,19 @@ All require mock `isAuthenticated === true`; otherwise redirect to `/login` with
 
 ## 6. Layout nesting strategy
 
-| Layout | Role | Visual change |
-|--------|------|---------------|
-| `PublicLayout` | Outlet wrapper; minimal (no chrome) | None — pages keep their own chrome |
-| `AuthLayout` | Outlet wrapper for login/register | None — pages keep existing two-panel / form UI |
-| `DashboardLayout` | Sidebar + TopBar + `<Outlet />` | Same chrome; **removed from individual pages** to avoid duplication |
-| Title | Derived from pathname map inside layout | Same title strings as Phase 1 |
+| Layout            | Role                                    | Visual change                                                       |
+| ----------------- | --------------------------------------- | ------------------------------------------------------------------- |
+| `PublicLayout`    | Outlet wrapper; minimal (no chrome)     | None — pages keep their own chrome                                  |
+| `AuthLayout`      | Outlet wrapper for login/register       | None — pages keep existing two-panel / form UI                      |
+| `DashboardLayout` | Sidebar + TopBar + `<Outlet />`         | Same chrome; **removed from individual pages** to avoid duplication |
+| Title             | Derived from pathname map inside layout | Same title strings as Phase 1                                       |
 
 ---
 
 ## 7. Temporary mock authentication strategy
 
 - File: `src/context/AuthContext.tsx`
-- Comment: *Temporary mock authentication for routing demonstration. Replace during Phase 6.*
+- Comment: _Temporary mock authentication for routing demonstration. Replace during Phase 6._
 - Shape: `{ id, name, email, role, isAuthenticated }`
 - Roles: `PATIENT` | `ADMIN` | `MEDICAL_EXPERT`
 - Persistence: `sessionStorage` key `thyrocare_mock_auth` storing only `{ authenticated: boolean, role: string }` — no PHI
@@ -158,15 +158,15 @@ All require mock `isAuthenticated === true`; otherwise redirect to `/login` with
 
 ## 10. Risks
 
-| Risk | Mitigation |
-|------|------------|
-| Visual regression from layout move | Keep DashboardLayout markup identical; only swap `children` → `Outlet` |
-| Redirect loops (login ↔ protected) | Guards skip redirect when already on auth routes; logout clears storage first |
-| “Try AI Chat Free” hits protected `/chat` | Redirect to login with `from`; after mock login resume intended path |
-| Emergency back to dashboard while logged out | Navigate to `/dashboard` if authed else `/` |
-| Nested interactive elements | Use `NavLink`/`Link` with existing button classes; no button-in-button |
-| Screen id vs URL path mismatch (`medication` vs `/medications`) | Central `ROUTES` + path map in navigation constants |
-| Chat internal scroll vs scroll-to-top | `ScrollToTop` only on pathname change; does not touch chat message list |
+| Risk                                                            | Mitigation                                                                    |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| Visual regression from layout move                              | Keep DashboardLayout markup identical; only swap `children` → `Outlet`        |
+| Redirect loops (login ↔ protected)                             | Guards skip redirect when already on auth routes; logout clears storage first |
+| “Try AI Chat Free” hits protected `/chat`                       | Redirect to login with `from`; after mock login resume intended path          |
+| Emergency back to dashboard while logged out                    | Navigate to `/dashboard` if authed else `/`                                   |
+| Nested interactive elements                                     | Use `NavLink`/`Link` with existing button classes; no button-in-button        |
+| Screen id vs URL path mismatch (`medication` vs `/medications`) | Central `ROUTES` + path map in navigation constants                           |
+| Chat internal scroll vs scroll-to-top                           | `ScrollToTop` only on pathname change; does not touch chat message list       |
 
 ---
 

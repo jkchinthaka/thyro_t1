@@ -1,4 +1,11 @@
-export const severityLabels = ["", "Mild", "Mild-Moderate", "Moderate", "Severe", "Critical"] as const;
+export const severityLabels = [
+  "",
+  "Mild",
+  "Mild-Moderate",
+  "Moderate",
+  "Severe",
+  "Critical",
+] as const;
 
 export const moodLabels = ["Very Low", "Low", "Neutral", "Good", "Great"] as const;
 
