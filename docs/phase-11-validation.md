@@ -2,12 +2,12 @@
 
 ## Automated
 
-| Check | Result |
-|-------|--------|
-| `npm run typecheck` / `lint` / `format:check` / `ci:build` | PASS |
-| `npm audit` / `npm audit --omit=dev` | 0 vulnerabilities |
-| `ruff check` / `ruff format --check` | PASS |
-| `pytest backend/tests` | **108 passed, 1 skipped** |
+| Check                                                      | Result                    |
+| ---------------------------------------------------------- | ------------------------- |
+| `npm run typecheck` / `lint` / `format:check` / `ci:build` | PASS                      |
+| `npm audit` / `npm audit --omit=dev`                       | 0 vulnerabilities         |
+| `ruff check` / `ruff format --check`                       | PASS                      |
+| `pytest backend/tests`                                     | **108 passed, 1 skipped** |
 
 ## Notes
 
