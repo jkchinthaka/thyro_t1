@@ -1,3 +1,4 @@
+/** Demo landing/dashboard/emergency datasets — not production clinical data. */
 import {
   MessageCircle,
   Pill,
@@ -8,12 +9,6 @@ import {
   BookOpen,
   User,
   Heart,
-  Droplets,
-  Eye,
-  Coffee,
-  Thermometer,
-  Zap,
-  Wind,
   Phone,
   Stethoscope,
 } from "lucide-react";
@@ -59,24 +54,6 @@ export const mockDashboardQuickStats = [
   { label: "Medication Adherence", value: "94%", color: BLUE, icon: Pill },
   { label: "Days Post-Surgery", value: "271", color: TEAL, icon: Calendar },
   { label: "Chats This Week", value: "12", color: AMBER, icon: MessageCircle },
-];
-
-export const mockSymptoms = [
-  { id: "dry-mouth", label: "Dry Mouth", icon: Droplets },
-  { id: "taste-change", label: "Taste Changes", icon: Coffee },
-  { id: "dry-eyes", label: "Dry Eyes", icon: Eye },
-  { id: "swollen-glands", label: "Swollen Glands", icon: Thermometer },
-  { id: "fatigue", label: "Fatigue", icon: Zap },
-  { id: "nausea", label: "Nausea", icon: Wind },
-  { id: "neck-pain", label: "Neck Pain", icon: Activity },
-  { id: "heart-palp", label: "Heart Palpitations", icon: Heart },
-];
-
-export const mockSymptomRecommendations = [
-  "Stay hydrated — aim for 8+ glasses of water daily",
-  "Ensure Levothyroxine is taken consistently each morning",
-  "Log these symptoms and discuss at your next appointment",
-  "Contact Dr. Chen if symptoms worsen over 48 hours",
 ];
 
 export const mockEmergencyCallOptions = [

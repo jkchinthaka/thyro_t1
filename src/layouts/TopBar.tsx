@@ -2,9 +2,9 @@ import { useState } from "react";
 import { Bell, Search } from "lucide-react";
 import { Avatar } from "@/components/common";
 import { mockNotificationCount, mockUser } from "@/data/mock";
-import type { Screen } from "@/types";
+import type { Screen, SetScreen } from "@/types";
 
-export function TopBar({ title, setScreen }: { title: string; setScreen: (s: Screen) => void }) {
+export function TopBar({ title, setScreen }: { title: string; setScreen: SetScreen }) {
   const [notifs, setNotifs] = useState(mockNotificationCount);
   return (
     <header className="flex items-center gap-4 px-6 py-4 bg-card border-b border-border sticky top-0 z-10">

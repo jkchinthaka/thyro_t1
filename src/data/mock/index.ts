@@ -1,15 +1,16 @@
-export { mockUser } from "./user";
+﻿/** Demo / mock datasets only — not production clinical data. */
+export { mockUser } from "./user.mock";
 export {
   mockMedications,
   mockAdherenceData,
   mockPrescriptionInfo,
   mockInitialTaken,
-} from "./medications";
+} from "./medications.mock";
 export {
   mockAppointments,
   mockTshHistory,
   mockNextAppointment,
-} from "./appointments";
+} from "./appointments.mock";
 export {
   mockWeeklyHealthData,
   mockDashboardWeekData,
@@ -17,30 +18,29 @@ export {
   mockMoodEmojis,
   mockProgressStats,
   mockHealthScore,
-} from "./analytics";
+} from "./analytics.mock";
 export {
   mockFoodsToEat,
   mockFoodsToAvoid,
   mockMeals,
   mockDietStatus,
-} from "./diet";
+} from "./diet.mock";
 export {
   mockInitialMessages,
   mockQuickActions,
   mockSuggestions,
   mockRecentChats,
   mockChatReply,
-} from "./chat";
-export { mockArticles, mockFaqs, mockVideos } from "./articles";
-export { mockNotificationCount, mockDashboardReminders } from "./notifications";
+} from "./chat.mock";
+export { mockArticles, mockFaqs, mockVideos } from "./resources.mock";
+export { mockNotificationCount, mockDashboardReminders } from "./notifications.mock";
 export {
   mockLandingFeatures,
   mockLandingStats,
   mockDashboardCards,
   mockDashboardQuickStats,
-  mockSymptoms,
-  mockSymptomRecommendations,
   mockEmergencyCallOptions,
   mockEmergencyWarningSigns,
   mockEmergencyContacts,
-} from "./dashboard";
+} from "./dashboard.mock";
+export { mockSymptoms, mockSymptomRecommendations } from "./symptoms.mock";

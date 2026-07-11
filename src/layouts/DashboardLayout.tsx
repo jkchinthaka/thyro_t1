@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { Sidebar } from "./Sidebar";
 import { TopBar } from "./TopBar";
-import type { Screen } from "@/types";
+import type { Screen, SetScreen } from "@/types";
 
 export function DashboardLayout({ screen, setScreen, title, children }: {
-  screen: Screen; setScreen: (s: Screen) => void; title: string; children: React.ReactNode;
+  screen: Screen; setScreen: SetScreen; title: string; children: React.ReactNode;
 }) {
   const [collapsed, setCollapsed] = useState(false);
   return (

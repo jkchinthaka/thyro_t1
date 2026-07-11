@@ -12,38 +12,47 @@
 | Phase | Title | Status | Date |
 |-------|-------|--------|------|
 | 0 | Project discovery and safety | **Complete** | 2026-07-11 |
-| 1 | Frontend structural refactor | Not started (partial prep exists from prior session) | — |
-| 2–22 | Remaining roadmap | Not started | — |
+| 1 | Frontend structural refactor | **Complete** | 2026-07-11 |
+| 2 | Routing and application shell | Not started | — |
+| 3–22 | Remaining roadmap | Not started | — |
 
 ---
 
 ## Phase 0 — Completion report
 
+- Baseline audit, backups, build/dev validation, commit `2d69852`.
+
+---
+
+## Phase 1 — Completion report
+
 ### What was done
 
-1. Inspected workspace `Thyro-Care-t1` and sibling `nivesha akka`.
-2. Confirmed workspace contains the active frontend (partial modularization); sibling holds the original Figma Make monolith.
-3. Created timestamped backups of both trees under `..\backups\` without deleting originals.
-4. Expanded `.gitignore` to exclude `node_modules`, `dist`, env secrets, Python/AI caches.
-5. Validated `npm run build` (success) and `npm run dev` (HTTP 200 on `/`).
-6. Authored `docs/baseline-audit.md`.
-7. Established Git baseline commit.
+1. Wrote `docs/phase-1-refactor-plan.md` before code changes.
+2. Ensured scalable `src/` folder structure (including feature component folders).
+3. Expanded shared types; kept constants; renamed mocks to `*.mock.ts`.
+4. Fixed Avatar dynamic Tailwind sizes via explicit size map.
+5. Extracted BrandLogo; chat + medication feature components.
+6. Split all 13 screens into `src/pages/*`.
+7. Reduced `App.tsx` to screen-state shell (~51 lines) with `AppProviders`.
+8. Validated `npm run build` (PASS).
+9. Documented validation + dependency cleanup recommendations.
 
 ### Validation
 
 - Production build: **PASS**
-- Dev server: **PASS** (`http://localhost:5173/`)
-- Known warning: JS chunk > 500 kB
+- typecheck/lint scripts: deferred to Phase 3
+- React Router: **not implemented** (Phase 2)
 
 ### Artifacts
 
-- `docs/baseline-audit.md`
-- `PROJECT_PROGRESS.md` (this file)
-- Backups under `nivesha akka tec\backups\`
+- `docs/phase-1-refactor-plan.md`
+- `docs/phase-1-validation.md`
+- `docs/dependency-cleanup-recommendations.md`
 
-### Next phase (do not start until approved)
+### Next phase
 
-Phase 1 — Frontend structural refactor: split screens into `pages/`, complete component extraction, keep UI identical, then validate build.
+Phase 2 — React Router, protected layouts, lazy routes. Do not start until approved.
 
 ---
 
@@ -51,4 +60,5 @@ Phase 1 — Frontend structural refactor: split screens into `pages/`, complete 
 
 | Date | Change |
 |------|--------|
-| 2026-07-11 | Phase 0 baseline established; build verified; docs added |
+| 2026-07-11 | Phase 0 baseline established |
+| 2026-07-11 | Phase 1 frontend modularization complete |

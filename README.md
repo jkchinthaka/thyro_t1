@@ -8,14 +8,17 @@ Educational patient-support prototype for differentiated thyroid cancer survivor
 
 ---
 
-## Current status (Phase 0)
+## Current status
 
-- Frontend prototype runs locally (React + TypeScript + Vite + Tailwind CSS).
-- 13 patient-facing screens present (Landing → Emergency).
-- Mock data is clearly separated under `src/data/mock/`.
-- No backend, no real authentication, no live AI yet.
-- Baseline audit: [`docs/baseline-audit.md`](docs/baseline-audit.md)
-- Progress log: [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
+- **Phase 0:** Complete (baseline + backups + build verified)
+- **Phase 1:** Complete (modular pages/components; UI preserved; no Router yet)
+- **Phase 2+:** Not started
+
+Mock data remains under `src/data/mock/` and is **not** live clinical data.
+
+Baseline audit: [`docs/baseline-audit.md`](docs/baseline-audit.md)  
+Phase 1 validation: [`docs/phase-1-validation.md`](docs/phase-1-validation.md)  
+Progress log: [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
 
 ---
 
@@ -51,18 +54,22 @@ npm run build
 
 ## Existing screens
 
-Landing · Login · Register · Dashboard · AI Chat · Medication · Diet · Symptoms · Follow-up · Progress · Resources · Profile · Emergency
+Landing · Login · Register · Dashboard · AI Chat · Medication · Diet · Symptoms · Follow-up · Progress/Analytics · Resources · Profile · Emergency
 
 ---
 
-## Project structure (current)
+## Project structure (after Phase 1)
 
 ```
 src/
-  app/App.tsx          # Screen implementations (to be split in Phase 1)
-  components/common/   # Shared UI primitives
-  layouts/             # Sidebar, TopBar, DashboardLayout
-  data/mock/           # Explicit mock datasets
+  app/App.tsx              # Screen-state shell only (~51 lines)
+  app/providers.tsx        # Placeholder providers
+  app/router.tsx           # Deferred to Phase 2
+  pages/                   # One file per screen
+  components/common/       # Card, Button, Input, Badge, Avatar, BrandLogo
+  components/chat|medication|.../
+  layouts/                 # Sidebar, TopBar, DashboardLayout
+  data/mock/               # Explicit demo datasets (*.mock.ts)
   constants/ types/ styles/
 ```
 
