@@ -1,16 +1,16 @@
 import {
-  Heart,
   ChevronRight,
   ChevronLeft,
   AlertTriangle,
   LogOut,
 } from "lucide-react";
+import { BrandLogo } from "@/components/common";
 import { BLUE, TEAL } from "@/constants/colors";
 import { navItems } from "@/constants/navigation";
-import type { Screen } from "@/types";
+import type { Screen, SetScreen } from "@/types";
 
 export function Sidebar({ current, setScreen, collapsed, setCollapsed }: {
-  current: Screen; setScreen: (s: Screen) => void;
+  current: Screen; setScreen: SetScreen;
   collapsed: boolean; setCollapsed: (v: boolean) => void;
 }) {
   return (
@@ -20,9 +20,7 @@ export function Sidebar({ current, setScreen, collapsed, setCollapsed }: {
     >
       {/* Logo */}
       <div className="flex items-center gap-3 px-4 py-5 border-b border-border">
-        <div className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `linear-gradient(135deg, ${BLUE}, ${TEAL})` }}>
-          <Heart className="w-4 h-4 text-white" />
-        </div>
+        <BrandLogo size="sm" />
         {!collapsed && (
           <div className="leading-none">
             <div className="font-bold text-sm text-foreground" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>ThyroCare</div>
