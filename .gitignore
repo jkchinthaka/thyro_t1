@@ -54,3 +54,8 @@ chroma_data/
 *.zip
 *.docx
 .DS_Store
+
+htmlcov/
+coverage.xml
+backend/.venv/
+

@@ -14,6 +14,7 @@ export default tseslint.config(
       "coverage/**",
       "backups/**",
       "scripts/**",
+      "backend/**",
       // Generated / vendored shadcn + figma helpers
       "src/app/components/ui/**",
       "src/app/components/figma/**",

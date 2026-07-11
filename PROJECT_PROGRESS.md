@@ -15,7 +15,8 @@
 | 1     | Frontend structural refactor  | **Complete** | 2026-07-11 |
 | 2     | Routing and application shell | **Complete** | 2026-07-11 |
 | 3     | Frontend quality foundation   | **Complete** | 2026-07-11 |
-| 4–22  | Remaining roadmap             | Not started  | —          |
+| 4     | FastAPI backend foundation    | **Complete** | 2026-07-11 |
+| 5–22  | Remaining roadmap             | Not started  | —          |
 
 ---
 
@@ -40,43 +41,47 @@
 
 ## Phase 3 — Completion report
 
+- Strict TypeScript, ESLint/Prettier, env, Axios foundation, forms, a11y; commit `7443b8b`.
+- Lint: 0 errors, 2 documented react-refresh warnings.
+
+---
+
+## Phase 4 — Completion report
+
 ### What was done
 
-1. Wrote `docs/phase-3-quality-plan.md` before source changes.
-2. Strict TypeScript project references + `npm run typecheck`.
-3. ESLint flat config + Prettier + standardized scripts.
-4. `.env.example` + typed `src/config/env.ts`.
-5. Axios API client foundation (no real calls) + `toAppError`.
-6. Global `ErrorBoundary`, loading/empty/error states, Sonner toasts.
-7. React Hook Form + Zod for login, register, profile, appointments, symptoms.
-8. Accessibility and keyboard improvements; skip link; mobile sidebar drawer.
-9. Document titles via `useDocumentTitle`.
-10. Validated typecheck, lint, format:check, and build.
+1. Wrote `docs/phase-4-backend-plan.md` before implementation.
+2. Created `backend/` FastAPI package with config, logging, exceptions, middleware, Mongo foundation, health routes.
+3. Added pytest suite (10 tests), Ruff, Dockerfile, `.env.example`.
+4. Documented Mongo degraded/unhealthy behavior; no domain collections.
+5. Validated ruff, pytest, uvicorn health/OpenAPI, and frontend regression.
 
 ### Validation
 
-- `typecheck` / `lint` / `format:check` / `build`: **PASS**
-- Lint warnings: 2 low-risk react-refresh export warnings (documented)
-- Phase 4: **not started**
+- Backend ruff / pytest: **PASS** (10 tests)
+- Uvicorn `/health`, `/api/v1/health`, `/docs`, `/redoc`, `/openapi.json`: **PASS**
+- Frontend typecheck / lint / format:check / build: **PASS**
+- Phase 5: **not started**
 
 ### Artifacts
 
-- `docs/phase-3-quality-plan.md`
-- `docs/phase-3-quality-foundation.md`
-- `docs/phase-3-validation.md`
-- `docs/accessibility-improvements.md`
+- `docs/phase-4-backend-plan.md`
+- `docs/phase-4-backend-foundation.md`
+- `docs/phase-4-validation.md`
+- `backend/README.md`
 
 ### Next phase
 
-Phase 4 — backend foundation. Do not start until approved.
+Phase 5 — database schema / domain collections. Do not start until approved.
 
 ---
 
 ## Change log
 
-| Date       | Change                                                 |
-| ---------- | ------------------------------------------------------ |
-| 2026-07-11 | Phase 0 baseline established                           |
-| 2026-07-11 | Phase 1 frontend modularization complete               |
-| 2026-07-11 | Phase 2 React Router + protected layouts complete      |
-| 2026-07-11 | Phase 3 quality, a11y, and tooling foundation complete |
+| Date       | Change                                         |
+| ---------- | ---------------------------------------------- |
+| 2026-07-11 | Phase 0 baseline established                   |
+| 2026-07-11 | Phase 1 frontend modularization complete       |
+| 2026-07-11 | Phase 2 routing and protected layouts complete |
+| 2026-07-11 | Phase 3 frontend quality foundation complete   |
+| 2026-07-11 | Phase 4 FastAPI backend foundation complete    |
