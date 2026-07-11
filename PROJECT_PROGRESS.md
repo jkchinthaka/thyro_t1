@@ -20,7 +20,8 @@
 | 6     | Secure authentication & RBAC           | **Complete** | 2026-07-11 |
 | 7     | Patient profile management             | **Complete** | 2026-07-11 |
 | 8     | Medication management & adherence      | **Complete** | 2026-07-11 |
-| 9–22  | Remaining roadmap                      | Not started  | —          |
+| 9     | Appointment and follow-up management   | **Complete** | 2026-07-11 |
+| 10–22 | Remaining roadmap                      | Not started  | —          |
 
 ---
 
@@ -45,11 +46,31 @@
 ### Validation
 
 - See `docs/phase-8-validation.md` (filled after final suite run).
-- Phase 9: **not started**
 
 ### Next phase
 
-Phase 9 — appointments (do not start until approved).
+Phase 9 — appointments ← **done**.
+
+---
+
+## Phase 9 — Completion report
+
+### What was done
+
+1. Planned in `docs/phase-9-appointment-plan.md`.
+2. Appointment model/enums/schemas, lifecycle, repository, API.
+3. Soft delete, optimistic concurrency, audit (field/status names only).
+4. Follow-Up page + dashboard follow-up card; appointment mocks removed.
+5. Documented architecture, data dictionary, lifecycle, validation.
+
+### Validation
+
+- See `docs/phase-9-validation.md`.
+- Phase 10: **not started**
+
+### Next phase
+
+Phase 10 — symptoms (do not start until approved).
 
 ---
 
@@ -61,6 +82,7 @@ Phase 9 — appointments (do not start until approved).
 | 2026-07-11 | Phase 7 patient profile management complete      |
 | 2026-07-11 | Phase 8 medication management complete           |
 | 2026-07-11 | Deployment-hardening patch (Cloudflare/Wrangler) |
+| 2026-07-11 | Phase 9 appointment / follow-up management       |
 
 ## Deployment hardening (not a numbered phase)
 
@@ -68,4 +90,4 @@ Phase 9 — appointments (do not start until approved).
 - npm audit cleared (react-router 7.18.1, vite 6.4.3)
 - Production env validation for API URL; docs for CORS/cookies and backend boundary
 - Recharts v3 deferred — see `docs/recharts-v3-migration-plan.md`
-- Does **not** start Phase 9
+- Does **not** start Phase 10

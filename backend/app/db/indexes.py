@@ -153,6 +153,28 @@ INDEX_SPECS: tuple[IndexSpec, ...] = (
         [("user_id", ASCENDING), ("status", ASCENDING), ("scheduled_start", ASCENDING)],
         rationale="Status-filtered appointment lists",
     ),
+    IndexSpec(
+        CollectionName.APPOINTMENTS.value,
+        "ix_appointments_user_deleted_start",
+        [("user_id", ASCENDING), ("is_deleted", ASCENDING), ("scheduled_start", ASCENDING)],
+        rationale="Owner soft-delete filtering with schedule order",
+    ),
+    IndexSpec(
+        CollectionName.APPOINTMENTS.value,
+        "ix_appointments_user_type_start",
+        [
+            ("user_id", ASCENDING),
+            ("appointment_type", ASCENDING),
+            ("scheduled_start", ASCENDING),
+        ],
+        rationale="Filter appointments by type for owner",
+    ),
+    IndexSpec(
+        CollectionName.APPOINTMENTS.value,
+        "ix_appointments_user_created",
+        [("user_id", ASCENDING), ("created_at", DESCENDING)],
+        rationale="Recent appointments for owner",
+    ),
     # symptom_logs
     IndexSpec(
         CollectionName.SYMPTOM_LOGS.value,

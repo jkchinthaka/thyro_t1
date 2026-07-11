@@ -39,9 +39,14 @@ Follow your healthcare provider’s instructions. Do not change or stop medicati
 professional advice. Soft deletion and optimistic concurrency (`expected_version`) apply.
 Patients may access only their own records; foreign IDs return 404.
 
-**Phase 4–8 scope:** infrastructure, persistence, authentication, patient profile,
-and medication tracking. Appointment/symptom CRUD and AI HTTP endpoints
-are **not** implemented yet.
+**Phase 4–9 scope:** infrastructure, persistence, authentication, patient profile,
+medication tracking, and appointment/follow-up organization. Symptom CRUD and AI HTTP
+endpoints are **not** implemented yet.
+
+**Appointment tracking:** Appointment endpoints are for personal organization only.
+They do not decide clinical follow-up, send real reminders, or replace clinician instructions.
+Soft deletion and optimistic concurrency (`expected_version`) apply. Patients may access
+only their own records; foreign IDs return 404.
 
 Authentication:
 - Bearer JWT access tokens (short-lived, memory-only on the client)

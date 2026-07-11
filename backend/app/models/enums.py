@@ -54,6 +54,14 @@ class AppointmentType(StrEnum):
     ULTRASOUND = "ultrasound"
     RAI_FOLLOW_UP = "rai_follow_up"
     MEDICATION_REVIEW = "medication_review"
+    GENERAL_FOLLOW_UP = "general_follow_up"
+    OTHER = "other"
+
+
+class AppointmentLocationType(StrEnum):
+    IN_PERSON = "in_person"
+    TELEHEALTH = "telehealth"
+    PHONE = "phone"
     OTHER = "other"
 
 

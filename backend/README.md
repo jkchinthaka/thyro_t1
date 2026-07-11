@@ -1,10 +1,10 @@
 # ThyroCare AI API (Backend)
 
-FastAPI + PyMongo Async persistence, authentication, patient profile, and medication tracking for ThyroCare AI (Phases 4–8).
+FastAPI + PyMongo Async persistence, authentication, patient profile, medication tracking, and appointments for ThyroCare AI (Phases 4–9).
 
-> **Medical disclaimer:** This API is part of a patient-support research prototype. It does **not** replace professional medical advice, diagnosis, or emergency care. Medication endpoints are for **tracking only** — they do not prescribe or recommend dosages. The patient profile is support metadata, not a medical record.
+> **Medical disclaimer:** This API is part of a patient-support research prototype. It does **not** replace professional medical advice, diagnosis, or emergency care. Medication and appointment endpoints are for **tracking/organization only**. The patient profile is support metadata, not a medical record.
 
-## Current scope (through Phase 8)
+## Current scope (through Phase 9)
 
 Included:
 
@@ -20,6 +20,7 @@ Included:
 - CSRF protection for refresh/logout, account lockout, RBAC dependencies, audit events
 - **Patient profile:** `GET` / `PATCH /api/v1/profiles/me` (PATIENT ownership, optimistic concurrency)
 - **Medications:** CRUD, dose logs, schedule, adherence (PATIENT ownership, soft delete, version conflicts)
+- **Appointments:** CRUD, status, calendar, upcoming (PATIENT ownership, soft delete, version conflicts)
 - Structured logging, CORS (credentials + exact origins), security headers
 - Pytest suite and Ruff
 - Dockerfile foundation
@@ -27,10 +28,10 @@ Included:
 **Not included yet:**
 
 - Password-reset email, email verification, MFA, social login
-- Appointment or symptom CRUD endpoints
+- Symptom CRUD endpoints
 - Chatbot / RAG / AI
-- Medication SMS/email reminders
-- Admin profile / medication management
+- Medication/appointment SMS/email reminders
+- Admin profile / medication / appointment management
 - Seed users or demo / default admin credentials
 
 ## Prerequisites
@@ -106,6 +107,21 @@ Profile is support metadata only — not a medical record and not diagnostic.
 
 All medication routes require an active PATIENT. Ownership is derived from the JWT. Soft delete and unique occurrence logs apply. See `docs/medication-architecture.md`.
 
+## Appointment endpoints
+
+| Method | Path                               | Notes                              |
+| ------ | ---------------------------------- | ---------------------------------- |
+| GET    | `/api/v1/appointments`             | List owned; filters + pagination   |
+| POST   | `/api/v1/appointments`             | Create                             |
+| GET    | `/api/v1/appointments/calendar`    | Bounded calendar range             |
+| GET    | `/api/v1/appointments/upcoming`    | Next upcoming (excludes cancelled) |
+| GET    | `/api/v1/appointments/{id}`        | Get owned; foreign → 404           |
+| PATCH  | `/api/v1/appointments/{id}`        | Update; `expected_version`         |
+| PATCH  | `/api/v1/appointments/{id}/status` | Status transition                  |
+| DELETE | `/api/v1/appointments/{id}`        | Soft delete                        |
+
+Organization/tracking only — reminders are not sent. See `docs/appointment-architecture.md`.
+
 Local cookies: `COOKIE_SECURE=false`, `COOKIE_SAMESITE=lax`, refresh path `/api/v1/auth`. Frontend origin must be listed in `ALLOWED_ORIGINS` (default `http://localhost:5173`) with credentials enabled.
 
 ## Database notes
@@ -128,7 +144,7 @@ ruff format --check app tests
 ## Known limitations
 
 - Email verification and password reset are not implemented
-- Appointment / symptom CRUD are not implemented
-- Medication reminders / pharmacy / prescription upload are not implemented
+- Symptom CRUD is not implemented
+- Medication/appointment reminders / pharmacy / prescription upload are not implemented
 - In-memory rate limiting only (not multi-instance safe)
 - Integration index creation requires Mongo authorization

@@ -21,11 +21,13 @@ import {
 } from "@/data/mock";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useMedications } from "@/hooks/useMedications";
+import { useAppointments } from "@/hooks/useAppointments";
 
 export function DashboardPage() {
   useDocumentTitle("Dashboard");
   const navigate = useNavigate();
   const { todaySchedule, adherence, loading: medLoading } = useMedications();
+  const { upcoming, loading: apptLoading } = useAppointments();
   const weekData = mockDashboardWeekData;
 
   const quickStats = useMemo(() => {
@@ -44,28 +46,48 @@ export function DashboardPage() {
     const pending = todaySchedule.filter((i) => !i.log_status).length;
     const taken = todaySchedule.filter((i) => i.log_status === "taken").length;
     const next = todaySchedule.find((i) => !i.log_status);
+    const nextAppt = upcoming[0];
     return mockDashboardCards.map((c) => {
-      if (c.id !== "medication") return c;
-      if (medLoading) {
-        return { ...c, value: "Loading…", sub: "Today's schedule" };
-      }
-      if (todaySchedule.length === 0) {
-        return { ...c, value: "No doses today", sub: "Open Medications" };
-      }
-      if (next) {
+      if (c.id === "medication") {
+        if (medLoading) {
+          return { ...c, value: "Loading…", sub: "Today's schedule" };
+        }
+        if (todaySchedule.length === 0) {
+          return { ...c, value: "No doses today", sub: "Open Medications" };
+        }
+        if (next) {
+          return {
+            ...c,
+            value: `${next.medication_name}`,
+            sub: `${next.scheduled_local_time} · ${pending} pending`,
+          };
+        }
         return {
           ...c,
-          value: `${next.medication_name}`,
-          sub: `${next.scheduled_local_time} · ${pending} pending`,
+          value: `${taken} of ${todaySchedule.length} taken`,
+          sub: "Today's schedule complete",
         };
       }
-      return {
-        ...c,
-        value: `${taken} of ${todaySchedule.length} taken`,
-        sub: "Today's schedule complete",
-      };
+      if (c.id === "followup") {
+        if (apptLoading) {
+          return { ...c, value: "Loading…", sub: "Follow-ups" };
+        }
+        if (!nextAppt) {
+          return { ...c, value: "No upcoming", sub: "Open Follow-ups" };
+        }
+        const when = new Date(nextAppt.scheduled_start).toLocaleDateString(undefined, {
+          month: "short",
+          day: "numeric",
+        });
+        return {
+          ...c,
+          value: nextAppt.title,
+          sub: `${when} · ${upcoming.length} upcoming`,
+        };
+      }
+      return c;
     });
-  }, [todaySchedule, medLoading]);
+  }, [todaySchedule, medLoading, upcoming, apptLoading]);
 
   return (
     <>

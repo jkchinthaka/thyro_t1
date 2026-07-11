@@ -19,7 +19,8 @@ Educational patient-support prototype for differentiated thyroid cancer survivor
 - **Phase 6:** Complete (secure auth: JWT access + HttpOnly refresh + CSRF + RBAC)
 - **Phase 7:** Complete (patient self-profile GET/PATCH + Profile page integration)
 - **Phase 8:** Complete (medication CRUD, dose logs, schedule, adherence + Medication page)
-- **Phase 9+:** Not started
+- **Phase 9:** Complete (appointment/follow-up management + Follow-Up page)
+- **Phase 10+:** Not started
 
 Mock clinical UI data remains under `src/data/mock/` for appointments, symptoms, diet, chat, etc., and is **not** live clinical data. Medication tracking uses the real API.
 
@@ -29,7 +30,9 @@ Mock clinical UI data remains under `src/data/mock/` for appointments, symptoms,
 
 **Medications** use `/api/v1/medications` for CRUD, logs, schedule, and adherence (tracking only — not prescribing).
 
-See [`docs/medication-architecture.md`](docs/medication-architecture.md) · [`docs/phase-8-validation.md`](docs/phase-8-validation.md) · [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
+**Appointments** use `/api/v1/appointments` for CRUD, status, calendar, and upcoming (organization only — no real reminders).
+
+See [`docs/appointment-architecture.md`](docs/appointment-architecture.md) · [`docs/phase-9-validation.md`](docs/phase-9-validation.md) · [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
 
 ### Cloudflare frontend deployment
 
@@ -184,10 +187,11 @@ src/
 5. Secure authentication & RBAC ← done (Phase 6)
 6. Patient self-profile management ← **done (Phase 7)**
 7. Medication management & adherence ← **done (Phase 8)**
-8. Appointments / symptoms (Phase 9+)
-9. Governed medical knowledge + safe RAG chatbot
-10. Admin / medical expert workflows
-11. Tests, security, Docker Compose, deployment docs
+8. Appointment / follow-up management ← **done (Phase 9)**
+9. Symptoms (Phase 10+)
+10. Governed medical knowledge + safe RAG chatbot
+11. Admin / medical expert workflows
+12. Tests, security, Docker Compose, deployment docs
 
 See `PROJECT_PROGRESS.md` for phase tracking.
 

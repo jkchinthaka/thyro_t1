@@ -1,6 +1,6 @@
 ﻿/** Demo / mock datasets only — not production clinical data. */
 export { mockUser } from "./user.mock";
-export { mockAppointments, mockTshHistory, mockNextAppointment } from "./appointments.mock";
+export { mockTshHistory } from "./appointments.mock";
 export {
   mockWeeklyHealthData,
   mockDashboardWeekData,

@@ -66,3 +66,26 @@ def utc_now_aware() -> datetime:
     if now.tzinfo is None:
         return now.replace(tzinfo=ZoneInfo("UTC"))
     return now.astimezone(ZoneInfo("UTC"))
+
+
+def ensure_utc_datetime(dt: datetime) -> datetime:
+    """Alias for ensure_utc — store appointment timestamps in UTC."""
+    return ensure_utc(dt)
+
+
+def appointment_local_date(utc_dt: datetime, timezone_name: str) -> date:
+    return utc_datetime_to_local(utc_dt, timezone_name).date()
+
+
+def normalize_date_range(
+    date_from: date,
+    date_to: date,
+    *,
+    max_days: int = 62,
+) -> tuple[date, date]:
+    if date_to < date_from:
+        raise ValueError("date_to cannot precede date_from")
+    span = (date_to - date_from).days
+    if span > max_days:
+        raise ValueError(f"Date range cannot exceed {max_days} days")
+    return date_from, date_to
