@@ -234,6 +234,18 @@ INDEX_SPECS: tuple[IndexSpec, ...] = (
     ),
     IndexSpec(
         CollectionName.CHAT_SESSIONS.value,
+        "ix_chat_sessions_user_updated",
+        [("user_id", ASCENDING), ("updated_at", DESCENDING)],
+        rationale="Owner session list by update time",
+    ),
+    IndexSpec(
+        CollectionName.CHAT_SESSIONS.value,
+        "ix_chat_sessions_user_deleted_updated",
+        [("user_id", ASCENDING), ("is_deleted", ASCENDING), ("updated_at", DESCENDING)],
+        rationale="Soft-delete aware session list",
+    ),
+    IndexSpec(
+        CollectionName.CHAT_SESSIONS.value,
         "ix_chat_sessions_user_archived",
         [("user_id", ASCENDING), ("archived_at", ASCENDING)],
         rationale="Archive filtering",
@@ -246,9 +258,21 @@ INDEX_SPECS: tuple[IndexSpec, ...] = (
     ),
     IndexSpec(
         CollectionName.CHAT_MESSAGES.value,
+        "ix_chat_messages_user_session_created",
+        [("user_id", ASCENDING), ("session_id", ASCENDING), ("created_at", ASCENDING)],
+        rationale="Owner-scoped session transcript",
+    ),
+    IndexSpec(
+        CollectionName.CHAT_MESSAGES.value,
         "ix_chat_messages_user_created",
         [("user_id", ASCENDING), ("created_at", DESCENDING)],
         rationale="Owner message history",
+    ),
+    IndexSpec(
+        CollectionName.CHAT_MESSAGES.value,
+        "ix_chat_messages_user_deleted",
+        [("user_id", ASCENDING), ("is_deleted", ASCENDING)],
+        rationale="Soft-delete filtering for messages",
     ),
     IndexSpec(
         CollectionName.CHAT_MESSAGES.value,
@@ -257,6 +281,31 @@ INDEX_SPECS: tuple[IndexSpec, ...] = (
         rationale="Emergency chat review",
     ),
     # knowledge
+    IndexSpec(
+        CollectionName.KNOWLEDGE_DOCUMENTS.value,
+        "ux_knowledge_docs_document_id",
+        [("document_id", ASCENDING)],
+        unique=True,
+        rationale="Stable knowledge document identifier",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_DOCUMENTS.value,
+        "ix_knowledge_docs_slug_language",
+        [("slug", ASCENDING), ("language", ASCENDING)],
+        rationale="Slug lookup by language",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_DOCUMENTS.value,
+        "ix_knowledge_docs_review_language",
+        [("review_status", ASCENDING), ("language", ASCENDING)],
+        rationale="Review workflow filtering",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_DOCUMENTS.value,
+        "ix_knowledge_docs_content_hash",
+        [("content_hash", ASCENDING)],
+        rationale="Content integrity / idempotent ingest",
+    ),
     IndexSpec(
         CollectionName.KNOWLEDGE_DOCUMENTS.value,
         "ix_knowledge_docs_status_active",
@@ -274,6 +323,31 @@ INDEX_SPECS: tuple[IndexSpec, ...] = (
         "ix_knowledge_docs_source_reference",
         [("source_reference", ASCENDING)],
         rationale="Deduplicate source references",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_CHUNKS.value,
+        "ux_knowledge_chunks_chunk_id",
+        [("chunk_id", ASCENDING)],
+        unique=True,
+        rationale="Stable chunk identifier",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_CHUNKS.value,
+        "ix_knowledge_chunks_doc_version",
+        [("document_id", ASCENDING), ("document_version", ASCENDING)],
+        rationale="Version-aware chunk sets",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_CHUNKS.value,
+        "ix_knowledge_chunks_review_lang_topic",
+        [("review_status", ASCENDING), ("language", ASCENDING), ("topic", ASCENDING)],
+        rationale="Approved retrieval filters",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_CHUNKS.value,
+        "ix_knowledge_chunks_content_hash",
+        [("content_hash", ASCENDING)],
+        rationale="Chunk integrity",
     ),
     IndexSpec(
         CollectionName.KNOWLEDGE_CHUNKS.value,

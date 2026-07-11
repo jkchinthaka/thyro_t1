@@ -1,39 +1,19 @@
 # ThyroCare AI API (Backend)
 
-FastAPI + PyMongo Async persistence, authentication, patient profile, medication tracking, appointments, and symptoms for ThyroCare AI (Phases 4–10).
+FastAPI + PyMongo Async persistence through Phase 11 (auth, profile, medications, appointments, symptoms, safe chat foundation).
 
-> **Medical disclaimer:** This API is part of a patient-support research prototype. It does **not** replace professional medical advice, diagnosis, or emergency care. Medication, appointment, and symptom endpoints are for **tracking/organization and safety awareness only**. Symptom safety classification uses structured answers and versioned rules only — never free-text inference. The patient profile is support metadata, not a medical record.
+> **Medical disclaimer:** Educational/support prototype only. Chat answers (when enabled) use approved sources with citations. No diagnosis, lab interpretation, or medication advice. Free-text chat is not an emergency classifier.
 
-## Current scope (through Phase 10)
+## Current scope (through Phase 11)
 
-Included:
+Includes Phase 4–10 capabilities plus:
 
-- FastAPI application factory and lifespan
-- `/api/v1` versioning and health endpoints
-- Configuration via environment variables (Pydantic Settings)
-- **PyMongo `AsyncMongoClient`** (Motor removed)
-- Domain persistence models + public schemas
-- Base and domain repositories
-- Named indexes, TTL indexes, migration registry
-- **Authentication:** register, login, refresh, logout, `/auth/me`
-- Argon2 password hashing (`pwdlib`), JWT access tokens (PyJWT), opaque refresh cookies
-- CSRF protection for refresh/logout, account lockout, RBAC dependencies, audit events
-- **Patient profile:** `GET` / `PATCH /api/v1/profiles/me` (PATIENT ownership, optimistic concurrency)
-- **Medications:** CRUD, dose logs, schedule, adherence (PATIENT ownership, soft delete, version conflicts)
-- **Appointments:** CRUD, status, calendar, upcoming (PATIENT ownership, soft delete, version conflicts)
-- **Symptoms:** CRUD, active list, status, structured safety-check (PATIENT ownership, soft delete, version conflicts, deterministic rules)
-- Structured logging, CORS (credentials + exact origins), security headers
-- Pytest suite and Ruff
-- Dockerfile foundation
+- Patient chat sessions/messages with ownership and soft delete
+- Controlled knowledge ingest (PENDING_REVIEW seed; APPROVED-only retrieval)
+- Lexical retrieval foundation + provider abstraction (default disabled)
+- Citation/grounding validation, prompt-injection protection, medical-safety policy
 
-**Not included yet:**
-
-- Password-reset email, email verification, MFA, social login
-- Chatbot / RAG / AI
-- Medication/appointment SMS/email reminders
-- Admin profile / medication / appointment / symptom management
-- Seed users or demo / default admin credentials
-- Clinically approved safety copy (engineering REVIEW_REQUIRED until medical sign-off)
+**Not included yet:** production LLM credentials, admin knowledge CMS, vector search requirement, autonomous agents/tools.
 
 ## Prerequisites
 

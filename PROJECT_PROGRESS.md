@@ -22,7 +22,8 @@
 | 8     | Medication management & adherence      | **Complete** | 2026-07-11 |
 | 9     | Appointment and follow-up management   | **Complete** | 2026-07-11 |
 | 10    | Symptom tracking & safety escalation   | **Complete** | 2026-07-12 |
-| 11–22 | Remaining roadmap                      | Not started  | —          |
+| 11    | Safe knowledge-grounded assistant      | **Complete** | 2026-07-12 |
+| 12–22 | Remaining roadmap                      | Not started  | —          |
 
 ---
 
@@ -89,11 +90,33 @@ Phase 10 — symptoms ← **done**.
 ### Validation
 
 - See `docs/phase-10-validation.md`.
-- Phase 11: **not started**
+- Phase 11: **complete** (see below)
 
 ### Next phase
 
-Phase 11 — governed knowledge / RAG chatbot (do not start until approved).
+Phase 11 — safe assistant ← **done**.
+
+---
+
+## Phase 11 — Completion report
+
+### What was done
+
+1. Planned in `docs/phase-11-safe-assistant-plan.md`.
+2. Knowledge ingest + lexical retrieval + provider abstraction (default disabled).
+3. Chat sessions/messages API with ownership, soft delete, citations, safety policy.
+4. Prompt-injection protection; grounding validation; Phase 10 safety redirect preserved.
+5. Chat page API integration; chat mocks removed.
+6. Documentation set under `docs/*assistant*`, `docs/phase-11-*`.
+
+### Validation
+
+- See `docs/phase-11-validation.md`.
+- Phase 12: **not started**
+
+### Next phase
+
+Phase 12 — admin / medical expert workflows (do not start until approved).
 
 ---
 
@@ -107,6 +130,7 @@ Phase 11 — governed knowledge / RAG chatbot (do not start until approved).
 | 2026-07-11 | Deployment-hardening patch (Cloudflare/Wrangler) |
 | 2026-07-11 | Phase 9 appointment / follow-up management       |
 | 2026-07-12 | Phase 10 symptom tracking & safety escalation    |
+| 2026-07-12 | Phase 11 safe knowledge-grounded assistant       |
 
 ## Deployment hardening (not a numbered phase)
 

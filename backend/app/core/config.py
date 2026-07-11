@@ -81,6 +81,20 @@ class Settings(BaseSettings):
         alias="REQUIRE_EMAIL_VERIFICATION",
     )
 
+    # Phase 11 — safe assistant (default disabled)
+    ai_assistant_enabled: bool = Field(default=False, alias="AI_ASSISTANT_ENABLED")
+    llm_provider: str = Field(default="disabled", alias="LLM_PROVIDER")
+    llm_model: str = Field(default="", alias="LLM_MODEL")
+    llm_api_key: str = Field(default="", alias="LLM_API_KEY")
+    llm_timeout_seconds: int = Field(default=20, alias="LLM_TIMEOUT_SECONDS")
+    llm_max_output_tokens: int = Field(default=512, alias="LLM_MAX_OUTPUT_TOKENS")
+    knowledge_retrieval_mode: str = Field(default="lexical", alias="KNOWLEDGE_RETRIEVAL_MODE")
+    knowledge_max_chunks: int = Field(default=5, alias="KNOWLEDGE_MAX_CHUNKS")
+    knowledge_min_score: float = Field(default=0.15, alias="KNOWLEDGE_MIN_SCORE")
+    chat_max_message_length: int = Field(default=4000, alias="CHAT_MAX_MESSAGE_LENGTH")
+    chat_max_history_messages: int = Field(default=50, alias="CHAT_MAX_HISTORY_MESSAGES")
+    chat_rate_limit: str = Field(default="20/minute", alias="CHAT_RATE_LIMIT")
+
     @field_validator("api_v1_prefix")
     @classmethod
     def normalize_prefix(cls, value: str) -> str:
@@ -135,6 +149,16 @@ class Settings(BaseSettings):
             raise ValueError("Production JWT_SECRET_KEY must be at least 32 characters")
         if secret.startswith("dev-only") or "change-me" in secret.lower():
             raise ValueError("Production must not use the development JWT_SECRET_KEY")
+        if self.ai_assistant_enabled:
+            provider = self.llm_provider.strip().lower()
+            if provider in {"", "disabled", "none", "fake"}:
+                raise ValueError(
+                    "Production AI_ASSISTANT_ENABLED requires a configured non-fake LLM_PROVIDER"
+                )
+            if not self.llm_api_key.strip():
+                raise ValueError("Production AI_ASSISTANT_ENABLED requires LLM_API_KEY")
+            if not self.llm_model.strip():
+                raise ValueError("Production AI_ASSISTANT_ENABLED requires LLM_MODEL")
 
 
 @lru_cache

@@ -122,9 +122,29 @@ class SafetyLevel(StrEnum):
 class KnowledgeStatus(StrEnum):
     DRAFT = "draft"
     IN_REVIEW = "in_review"
+    PENDING_REVIEW = "pending_review"
     APPROVED = "approved"
     REJECTED = "rejected"
     ARCHIVED = "archived"
+    RETIRED = "retired"
+
+
+class ChatMessageRole(StrEnum):
+    USER = "user"
+    ASSISTANT = "assistant"
+
+
+class ChatSessionStatus(StrEnum):
+    ACTIVE = "active"
+    ARCHIVED = "archived"
+
+
+class ChatResponseMode(StrEnum):
+    GROUNDED_ANSWER = "grounded_answer"
+    INSUFFICIENT_EVIDENCE = "insufficient_evidence"
+    SAFETY_REDIRECT = "safety_redirect"
+    PROVIDER_UNAVAILABLE = "provider_unavailable"
+    POLICY_REFUSAL = "policy_refusal"
 
 
 class FeedbackType(StrEnum):
@@ -138,11 +158,6 @@ class EmergencyEventStatus(StrEnum):
     ACKNOWLEDGED = "acknowledged"
     REVIEWED = "reviewed"
     CLOSED = "closed"
-
-
-class ChatMessageRole(StrEnum):
-    USER = "user"
-    ASSISTANT = "assistant"
 
 
 class AssessmentSource(StrEnum):

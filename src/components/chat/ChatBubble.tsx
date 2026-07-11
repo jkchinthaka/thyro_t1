@@ -1,6 +1,6 @@
 import { BLUE, TEAL } from "@/constants/colors";
 import { Avatar } from "@/components/common";
-import type { ChatMsg } from "@/types";
+import type { ChatMsg } from "@/types/chat";
 import { Heart } from "lucide-react";
 
 export function ChatBubble({ message, userName }: { message: ChatMsg; userName: string }) {
@@ -30,6 +30,37 @@ export function ChatBubble({ message, userName }: { message: ChatMsg; userName: 
         >
           {m.text}
         </div>
+        {m.from === "ai" && m.citations && m.citations.length > 0 ? (
+          <ol className="text-[10px] text-muted-foreground space-y-1 mt-1 list-decimal pl-4">
+            {m.citations.map((c, idx) => (
+              <li key={c.citation_id}>
+                <span className="font-semibold text-foreground">
+                  [{idx + 1}] {c.title}
+                </span>
+                {" · "}
+                {c.source_name} · v{c.document_version}
+                {c.source_url ? (
+                  <>
+                    {" · "}
+                    <a
+                      href={c.source_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary hover:underline"
+                    >
+                      Source
+                    </a>
+                  </>
+                ) : null}
+              </li>
+            ))}
+          </ol>
+        ) : null}
+        {m.from === "ai" && m.response_mode && m.response_mode !== "grounded_answer" ? (
+          <span className="text-[10px] uppercase tracking-wide text-amber-700">
+            {m.response_mode.replaceAll("_", " ")}
+          </span>
+        ) : null}
         <span className="text-[10px] text-muted-foreground">{m.time}</span>
       </div>
     </div>

@@ -21,21 +21,14 @@ Educational patient-support prototype for differentiated thyroid cancer survivor
 - **Phase 8:** Complete (medication CRUD, dose logs, schedule, adherence + Medication page)
 - **Phase 9:** Complete (appointment/follow-up management + Follow-Up page)
 - **Phase 10:** Complete (symptom tracking + deterministic safety escalation)
-- **Phase 11+:** Not started
+- **Phase 11:** Complete (safe knowledge-grounded assistant foundation)
+- **Phase 12+:** Not started
 
-Mock clinical UI data remains under `src/data/mock/` for diet, chat, analytics, etc., and is **not** live clinical data. Auth, profile, medications, appointments, and symptoms use the real API.
+Mock clinical UI data remains under `src/data/mock/` for diet, resources, analytics, etc. Auth, profile, medications, appointments, symptoms, and chat use the real API.
 
-**Authentication** uses real backend endpoints. Access tokens live in memory only; refresh tokens are HttpOnly cookies. Page reload restores the session via refresh.
+**Chat / educational assistant** uses `/api/v1/chat` with approved-source grounding when content is APPROVED and a provider is configured. Default: assistant disabled (`AI_ASSISTANT_ENABLED=false`). Seed knowledge is PENDING_REVIEW until medical sign-off.
 
-**Patient profile** loads and saves via `/api/v1/profiles/me` (support metadata only — not a medical record).
-
-**Medications** use `/api/v1/medications` for CRUD, logs, schedule, and adherence (tracking only — not prescribing).
-
-**Appointments** use `/api/v1/appointments` for CRUD, status, calendar, and upcoming (organization only — no real reminders).
-
-**Symptoms** use `/api/v1/symptoms` for CRUD, active list, status, and structured safety-check (tracking + safety awareness only — no diagnosis; free text is never used for safety classification).
-
-See [`docs/symptom-architecture.md`](docs/symptom-architecture.md) · [`docs/phase-10-validation.md`](docs/phase-10-validation.md) · [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
+See [`docs/safe-assistant-architecture.md`](docs/safe-assistant-architecture.md) · [`docs/phase-11-validation.md`](docs/phase-11-validation.md) · [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
 
 ### Cloudflare frontend deployment
 
@@ -101,7 +94,7 @@ See [`backend/README.md`](backend/README.md).
 
 **Local auth notes:** Frontend at `http://localhost:5173` must match `ALLOWED_ORIGINS`. Access tokens stay in memory; refresh uses an HttpOnly cookie. Production requires `COOKIE_SECURE=true` and a strong `JWT_SECRET_KEY` (never commit secrets).
 
-**Still deferred:** password-reset email, email verification, MFA, chatbot/AI/RAG, admin management UI, medication/appointment SMS reminders.
+**Still deferred:** password-reset email, email verification, MFA, production LLM enablement, admin knowledge CMS, Atlas Vector Search ops, medication/appointment SMS reminders.
 
 ### Developer scripts (frontend)
 
@@ -192,8 +185,8 @@ src/
 7. Medication management & adherence ← **done (Phase 8)**
 8. Appointment / follow-up management ← **done (Phase 9)**
 9. Symptom tracking + safety escalation ← **done (Phase 10)**
-10. Governed medical knowledge + safe RAG chatbot (Phase 11+)
-11. Admin / medical expert workflows
+10. Safe knowledge-grounded assistant ← **done (Phase 11)**
+11. Admin / medical expert workflows (Phase 12+)
 12. Tests, security, Docker Compose, deployment docs
 
 See `PROJECT_PROGRESS.md` for phase tracking.

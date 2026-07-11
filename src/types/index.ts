@@ -17,7 +17,7 @@ export type Screen =
   | "emergency";
 
 export interface ChatMsg {
-  id: number;
+  id: number | string;
   from: "ai" | "user";
   text: string;
   time: string;

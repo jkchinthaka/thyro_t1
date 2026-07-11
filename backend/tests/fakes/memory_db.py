@@ -25,6 +25,11 @@ class _Cursor:
         self._docs = self._docs[:n]
         return self
 
+    async def to_list(self, length: int | None = None) -> list[dict[str, Any]]:
+        if length is None:
+            return [deepcopy(d) for d in self._docs]
+        return [deepcopy(d) for d in self._docs[:length]]
+
     def __aiter__(self) -> _Cursor:
         self._i = 0
         return self
@@ -113,7 +118,9 @@ class MemoryCollection:
 
         return _Result()
 
-    async def update_one(self, query: dict[str, Any], update: dict[str, Any]) -> Any:
+    async def update_one(
+        self, query: dict[str, Any], update: dict[str, Any], upsert: bool = False
+    ) -> Any:
         matched = 0
         modified = 0
         for doc in self.docs:
@@ -127,6 +134,15 @@ class MemoryCollection:
                         doc[key] = int(doc.get(key, 0)) + int(amount)
                     modified = 1
                 break
+        if matched == 0 and upsert and "$set" in update:
+            payload = deepcopy(update["$set"])
+            for key, value in query.items():
+                payload.setdefault(key, value)
+            if "_id" not in payload or payload["_id"] is None:
+                payload["_id"] = ObjectId()
+            self.docs.append(payload)
+            matched = 1
+            modified = 1
 
         class _Result:
             matched_count = matched
