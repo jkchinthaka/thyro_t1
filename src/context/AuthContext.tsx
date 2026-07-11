@@ -1,115 +1,123 @@
 /**
- * Temporary mock authentication for routing demonstration. Replace during Phase 6.
- *
- * Development-only. No APIs, no JWTs, no PHI. sessionStorage holds only a
- * boolean + role string for refresh-safe protected routing demos.
+ * Real authentication provider: memory access token + HttpOnly refresh cookie bootstrap.
  */
 
-import { createContext, useCallback, useContext, useMemo, useState, type ReactNode } from "react";
-import { mockUser } from "@/data/mock";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import * as authService from "@/services/authService";
+import { setUnauthorizedHandler } from "@/services/api";
+import { clearAccessToken, setAccessToken } from "@/services/tokenStore";
+import type {
+  AuthContextValue,
+  AuthStatus,
+  AuthUser,
+  LoginRequest,
+  RegisterRequest,
+  UserRole,
+} from "@/types/auth";
 
-export type UserRole = "PATIENT" | "ADMIN" | "MEDICAL_EXPERT";
-
-export interface MockAuthUser {
-  id: string;
-  name: string;
-  email: string;
-  role: UserRole;
-  isAuthenticated: boolean;
-}
-
-interface AuthContextValue {
-  user: MockAuthUser | null;
-  isAuthenticated: boolean;
-  role: UserRole | null;
-  /** Mock sign-in as demo patient. */
-  login: () => void;
-  /** Mock registration — same as login for current demo flow. */
-  register: () => void;
-  logout: () => void;
-}
-
-const STORAGE_KEY = "thyrocare_mock_auth";
-
-interface StoredMockAuth {
-  authenticated: boolean;
-  role: UserRole;
-}
-
-function readStoredAuth(): StoredMockAuth | null {
-  try {
-    const raw = sessionStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as StoredMockAuth;
-    if (typeof parsed?.authenticated !== "boolean" || !parsed?.role) return null;
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function writeStoredAuth(value: StoredMockAuth | null) {
-  try {
-    if (!value) {
-      sessionStorage.removeItem(STORAGE_KEY);
-    } else {
-      sessionStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-    }
-  } catch {
-    // Ignore storage failures in demo mode
-  }
-}
-
-function buildPatientUser(): MockAuthUser {
-  return {
-    id: "mock-patient-sarah",
-    name: mockUser.name,
-    email: mockUser.email,
-    role: "PATIENT",
-    isAuthenticated: true,
-  };
-}
+export type { UserRole, AuthUser, AuthStatus };
 
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<MockAuthUser | null>(() => {
-    const stored = readStoredAuth();
-    if (stored?.authenticated) {
-      return {
-        ...buildPatientUser(),
-        role: stored.role,
-      };
-    }
-    return null;
-  });
+  const [user, setUser] = useState<AuthUser | null>(null);
+  const [status, setStatus] = useState<AuthStatus>("initializing");
 
-  const login = useCallback(() => {
-    const next = buildPatientUser();
-    writeStoredAuth({ authenticated: true, role: next.role });
-    setUser(next);
+  const applySession = useCallback((accessToken: string, nextUser: AuthUser) => {
+    setAccessToken(accessToken);
+    setUser(nextUser);
+    setStatus("authenticated");
   }, []);
 
-  const register = useCallback(() => {
-    // Preserve existing demo: Create Account → dashboard as authenticated patient
-    login();
-  }, [login]);
-
-  const logout = useCallback(() => {
-    writeStoredAuth(null);
+  const clearSession = useCallback(() => {
+    clearAccessToken();
     setUser(null);
+    setStatus("unauthenticated");
   }, []);
+
+  const refreshSession = useCallback(async (): Promise<boolean> => {
+    try {
+      const result = await authService.refresh();
+      applySession(result.access_token, result.user);
+      return true;
+    } catch {
+      clearSession();
+      return false;
+    }
+  }, [applySession, clearSession]);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const result = await authService.refresh();
+        if (cancelled) return;
+        applySession(result.access_token, result.user);
+      } catch {
+        if (cancelled) return;
+        clearSession();
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [applySession, clearSession]);
+
+  useEffect(() => {
+    setUnauthorizedHandler(() => {
+      clearAccessToken();
+      setUser(null);
+      setStatus("unauthenticated");
+    });
+    return () => setUnauthorizedHandler(null);
+  }, []);
+
+  const login = useCallback(
+    async (payload: LoginRequest) => {
+      const result = await authService.login(payload);
+      applySession(result.access_token, result.user);
+    },
+    [applySession],
+  );
+
+  const register = useCallback(
+    async (payload: RegisterRequest) => {
+      const result = await authService.register(payload);
+      applySession(result.access_token, result.user);
+    },
+    [applySession],
+  );
+
+  const logout = useCallback(async () => {
+    try {
+      await authService.logout();
+    } catch {
+      // Always clear local session even if network logout fails
+    } finally {
+      clearSession();
+    }
+  }, [clearSession]);
 
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
-      isAuthenticated: Boolean(user?.isAuthenticated),
+      status,
+      isAuthenticated: status === "authenticated" && user !== null,
       role: user?.role ?? null,
       login,
       register,
       logout,
+      refreshSession,
     }),
-    [user, login, register, logout],
+    [user, status, login, register, logout, refreshSession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

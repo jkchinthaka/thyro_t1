@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -6,18 +7,26 @@ import { Btn, Input, BrandLogo } from "@/components/common";
 import { BLUE, TEAL } from "@/constants/colors";
 import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/context/AuthContext";
-import { mockUser } from "@/data/mock";
 import { loginSchema, type LoginFormValues } from "@/schemas/authSchemas";
 import { useToast } from "@/hooks/useToast";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { SkipLink } from "@/layouts/Sidebar";
+import type { AppError } from "@/types/api";
+
+function isSafeInternalPath(path: string | undefined): path is string {
+  if (!path || !path.startsWith("/") || path.startsWith("//")) return false;
+  if (path === ROUTES.LOGIN || path === ROUTES.REGISTER) return false;
+  return true;
+}
 
 export function LoginPage() {
   useDocumentTitle("Login");
   const navigate = useNavigate();
   const location = useLocation();
   const { login } = useAuth();
-  const { success } = useToast();
+  const { success, error: showError } = useToast();
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
 
@@ -29,17 +38,29 @@ export function LoginPage() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: mockUser.email,
-      password: mockUser.passwordPlaceholder,
+      email: "",
+      password: "",
       remember: false,
     },
   });
 
-  const onSubmit = (values: LoginFormValues) => {
-    void values;
-    login();
-    success("Signed in successfully");
-    navigate(from && from !== ROUTES.LOGIN ? from : ROUTES.DASHBOARD, { replace: true });
+  const onSubmit = async (values: LoginFormValues) => {
+    if (submitting) return;
+    setSubmitting(true);
+    setFormError(null);
+    try {
+      await login({ email: values.email, password: values.password });
+      success("Signed in successfully");
+      const target = isSafeInternalPath(from) ? from : ROUTES.DASHBOARD;
+      navigate(target, { replace: true });
+    } catch (err) {
+      const appErr = err as AppError;
+      const message = appErr?.message || "Invalid email or password.";
+      setFormError(message);
+      showError(message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const onInvalid = () => {
@@ -98,6 +119,12 @@ export function LoginPage() {
               {...register("password")}
             />
 
+            {formError ? (
+              <p className="text-sm text-red-600" role="alert">
+                {formError}
+              </p>
+            ) : null}
+
             <div className="flex items-center justify-between gap-2 flex-wrap">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input type="checkbox" className="rounded" {...register("remember")} />
@@ -105,14 +132,22 @@ export function LoginPage() {
               </label>
               <button
                 type="button"
-                className="text-sm font-semibold text-primary hover:underline cursor-pointer"
+                disabled
+                title="Password reset will be available in a future release"
+                className="text-sm font-semibold text-muted-foreground cursor-not-allowed"
               >
-                Forgot password?
+                Forgot password? (coming soon)
               </button>
             </div>
 
-            <Btn className="w-full justify-center" size="lg" type="submit">
-              Sign In
+            <Btn
+              className="w-full justify-center"
+              size="lg"
+              type="submit"
+              disabled={submitting}
+              aria-busy={submitting}
+            >
+              {submitting ? "Signing in…" : "Sign In"}
             </Btn>
 
             <div className="relative my-2">
@@ -128,7 +163,9 @@ export function LoginPage() {
 
             <button
               type="button"
-              className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl border border-border bg-white hover:bg-gray-50 transition text-sm font-semibold text-foreground cursor-pointer"
+              disabled
+              title="Social login is not available yet"
+              className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl border border-border bg-white text-sm font-semibold text-muted-foreground cursor-not-allowed opacity-70"
             >
               <svg viewBox="0 0 24 24" className="w-5 h-5" aria-hidden="true">
                 <path
@@ -148,7 +185,7 @@ export function LoginPage() {
                   d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
                 />
               </svg>
-              Continue with Google
+              Continue with Google (coming soon)
             </button>
 
             <p className="text-center text-sm text-muted-foreground">

@@ -1,10 +1,10 @@
 # ThyroCare AI API (Backend)
 
-FastAPI + PyMongo Async persistence foundation for ThyroCare AI (Phases 4–5).
+FastAPI + PyMongo Async persistence and secure authentication for ThyroCare AI (Phases 4–6).
 
 > **Medical disclaimer:** This API is part of a patient-support research prototype. It does **not** replace professional medical advice, diagnosis, or emergency care.
 
-## Current scope (through Phase 5)
+## Current scope (through Phase 6)
 
 Included:
 
@@ -13,26 +13,27 @@ Included:
 - Configuration via environment variables (Pydantic Settings)
 - **PyMongo `AsyncMongoClient`** (Motor removed)
 - Domain persistence models + public schemas
-- Base and domain repositories (no public CRUD routes)
+- Base and domain repositories
 - Named indexes, TTL indexes, migration registry
-- Structured logging, CORS, security headers, request ID, timing
-- Exception handlers with safe JSON errors
+- **Authentication:** register, login, refresh, logout, `/auth/me`
+- Argon2 password hashing (`pwdlib`), JWT access tokens (PyJWT), opaque refresh cookies
+- CSRF protection for refresh/logout, account lockout, RBAC dependencies, audit events
+- Structured logging, CORS (credentials + exact origins), security headers
 - Pytest suite and Ruff
 - Dockerfile foundation
 
 **Not included yet:**
 
-- User registration / login / JWT / password hashing workflows
-- Public profile, medication, appointment, symptom, or chat endpoints
+- Password-reset email, email verification, MFA, social login
+- Public profile, medication, appointment, symptom, or chat CRUD endpoints
 - Chatbot / RAG / AI
-- Frontend ↔ backend wiring
-- Seed users or demo credentials
+- Seed users or demo / default admin credentials
 
 ## Prerequisites
 
 - Python **3.11+** (validated on 3.14 locally; Docker uses 3.12)
 - `pip`
-- Optional: MongoDB on `localhost:27017` (app starts degraded without it in non-production)
+- MongoDB on `localhost:27017` recommended for full auth flows (app can start degraded without it in non-production)
 
 ## Windows setup
 
@@ -44,6 +45,14 @@ python -m pip install --upgrade pip
 pip install -r requirements-dev.txt
 copy .env.example .env
 ```
+
+Generate a local JWT secret (do not commit it):
+
+```powershell
+python -c "import secrets; print(secrets.token_hex(32))"
+```
+
+Set `JWT_SECRET_KEY` in `backend/.env`. Development may use a long local secret; production must use a strong unique secret and `COOKIE_SECURE=true`.
 
 ## Start development server
 
@@ -57,6 +66,18 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 | ------ | ---------------- | --------------------------------- |
 | GET    | `/health`        | Lightweight probe                 |
 | GET    | `/api/v1/health` | Detailed health + database status |
+
+## Authentication endpoints
+
+| Method | Path                    | Notes                                     |
+| ------ | ----------------------- | ----------------------------------------- |
+| POST   | `/api/v1/auth/register` | Creates PATIENT only; sets refresh + CSRF |
+| POST   | `/api/v1/auth/login`    | Generic failure messages; sets cookies    |
+| POST   | `/api/v1/auth/refresh`  | Cookie + `X-CSRF-Token`; rotates refresh  |
+| POST   | `/api/v1/auth/logout`   | CSRF when cookie present; clears cookies  |
+| GET    | `/api/v1/auth/me`       | Bearer access token                       |
+
+Local cookies: `COOKIE_SECURE=false`, `COOKIE_SAMESITE=lax`, refresh path `/api/v1/auth`. Frontend origin must be listed in `ALLOWED_ORIGINS` (default `http://localhost:5173`) with credentials enabled.
 
 ## Database notes
 
@@ -77,6 +98,6 @@ ruff format --check app tests
 
 ## Known limitations
 
-- No authentication or domain HTTP APIs
-- In-memory rate limiting only
+- Email verification and password reset are not implemented
+- In-memory rate limiting only (not multi-instance safe)
 - Integration index creation requires Mongo authorization

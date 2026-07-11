@@ -1,4 +1,4 @@
-"""User persistence document (no password hashing or auth workflows in Phase 5)."""
+"""User persistence document (password hashing implemented in auth services)."""
 
 from __future__ import annotations
 
@@ -8,10 +8,9 @@ from pydantic import Field, field_validator
 
 from app.models.base import SoftDeletableDocument
 from app.models.enums import AccountStatus, UserRole
+from app.utils.email import normalize_email
 
-
-def normalize_email(email: str) -> str:
-    return email.strip().lower()
+__all__ = ["UserDocument", "normalize_email"]
 
 
 class UserDocument(SoftDeletableDocument):

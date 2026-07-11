@@ -8,16 +8,16 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from slowapi.middleware import SlowAPIMiddleware
-from slowapi.util import get_remote_address
 
 from app.api.v1.health import lightweight_health
 from app.api.v1.router import api_router
 from app.core.config import Settings, get_settings
 from app.core.exceptions import register_exception_handlers
 from app.core.logging import configure_logging, get_logger
+from app.core.rate_limit import configure_limiter, limiter
 from app.db.initialize import initialize_database
 from app.db.mongodb import close_mongo_connection, connect_to_mongo
 from app.middleware.request_id import RequestIdMiddleware
@@ -33,18 +33,14 @@ ThyroCare AI API — patient-support research system for post-thyroidectomy thyr
 **Medical disclaimer:** This system provides informational support only. It does **not** replace
 professional medical advice, diagnosis, or emergency care.
 
-**Phase 4–5 scope:** infrastructure and persistence foundation only.
-Medical, user authentication, and AI HTTP endpoints are **not** implemented yet.
+**Phase 4–6 scope:** infrastructure, persistence foundation, and secure authentication.
+Patient clinical CRUD and AI HTTP endpoints are **not** implemented yet.
+
+Authentication:
+- Bearer JWT access tokens (short-lived, memory-only on the client)
+- Opaque HttpOnly refresh cookies with rotation and reuse detection
+- CSRF double-submit for refresh/logout
 """
-
-
-def _build_limiter(settings: Settings) -> Limiter:
-    """In-memory rate-limit foundation. Distributed/Redis limiting is deferred."""
-    return Limiter(
-        key_func=get_remote_address,
-        default_limits=[settings.rate_limit_default] if settings.rate_limit_enabled else [],
-        enabled=settings.rate_limit_enabled,
-    )
 
 
 @asynccontextmanager
@@ -84,7 +80,10 @@ def create_application() -> FastAPI:
         debug=False,
     )
     app.state.settings = settings
-    limiter = _build_limiter(settings)
+    configure_limiter(
+        enabled=settings.rate_limit_enabled,
+        default_limit=settings.rate_limit_default,
+    )
     app.state.limiter = limiter
 
     app.add_middleware(SecurityHeadersMiddleware)
@@ -93,9 +92,9 @@ def create_application() -> FastAPI:
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.cors_origins,
-        allow_credentials=False,
+        allow_credentials=True,
         allow_methods=["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-        allow_headers=["*"],
+        allow_headers=["Authorization", "Content-Type", "X-CSRF-Token", "X-Request-ID"],
         expose_headers=["X-Request-ID", "X-Process-Time"],
     )
 

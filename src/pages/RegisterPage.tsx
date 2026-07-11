@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -9,12 +10,15 @@ import { registerSchema, type RegisterFormValues } from "@/schemas/authSchemas";
 import { useToast } from "@/hooks/useToast";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { SkipLink } from "@/layouts/Sidebar";
+import type { AppError } from "@/types/api";
 
 export function RegisterPage() {
   useDocumentTitle("Register");
   const navigate = useNavigate();
-  const { register: mockRegister } = useAuth();
-  const { success } = useToast();
+  const { register: registerAccount } = useAuth();
+  const { success, error: showError } = useToast();
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const {
     register,
@@ -33,13 +37,34 @@ export function RegisterPage() {
       gender: "female",
       surgeryDate: "2023-09-15",
       consent: false,
+      disclaimer: false,
     },
   });
 
-  const onSubmit = () => {
-    mockRegister();
-    success("Account created successfully");
-    navigate(ROUTES.DASHBOARD, { replace: true });
+  const onSubmit = async (values: RegisterFormValues) => {
+    if (submitting) return;
+    setSubmitting(true);
+    setFormError(null);
+    try {
+      await registerAccount({
+        full_name: values.fullName,
+        email: values.email,
+        password: values.password,
+        confirm_password: values.confirmPassword,
+        consent_accepted: values.consent,
+        disclaimer_accepted: values.disclaimer,
+      });
+      success("Account created successfully");
+      navigate(ROUTES.DASHBOARD, { replace: true });
+    } catch (err) {
+      const appErr = err as AppError;
+      const message =
+        appErr?.message || "Unable to create account. Please check your details and try again.";
+      setFormError(message);
+      showError(message);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   const onInvalid = () => {
@@ -52,6 +77,7 @@ export function RegisterPage() {
       "surgeryDate",
       "rai",
       "consent",
+      "disclaimer",
     ];
     for (const key of order) {
       if (errors[key]) {
@@ -237,8 +263,37 @@ export function RegisterPage() {
                     {errors.consent.message}
                   </p>
                 ) : null}
-                <Btn className="w-full justify-center" size="lg" type="submit">
-                  Create Account <ArrowRight className="w-5 h-5" aria-hidden="true" />
+                <label className="flex items-start gap-2 cursor-pointer">
+                  <input type="checkbox" className="mt-1 rounded" {...register("disclaimer")} />
+                  <span className="text-sm text-muted-foreground">
+                    I understand ThyroCare AI provides supportive information only and is not a
+                    substitute for professional medical advice, diagnosis, or emergency care.
+                  </span>
+                </label>
+                {errors.disclaimer ? (
+                  <p className="text-xs text-red-600" role="alert">
+                    {errors.disclaimer.message}
+                  </p>
+                ) : null}
+                {formError ? (
+                  <p className="text-sm text-red-600" role="alert">
+                    {formError}
+                  </p>
+                ) : null}
+                <Btn
+                  className="w-full justify-center"
+                  size="lg"
+                  type="submit"
+                  disabled={submitting}
+                  aria-busy={submitting}
+                >
+                  {submitting ? (
+                    "Creating account…"
+                  ) : (
+                    <>
+                      Create Account <ArrowRight className="w-5 h-5" aria-hidden="true" />
+                    </>
+                  )}
                 </Btn>
                 <p className="text-center text-sm text-muted-foreground">
                   Already have an account?{" "}

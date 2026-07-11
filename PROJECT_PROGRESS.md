@@ -17,7 +17,8 @@
 | 3     | Frontend quality foundation            | **Complete** | 2026-07-11 |
 | 4     | FastAPI backend foundation             | **Complete** | 2026-07-11 |
 | 5     | MongoDB models & repository foundation | **Complete** | 2026-07-11 |
-| 6–22  | Remaining roadmap                      | Not started  | —          |
+| 6     | Secure authentication & RBAC           | **Complete** | 2026-07-11 |
+| 7–22  | Remaining roadmap                      | Not started  | —          |
 
 ---
 
@@ -29,33 +30,38 @@
 
 ## Phase 5 — Completion report
 
+- MongoDB repository foundation; commit `a457e4b`.
+
+---
+
+## Phase 6 — Completion report
+
 ### What was done
 
-1. Planned in `docs/phase-5-database-plan.md`.
-2. Migrated Motor → PyMongo `AsyncMongoClient`.
-3. Added collections, ObjectId helpers, enums, persistence models, public schemas.
-4. Implemented BaseRepository + domain repositories with ownership filters.
-5. Defined named indexes (including TTL), initialization, and migration registry.
-6. Documented privacy, design, indexes, repository architecture, validation strategy.
-7. Added unit tests (35) and optional integration marker.
+1. Planned in `docs/phase-6-authentication-plan.md`.
+2. Added `pwdlib[argon2]` and `PyJWT`; auth settings and production secret/cookie checks.
+3. Implemented password, JWT, refresh-token, CSRF, and cookie helpers.
+4. Auth service + repositories: register, login, refresh rotation/reuse detection, logout, `/me`.
+5. RBAC dependencies and audit events.
+6. Replaced frontend mock auth with memory access token + refresh bootstrap + Axios single-flight refresh.
+7. Documented architecture, token lifecycle, threat model, and validation.
 
 ### Validation
 
-- Backend ruff / pytest: **PASS** (35 unit tests)
-- Integration: skipped without index privileges (safe)
-- Health / OpenAPI regression: **PASS**
-- Frontend regression: **PASS**
-- Phase 6: **not started**
+- Backend ruff / pytest: **PASS** (60 unit tests, 1 skipped integration)
+- Frontend typecheck / lint / format / build: **PASS**
+- Phase 7: **not started**
 
 ### Next phase
 
-Phase 6 — authentication. Do not start until approved.
+Phase 7 — patient profile CRUD (do not start until approved).
 
 ---
 
 ## Change log
 
-| Date       | Change                                         |
-| ---------- | ---------------------------------------------- |
-| 2026-07-11 | Phase 0–4 complete                             |
-| 2026-07-11 | Phase 5 MongoDB repository foundation complete |
+| Date       | Change                                          |
+| ---------- | ----------------------------------------------- |
+| 2026-07-11 | Phase 0–4 complete                              |
+| 2026-07-11 | Phase 5 MongoDB repository foundation complete  |
+| 2026-07-11 | Phase 6 secure authentication and RBAC complete |

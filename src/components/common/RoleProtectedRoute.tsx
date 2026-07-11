@@ -1,14 +1,20 @@
 import { Navigate, Outlet, useLocation } from "react-router";
-import { useAuth, type UserRole } from "@/context/AuthContext";
+import { useAuth } from "@/context/AuthContext";
+import type { UserRole } from "@/types/auth";
 import { ROUTES } from "@/constants/routes";
+import { PageLoader } from "@/components/common/PageLoader";
 
 /**
  * Role-guard foundation for future admin / expert routes.
- * No admin pages are mounted in Phase 2.
+ * No admin pages are mounted in Phase 6.
  */
 export function RoleProtectedRoute({ allowedRoles }: { allowedRoles: UserRole[] }) {
-  const { isAuthenticated, role } = useAuth();
+  const { isAuthenticated, role, status } = useAuth();
   const location = useLocation();
+
+  if (status === "initializing") {
+    return <PageLoader />;
+  }
 
   if (!isAuthenticated) {
     return <Navigate to={ROUTES.LOGIN} replace state={{ from: location }} />;

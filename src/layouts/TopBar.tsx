@@ -2,12 +2,15 @@ import { useState, type ReactNode } from "react";
 import { useNavigate } from "react-router";
 import { Bell, Search } from "lucide-react";
 import { Avatar } from "@/components/common";
-import { mockNotificationCount, mockUser } from "@/data/mock";
+import { mockNotificationCount } from "@/data/mock";
 import { ROUTES } from "@/constants/routes";
+import { useAuth } from "@/context/AuthContext";
 
 export function TopBar({ title, leading }: { title: string; leading?: ReactNode }) {
   const [notifs, setNotifs] = useState(mockNotificationCount);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const displayName = user?.full_name ?? "Account";
 
   return (
     <header className="flex items-center gap-3 sm:gap-4 px-4 sm:px-6 py-4 bg-card border-b border-border sticky top-0 z-10">
@@ -49,9 +52,9 @@ export function TopBar({ title, leading }: { title: string; leading?: ReactNode 
         type="button"
         onClick={() => navigate(ROUTES.PROFILE)}
         className="cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-full"
-        aria-label={`Open profile for ${mockUser.name}`}
+        aria-label={`Open profile for ${displayName}`}
       >
-        <Avatar name={mockUser.name} size={9} />
+        <Avatar name={displayName} size={9} />
       </button>
     </header>
   );

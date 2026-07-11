@@ -5,7 +5,8 @@ export const loginSchema = z.object({
   password: z
     .string()
     .min(1, "Password is required")
-    .min(6, "Password must be at least 6 characters"),
+    .min(10, "Password must be at least 10 characters")
+    .max(128, "Password is too long"),
   remember: z.boolean().optional(),
 });
 
@@ -18,8 +19,10 @@ export const registerSchema = z
     password: z
       .string()
       .min(1, "Password is required")
-      .min(8, "Password must be at least 8 characters"),
+      .min(10, "Password must be at least 10 characters")
+      .max(128, "Password is too long"),
     confirmPassword: z.string().min(1, "Confirm your password"),
+    // Local UI-only fields preserved for design; not sent to auth API in Phase 6.
     age: z
       .string()
       .trim()
@@ -35,6 +38,9 @@ export const registerSchema = z
     }),
     consent: z.boolean().refine((v) => v === true, {
       message: "You must agree to the Terms and Privacy Policy",
+    }),
+    disclaimer: z.boolean().refine((v) => v === true, {
+      message: "You must acknowledge the medical support disclaimer",
     }),
   })
   .refine((data) => data.password === data.confirmPassword, {

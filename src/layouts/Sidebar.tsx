@@ -26,12 +26,12 @@ function NavBody({
   onNavigate?: () => void;
 }) {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
     onNavigate?.();
-    navigate(ROUTES.HOME);
+    await logout();
+    navigate(ROUTES.LOGIN, { replace: true });
   };
 
   return (
@@ -104,6 +104,12 @@ function NavBody({
       </nav>
 
       <div className="px-2 pb-4 space-y-1">
+        {!collapsed && user ? (
+          <div className="px-3 py-2 mb-1 rounded-xl bg-muted/60">
+            <p className="text-sm font-semibold text-foreground truncate">{user.full_name}</p>
+            <p className="text-[11px] text-muted-foreground truncate">{user.email}</p>
+          </div>
+        ) : null}
         <NavLink
           to={ROUTES.EMERGENCY}
           onClick={() => onNavigate?.()}

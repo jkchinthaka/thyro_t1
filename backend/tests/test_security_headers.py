@@ -52,5 +52,8 @@ async def test_openapi_available_in_development(client: AsyncClient) -> None:
     assert payload["info"]["title"]
     assert (
         "Phase 4" in payload["info"]["description"]
+        or "authentication" in payload["info"]["description"].lower()
         or "infrastructure" in payload["info"]["description"].lower()
     )
+    paths = payload.get("paths", {})
+    assert "/api/v1/auth/login" in paths or any("auth/login" in p for p in paths)

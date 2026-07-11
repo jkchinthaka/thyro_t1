@@ -16,36 +16,36 @@ Educational patient-support prototype for differentiated thyroid cancer survivor
 - **Phase 3:** Complete (TypeScript strictness, ESLint/Prettier, env, Axios foundation, forms, a11y)
 - **Phase 4:** Complete (FastAPI backend foundation — health/infra only)
 - **Phase 5:** Complete (PyMongo Async models, repositories, indexes — no public CRUD)
-- **Phase 6+:** Not started
+- **Phase 6:** Complete (secure auth: JWT access + HttpOnly refresh + CSRF + RBAC)
+- **Phase 7+:** Not started
 
-Mock data remains under `src/data/mock/` and is **not** live clinical data.
+Mock clinical UI data remains under `src/data/mock/` and is **not** live clinical data.
 
-**Authentication is mock-only** for routing demos. Real JWT auth is deferred to Phase 6.
+**Authentication** uses real backend endpoints. Access tokens live in memory only; refresh tokens are HttpOnly cookies. Page reload restores the session via refresh.
 
-**API client is mock-ready only** (`src/services/api.ts`) — frontend forms are **not** wired to the backend yet.
+See [`docs/authentication-architecture.md`](docs/authentication-architecture.md) · [`docs/phase-6-validation.md`](docs/phase-6-validation.md) · [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
 
 Accessibility improvements move toward WCAG 2.1 AA practices; formal certification has not been performed. See [`docs/accessibility-improvements.md`](docs/accessibility-improvements.md).
-
-Docs: [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md) · [`docs/phase-5-database-foundation.md`](docs/phase-5-database-foundation.md) · [`docs/phase-5-validation.md`](docs/phase-5-validation.md)
 
 ---
 
 ## Tech stack
 
-| Layer    | Technology                          |
-| -------- | ----------------------------------- |
-| UI       | React 18.3                          |
-| Language | TypeScript (strict)                 |
-| Bundler  | Vite 6                              |
-| Routing  | react-router 7                      |
-| Forms    | react-hook-form + Zod               |
-| HTTP     | Axios (foundation only)             |
-| Toasts   | sonner                              |
-| Styling  | Tailwind CSS 4                      |
-| Charts   | Recharts                            |
-| Icons    | lucide-react                        |
-| Backend  | FastAPI + Uvicorn (Phase 4)         |
-| Database | MongoDB via PyMongo AsyncMongoClient |
+| Layer    | Technology                              |
+| -------- | --------------------------------------- |
+| UI       | React 18.3                              |
+| Language | TypeScript (strict)                     |
+| Bundler  | Vite 6                                  |
+| Routing  | react-router 7                          |
+| Forms    | react-hook-form + Zod                   |
+| HTTP     | Axios (Bearer + single-flight refresh)  |
+| Toasts   | sonner                                  |
+| Styling  | Tailwind CSS 4                          |
+| Charts   | Recharts                                |
+| Icons    | lucide-react                            |
+| Backend  | FastAPI + Uvicorn                       |
+| Auth     | pwdlib Argon2 + PyJWT + refresh cookies |
+| Database | MongoDB via PyMongo AsyncMongoClient    |
 
 ---
 
@@ -61,7 +61,7 @@ npm run dev
 
 Open `http://localhost:5173/`.
 
-### Backend (Phase 4)
+### Backend (Phases 4–6)
 
 ```powershell
 cd backend
@@ -69,16 +69,20 @@ python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements-dev.txt
 copy .env.example .env
+# Set JWT_SECRET_KEY to a long random value (see backend/.env.example)
 uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
 - Health: `http://localhost:8000/health`
 - Detailed health: `http://localhost:8000/api/v1/health`
+- Auth: `/api/v1/auth/register`, `/login`, `/refresh`, `/logout`, `/me`
 - OpenAPI: `http://localhost:8000/docs`
 
 See [`backend/README.md`](backend/README.md).
 
-**Phase 4–5 limitations:** no user registration, login, JWT, password hashing, or public domain CRUD endpoints. Persistence models/repositories exist for later phases.
+**Local auth notes:** Frontend at `http://localhost:5173` must match `ALLOWED_ORIGINS`. Access tokens stay in memory; refresh uses an HttpOnly cookie. Production requires `COOKIE_SECURE=true` and a strong `JWT_SECRET_KEY` (never commit secrets).
+
+**Still deferred:** password-reset email, email verification, MFA, patient profile CRUD, medications/appointments/symptoms APIs, chatbot/AI, admin management UI.
 
 ### Developer scripts (frontend)
 
@@ -107,7 +111,7 @@ Environment variables (browser-safe `VITE_*` only) are documented in `.env.examp
 | `/register`  | Register  |
 | `/emergency` | Emergency |
 
-### Patient (mock-auth protected)
+### Patient (authenticated)
 
 | URL            | Screen               |
 | -------------- | -------------------- |
@@ -128,25 +132,27 @@ Environment variables (browser-safe `VITE_*` only) are documented in `.env.examp
 | `/unauthorized` | Unauthorized |
 | unknown paths   | Not Found    |
 
-Sign in / register uses **temporary mock authentication** (sessionStorage flag). It is not secure and must be replaced in Phase 6.
+Sign in / register call the FastAPI auth API. Access tokens are memory-only; refresh uses an HttpOnly cookie.
 
 ---
 
 ## Project structure
 
 ```
-backend/                   # FastAPI Phase 4 foundation
+backend/                   # FastAPI + Mongo + auth (Phases 4–6)
 src/
   app/App.tsx              # Providers + RouterProvider shell
   app/providers.tsx        # ErrorBoundary, Auth, Toast
   app/router.tsx           # createBrowserRouter route table
   config/env.ts            # Typed Vite env
-  services/api.ts          # Axios client foundation (no real calls)
+  services/api.ts          # Axios + Bearer + refresh interceptors
+  services/authService.ts  # Register/login/refresh/logout/me
+  services/tokenStore.ts   # In-memory access token
   schemas/                 # Zod validation schemas
   hooks/                   # useDocumentTitle, useToast
   pages/                   # Lazy-loaded route pages
   layouts/                 # Public, Auth, Dashboard (+ mobile drawer)
-  context/AuthContext.tsx  # Temporary mock auth
+  context/AuthContext.tsx  # Real auth provider (refresh bootstrap)
   components/common/       # Guards, states, ErrorBoundary, UI atoms
   data/mock/               # Explicit demo datasets (*.mock.ts)
 ```
@@ -158,11 +164,12 @@ src/
 1. Modular frontend + routing ← done (Phases 1–2)
 2. Quality / accessibility foundation ← done (Phase 3)
 3. FastAPI backend foundation ← done (Phase 4)
-4. MongoDB models & repositories ← **done (Phase 5)**
-5. Auth, profiles, clinical support modules (Phase 6 — not started)
-6. Governed medical knowledge + safe RAG chatbot
-7. Admin / medical expert workflows
-8. Tests, security, Docker Compose, deployment docs
+4. MongoDB models & repositories ← done (Phase 5)
+5. Secure authentication & RBAC ← **done (Phase 6)**
+6. Patient profiles + clinical support modules (Phase 7+)
+7. Governed medical knowledge + safe RAG chatbot
+8. Admin / medical expert workflows
+9. Tests, security, Docker Compose, deployment docs
 
 See `PROJECT_PROGRESS.md` for phase tracking.
 
