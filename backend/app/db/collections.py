@@ -21,6 +21,8 @@ class CollectionName(StrEnum):
     CHAT_SESSIONS = "chat_sessions"
     CHAT_MESSAGES = "chat_messages"
     KNOWLEDGE_DOCUMENTS = "knowledge_documents"
+    KNOWLEDGE_DOCUMENT_VERSIONS = "knowledge_document_versions"
+    KNOWLEDGE_REVIEW_RECORDS = "knowledge_review_records"
     KNOWLEDGE_CHUNKS = "knowledge_chunks"
     USER_FEEDBACK = "user_feedback"
     EMERGENCY_EVENTS = "emergency_events"

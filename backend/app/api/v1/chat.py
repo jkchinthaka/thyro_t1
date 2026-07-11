@@ -162,6 +162,6 @@ async def get_knowledge_source(
         source_url=doc.source_url,
         topic=doc.topic,
         language=doc.language,
-        version=doc.version,
+        version=doc.content_version,
         medical_disclaimer=doc.medical_disclaimer,
     )

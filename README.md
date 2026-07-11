@@ -22,11 +22,14 @@ Educational patient-support prototype for differentiated thyroid cancer survivor
 - **Phase 9:** Complete (appointment/follow-up management + Follow-Up page)
 - **Phase 10:** Complete (symptom tracking + deterministic safety escalation)
 - **Phase 11:** Complete (safe knowledge-grounded assistant foundation)
-- **Phase 12+:** Not started
+- **Phase 12:** Complete (knowledge governance + medical-expert review console)
+- **Phase 13+:** Not started
 
-Mock clinical UI data remains under `src/data/mock/` for diet, resources, analytics, etc. Auth, profile, medications, appointments, symptoms, and chat use the real API.
+Mock clinical UI data remains under `src/data/mock/` for diet, resources, analytics, etc. Auth, profile, medications, appointments, symptoms, chat, and knowledge governance use the real API.
 
-**Chat / educational assistant** uses `/api/v1/chat` with approved-source grounding when content is APPROVED and a provider is configured. Default: assistant disabled (`AI_ASSISTANT_ENABLED=false`). Seed knowledge is PENDING_REVIEW until medical sign-off.
+**Chat / educational assistant** uses `/api/v1/chat` with approved-source grounding when content is APPROVED and a provider is configured. Default: assistant disabled (`AI_ASSISTANT_ENABLED=false`). Seed knowledge remains **PENDING_REVIEW** until a medical expert approves it — it is never auto-approved.
+
+**Knowledge governance & medical review (Phase 12):** ADMIN authors and submits knowledge drafts at `/admin/knowledge*`; only **MEDICAL_EXPERT** (never ADMIN) can approve, request changes, reject, or restore content at `/medical-review*`. There is no auto-approve and no LLM approval. See [`docs/knowledge-governance-architecture.md`](docs/knowledge-governance-architecture.md) · [`docs/knowledge-content-lifecycle.md`](docs/knowledge-content-lifecycle.md) · [`docs/medical-review-workflow.md`](docs/medical-review-workflow.md) · [`docs/knowledge-versioning-and-hashing.md`](docs/knowledge-versioning-and-hashing.md) · [`docs/knowledge-publication-and-ingestion.md`](docs/knowledge-publication-and-ingestion.md) · [`docs/knowledge-governance-rbac.md`](docs/knowledge-governance-rbac.md) · [`docs/phase-12-knowledge-governance.md`](docs/phase-12-knowledge-governance.md) · [`docs/phase-12-validation.md`](docs/phase-12-validation.md)
 
 See [`docs/safe-assistant-architecture.md`](docs/safe-assistant-architecture.md) · [`docs/phase-11-validation.md`](docs/phase-11-validation.md) · [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
 
@@ -36,6 +39,7 @@ See [`docs/safe-assistant-architecture.md`](docs/safe-assistant-architecture.md)
 - Committed config: `wrangler.jsonc`; Wrangler pinned as `devDependency`
 - Build: `npm run ci:build` · Deploy: `npm run cf:deploy` (no second Vite build)
 - **Does not deploy FastAPI** — see [`docs/cloudflare-frontend-deployment.md`](docs/cloudflare-frontend-deployment.md) and [`docs/backend-production-deployment-checklist.md`](docs/backend-production-deployment-checklist.md)
+- Phase 12 added frontend-only admin/medical-review pages; the deployed Worker build is otherwise unchanged for this phase. Redeploying it to pick up those new pages is a separate action (not required to complete Phase 12) — the FastAPI backend remains not publicly deployed.
 
 Accessibility improvements move toward WCAG 2.1 AA practices; formal certification has not been performed. See [`docs/accessibility-improvements.md`](docs/accessibility-improvements.md).
 
@@ -94,7 +98,7 @@ See [`backend/README.md`](backend/README.md).
 
 **Local auth notes:** Frontend at `http://localhost:5173` must match `ALLOWED_ORIGINS`. Access tokens stay in memory; refresh uses an HttpOnly cookie. Production requires `COOKIE_SECURE=true` and a strong `JWT_SECRET_KEY` (never commit secrets).
 
-**Still deferred:** password-reset email, email verification, MFA, production LLM enablement, admin knowledge CMS, Atlas Vector Search ops, medication/appointment SMS reminders.
+**Still deferred:** password-reset email, email verification, MFA, production LLM enablement, Atlas Vector Search ops, medication/appointment SMS reminders. FastAPI backend is not publicly deployed.
 
 ### Developer scripts (frontend)
 
@@ -139,6 +143,24 @@ Environment variables (browser-safe `VITE_*` only) are documented in `.env.examp
 | `/analytics`   | Progress / Analytics |
 | `/resources`   | Resources            |
 | `/profile`     | Profile              |
+
+### Admin (role `admin`, Phase 12)
+
+| URL                                                | Screen                    |
+| -------------------------------------------------- | ------------------------- |
+| `/admin/knowledge`                                 | Knowledge management list |
+| `/admin/knowledge/new`                             | New knowledge draft       |
+| `/admin/knowledge/:documentId`                     | Draft editor              |
+| `/admin/knowledge/:documentId/versions/:versionId` | Version detail            |
+
+### Medical expert (role `medical_expert`, Phase 12)
+
+| URL                                      | Screen                                             |
+| ---------------------------------------- | -------------------------------------------------- |
+| `/medical-review`                        | Review queue                                       |
+| `/medical-review/:documentId/:versionId` | Review detail (approve / request changes / reject) |
+
+Only `medical_expert` can approve, request changes, reject, or restore; `admin` can author/submit drafts but cannot review. See [`docs/knowledge-governance-rbac.md`](docs/knowledge-governance-rbac.md).
 
 ### System
 
@@ -186,8 +208,8 @@ src/
 8. Appointment / follow-up management ← **done (Phase 9)**
 9. Symptom tracking + safety escalation ← **done (Phase 10)**
 10. Safe knowledge-grounded assistant ← **done (Phase 11)**
-11. Admin / medical expert workflows (Phase 12+)
-12. Tests, security, Docker Compose, deployment docs
+11. Admin / medical expert knowledge governance workflows ← **done (Phase 12)**
+12. Tests, security, Docker Compose, deployment docs (Phase 13+, not started)
 
 See `PROJECT_PROGRESS.md` for phase tracking.
 

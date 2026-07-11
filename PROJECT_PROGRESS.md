@@ -23,7 +23,8 @@
 | 9     | Appointment and follow-up management   | **Complete** | 2026-07-11 |
 | 10    | Symptom tracking & safety escalation   | **Complete** | 2026-07-12 |
 | 11    | Safe knowledge-grounded assistant      | **Complete** | 2026-07-12 |
-| 12–22 | Remaining roadmap                      | Not started  | —          |
+| 12    | Knowledge governance & medical review  | **Complete** | 2026-07-12 |
+| 13–22 | Remaining roadmap                      | Not started  | —          |
 
 ---
 
@@ -112,11 +113,41 @@ Phase 11 — safe assistant ← **done**.
 ### Validation
 
 - See `docs/phase-11-validation.md`.
-- Phase 12: **not started**
+- Phase 12: **complete** (see below)
 
 ### Next phase
 
-Phase 12 — admin / medical expert workflows (do not start until approved).
+Phase 12 — knowledge governance & medical review ← **done**.
+
+---
+
+## Phase 12 — Completion report
+
+### What was done
+
+1. Planned in `docs/phase-12-knowledge-governance-plan.md`.
+2. `KnowledgeDocumentVersionDocument` + append-only `KnowledgeReviewRecordDocument` models; `knowledge_document_versions` / `knowledge_review_records` collections and indexes.
+3. `KnowledgeGovernanceRepository` (OCC-safe) + `KnowledgeGovernanceService` (draft → submit → approve/request-changes/reject → retire/restore; new-version-from-approved; version compare).
+4. Governance API under `/api/v1/governance/knowledge` and `/api/v1/governance/review-queue`; only `MEDICAL_EXPERT` may approve/request-changes/reject/restore — `ADMIN` cannot.
+5. Deterministic re-ingestion into `knowledge_chunks` on approve/restore; partial-failure-safe (`ingestion_status: "failed"` without losing the approval record).
+6. Admin console (`/admin/knowledge*`) and medical-review console (`/medical-review*`); role-protected routing and sidebar.
+7. Audit events for the full governance lifecycle (metadata only — never full body/comments).
+8. Documented architecture, lifecycle, review workflow, versioning/hashing, publication/ingestion, RBAC, completion report, validation checklist.
+
+### Validation
+
+- See `docs/phase-12-validation.md` (checklist — fill placeholders after running the full suite).
+- Phase 13: **not started**
+
+### Facts carried forward
+
+- No auto-approve; no LLM/AI approval — MEDICAL_EXPERT decision only.
+- Seed JSON under `backend/app/content/approved_knowledge/` remains `pending_review`.
+- FastAPI backend is not publicly deployed. Cloudflare Worker frontend build is otherwise unchanged as an infra requirement for this phase, though the frontend did gain new pages/routes that would need a separate redeploy if pushed live.
+
+### Next phase
+
+Phase 13 — scope not yet defined; do not start until an approved plan exists.
 
 ---
 
@@ -131,6 +162,7 @@ Phase 12 — admin / medical expert workflows (do not start until approved).
 | 2026-07-11 | Phase 9 appointment / follow-up management       |
 | 2026-07-12 | Phase 10 symptom tracking & safety escalation    |
 | 2026-07-12 | Phase 11 safe knowledge-grounded assistant       |
+| 2026-07-12 | Phase 12 knowledge governance & medical review   |
 
 ## Deployment hardening (not a numbered phase)
 

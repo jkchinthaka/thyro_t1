@@ -2,14 +2,14 @@ import { useState } from "react";
 import { Outlet, useLocation } from "react-router";
 import { Sidebar, MobileMenuButton, SkipLink } from "./Sidebar";
 import { TopBar } from "./TopBar";
-import { ROUTE_TITLES } from "@/constants/routes";
+import { resolveRouteTitle } from "@/constants/routes";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 
 export function DashboardLayout() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const { pathname } = useLocation();
-  const title = ROUTE_TITLES[pathname] ?? "ThyroCare AI";
+  const title = resolveRouteTitle(pathname);
   useDocumentTitle(title.replace(/👋/g, "").trim() || "Dashboard");
 
   return (

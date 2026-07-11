@@ -115,14 +115,18 @@ class KnowledgeRepository(BaseRepository[KnowledgeDocumentDocument]):
                 raise map_pymongo_error(exc) from exc
         return count
 
-    async def retire_old_chunks(self, document_id: str, keep_version: str) -> int:
+    async def retire_old_chunks(self, document_id: str, keep_version: str | None) -> int:
+        """Retire chunks not matching `keep_version`. Pass None to retire all chunks
+        for the document (e.g. when governance retires the entire document)."""
+        query: dict[str, Any] = {
+            "document_id": document_id,
+            "is_deleted": {"$ne": True},
+        }
+        if keep_version is not None:
+            query["document_version"] = {"$ne": keep_version}
         try:
             result = await self._chunks.update_many(
-                {
-                    "document_id": document_id,
-                    "document_version": {"$ne": keep_version},
-                    "is_deleted": {"$ne": True},
-                },
+                query,
                 {
                     "$set": {
                         "review_status": KnowledgeStatus.RETIRED.value,

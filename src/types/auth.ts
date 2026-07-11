@@ -42,7 +42,7 @@ export interface AuthContextValue {
   status: AuthStatus;
   isAuthenticated: boolean;
   role: UserRole | null;
-  login: (payload: LoginRequest) => Promise<void>;
+  login: (payload: LoginRequest) => Promise<AuthUser>;
   register: (payload: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<boolean>;

@@ -1,6 +1,12 @@
 ﻿import { Suspense, lazy } from "react";
 import { createBrowserRouter, Outlet } from "react-router";
-import { ScrollToTop, PageLoader, ProtectedRoute, RouteErrorPage } from "@/components/common";
+import {
+  ScrollToTop,
+  PageLoader,
+  ProtectedRoute,
+  RoleProtectedRoute,
+  RouteErrorPage,
+} from "@/components/common";
 import { PublicLayout, AuthLayout, DashboardLayout } from "@/layouts";
 import { ROUTES } from "@/constants/routes";
 
@@ -42,6 +48,28 @@ const UnauthorizedPage = lazy(() =>
 );
 const NotFoundPage = lazy(() =>
   import("@/pages/NotFoundPage").then((m) => ({ default: m.NotFoundPage })),
+);
+
+const KnowledgeManagementPage = lazy(() =>
+  import("@/pages/admin/KnowledgeManagementPage").then((m) => ({
+    default: m.KnowledgeManagementPage,
+  })),
+);
+const KnowledgeEditorPage = lazy(() =>
+  import("@/pages/admin/KnowledgeEditorPage").then((m) => ({ default: m.KnowledgeEditorPage })),
+);
+const KnowledgeVersionPage = lazy(() =>
+  import("@/pages/admin/KnowledgeVersionPage").then((m) => ({ default: m.KnowledgeVersionPage })),
+);
+const MedicalReviewQueuePage = lazy(() =>
+  import("@/pages/medical/MedicalReviewQueuePage").then((m) => ({
+    default: m.MedicalReviewQueuePage,
+  })),
+);
+const MedicalReviewDetailPage = lazy(() =>
+  import("@/pages/medical/MedicalReviewDetailPage").then((m) => ({
+    default: m.MedicalReviewDetailPage,
+  })),
 );
 
 function RootLayout() {
@@ -91,6 +119,32 @@ export const router = createBrowserRouter([
               { path: ROUTES.ANALYTICS, element: <AnalyticsPage /> },
               { path: ROUTES.RESOURCES, element: <ResourcesPage /> },
               { path: ROUTES.PROFILE, element: <ProfilePage /> },
+            ],
+          },
+        ],
+      },
+      {
+        element: <RoleProtectedRoute allowedRoles={["admin"]} />,
+        children: [
+          {
+            element: <DashboardLayout />,
+            children: [
+              { path: ROUTES.ADMIN_KNOWLEDGE, element: <KnowledgeManagementPage /> },
+              { path: ROUTES.ADMIN_KNOWLEDGE_NEW, element: <KnowledgeEditorPage /> },
+              { path: ROUTES.ADMIN_KNOWLEDGE_DETAIL, element: <KnowledgeEditorPage /> },
+              { path: ROUTES.ADMIN_KNOWLEDGE_VERSION, element: <KnowledgeVersionPage /> },
+            ],
+          },
+        ],
+      },
+      {
+        element: <RoleProtectedRoute allowedRoles={["medical_expert"]} />,
+        children: [
+          {
+            element: <DashboardLayout />,
+            children: [
+              { path: ROUTES.MEDICAL_REVIEW, element: <MedicalReviewQueuePage /> },
+              { path: ROUTES.MEDICAL_REVIEW_DETAIL, element: <MedicalReviewDetailPage /> },
             ],
           },
         ],

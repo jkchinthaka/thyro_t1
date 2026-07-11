@@ -123,10 +123,41 @@ class KnowledgeStatus(StrEnum):
     DRAFT = "draft"
     IN_REVIEW = "in_review"
     PENDING_REVIEW = "pending_review"
+    CHANGES_REQUESTED = "changes_requested"
     APPROVED = "approved"
     REJECTED = "rejected"
     ARCHIVED = "archived"
     RETIRED = "retired"
+
+
+# Phase 12 unifies review + lifecycle status onto a single enum.
+KnowledgeReviewStatus = KnowledgeStatus
+
+
+class KnowledgeReviewDecision(StrEnum):
+    APPROVE = "approve"
+    REQUEST_CHANGES = "request_changes"
+    REJECT = "reject"
+    RETIRE = "retire"
+    RESTORE = "restore"
+
+
+class KnowledgeLanguage(StrEnum):
+    ENGLISH = "english"
+    SINHALA = "sinhala"
+    TAMIL = "tamil"
+
+
+class KnowledgeTopic(StrEnum):
+    THYROIDECTOMY_RECOVERY = "thyroidectomy_recovery"
+    THYROID_CANCER_SURVIVORSHIP = "thyroid_cancer_survivorship"
+    MEDICATION_EDUCATION = "medication_education"
+    FOLLOW_UP_EDUCATION = "follow_up_education"
+    SYMPTOM_AWARENESS = "symptom_awareness"
+    NUTRITION_EDUCATION = "nutrition_education"
+    EMERGENCY_AWARENESS = "emergency_awareness"
+    GENERAL_EDUCATION = "general_education"
+    OTHER = "other"
 
 
 class ChatMessageRole(StrEnum):

@@ -25,11 +25,34 @@ export const ROUTES = {
   UNAUTHORIZED: "/unauthorized",
   NOT_FOUND: "*",
 
-  // Future admin (constants only — no admin pages in Phase 2)
+  // Admin — knowledge governance (Phase 12)
   ADMIN_ROOT: "/admin",
+  ADMIN_KNOWLEDGE: "/admin/knowledge",
+  ADMIN_KNOWLEDGE_NEW: "/admin/knowledge/new",
+  ADMIN_KNOWLEDGE_DETAIL: "/admin/knowledge/:documentId",
+  ADMIN_KNOWLEDGE_VERSION: "/admin/knowledge/:documentId/versions/:versionId",
+
+  // Medical expert — knowledge review (Phase 12)
+  MEDICAL_REVIEW: "/medical-review",
+  MEDICAL_REVIEW_DETAIL: "/medical-review/:documentId/:versionId",
 } as const;
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];
+
+/** Builds a concrete admin knowledge document detail path. */
+export function adminKnowledgeDetailPath(documentId: string): string {
+  return `/admin/knowledge/${documentId}`;
+}
+
+/** Builds a concrete admin knowledge version detail path. */
+export function adminKnowledgeVersionPath(documentId: string, versionId: string): string {
+  return `/admin/knowledge/${documentId}/versions/${versionId}`;
+}
+
+/** Builds a concrete medical review-queue item detail path. */
+export function medicalReviewDetailPath(documentId: string, versionId: string): string {
+  return `/medical-review/${documentId}/${versionId}`;
+}
 
 /** Maps legacy Phase 1 screen ids to URL paths (for mock card / nav migration). */
 export const SCREEN_PATH: Record<string, string> = {
@@ -59,4 +82,27 @@ export const ROUTE_TITLES: Record<string, string> = {
   [ROUTES.ANALYTICS]: "Health Progress",
   [ROUTES.RESOURCES]: "Educational Resources",
   [ROUTES.PROFILE]: "My Profile",
+  [ROUTES.ADMIN_KNOWLEDGE]: "Knowledge Management",
+  [ROUTES.ADMIN_KNOWLEDGE_NEW]: "New Knowledge Draft",
+  [ROUTES.MEDICAL_REVIEW]: "Medical Review Queue",
 };
+
+/**
+ * Resolves a TopBar / DashboardLayout title for a pathname, falling back to
+ * prefix matching for dynamic detail routes (document/version ids) that cannot
+ * be represented as exact keys in ROUTE_TITLES.
+ */
+export function resolveRouteTitle(pathname: string): string {
+  const exact = ROUTE_TITLES[pathname];
+  if (exact) return exact;
+  if (pathname.startsWith("/admin/knowledge/") && pathname.includes("/versions/")) {
+    return "Knowledge Version Detail";
+  }
+  if (pathname.startsWith("/admin/knowledge/")) {
+    return "Knowledge Document";
+  }
+  if (pathname.startsWith("/medical-review/")) {
+    return "Review Knowledge Content";
+  }
+  return "ThyroCare AI";
+}

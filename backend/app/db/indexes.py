@@ -325,6 +325,64 @@ INDEX_SPECS: tuple[IndexSpec, ...] = (
         rationale="Deduplicate source references",
     ),
     IndexSpec(
+        CollectionName.KNOWLEDGE_DOCUMENTS.value,
+        "ix_knowledge_docs_current_status",
+        [("current_status", ASCENDING)],
+        rationale="Governance lifecycle filtering",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_DOCUMENTS.value,
+        "ix_knowledge_docs_current_version",
+        [("current_version_id", ASCENDING)],
+        rationale="Lookup parent by current version",
+    ),
+    # knowledge_document_versions (Phase 12)
+    IndexSpec(
+        CollectionName.KNOWLEDGE_DOCUMENT_VERSIONS.value,
+        "ux_knowledge_versions_version_id",
+        [("version_id", ASCENDING)],
+        unique=True,
+        rationale="Stable version identifier",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_DOCUMENT_VERSIONS.value,
+        "ux_knowledge_versions_document_number",
+        [("document_id", ASCENDING), ("version_number", ASCENDING)],
+        unique=True,
+        rationale="Unique sequential version numbering per document",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_DOCUMENT_VERSIONS.value,
+        "ix_knowledge_versions_review_status_submitted",
+        [("review_status", ASCENDING), ("submitted_for_review_at", ASCENDING)],
+        rationale="Medical-expert review queue ordering",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_DOCUMENT_VERSIONS.value,
+        "ix_knowledge_versions_content_hash",
+        [("content_hash", ASCENDING)],
+        rationale="Content integrity checks",
+    ),
+    # knowledge_review_records (Phase 12, append-only)
+    IndexSpec(
+        CollectionName.KNOWLEDGE_REVIEW_RECORDS.value,
+        "ix_knowledge_reviews_version_created",
+        [("version_id", ASCENDING), ("created_at", DESCENDING)],
+        rationale="Review history for a version",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_REVIEW_RECORDS.value,
+        "ix_knowledge_reviews_document_created",
+        [("document_id", ASCENDING), ("created_at", DESCENDING)],
+        rationale="Review history for a document",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_REVIEW_RECORDS.value,
+        "ix_knowledge_reviews_reviewer_created",
+        [("reviewer_user_id", ASCENDING), ("created_at", DESCENDING)],
+        rationale="Reviewer activity timeline",
+    ),
+    IndexSpec(
         CollectionName.KNOWLEDGE_CHUNKS.value,
         "ux_knowledge_chunks_chunk_id",
         [("chunk_id", ASCENDING)],
@@ -361,6 +419,12 @@ INDEX_SPECS: tuple[IndexSpec, ...] = (
         "ix_knowledge_chunks_active",
         [("active", ASCENDING)],
         rationale="Active chunk filtering",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_CHUNKS.value,
+        "ix_knowledge_chunks_version_id",
+        [("version_id", ASCENDING)],
+        rationale="Trace chunks back to originating governance version",
     ),
     # feedback / emergency / notifications / audit / migrations
     IndexSpec(

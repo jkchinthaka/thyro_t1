@@ -84,6 +84,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     async (payload: LoginRequest) => {
       const result = await authService.login(payload);
       applySession(result.access_token, result.user);
+      return result.user;
     },
     [applySession],
   );

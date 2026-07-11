@@ -13,3 +13,7 @@ export { ProfilePage } from "./ProfilePage";
 export { EmergencyPage } from "./EmergencyPage";
 export { UnauthorizedPage } from "./UnauthorizedPage";
 export { NotFoundPage } from "./NotFoundPage";
+
+// Phase 12 — knowledge governance (admin + medical expert)
+export { KnowledgeManagementPage, KnowledgeEditorPage, KnowledgeVersionPage } from "./admin";
+export { MedicalReviewQueuePage, MedicalReviewDetailPage } from "./medical";

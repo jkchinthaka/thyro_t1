@@ -1,4 +1,4 @@
-"""Load and chunk controlled local knowledge files."""
+"""Load and chunk controlled local knowledge files; ingest approved governance versions."""
 
 from __future__ import annotations
 
@@ -6,7 +6,7 @@ import hashlib
 import json
 import re
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from app.models.enums import KnowledgeStatus
 from app.models.knowledge import (
@@ -16,6 +16,10 @@ from app.models.knowledge import (
 )
 from app.utils.datetime import utc_now
 
+if TYPE_CHECKING:
+    from app.models.knowledge import KnowledgeDocumentVersionDocument
+    from app.repositories.knowledge_repository import KnowledgeRepository
+
 CHUNK_SIZE = 800
 CHUNK_OVERLAP = 100
 
@@ -24,6 +28,23 @@ _DEFAULT_DIR = Path(__file__).resolve().parent.parent / "content" / "approved_kn
 
 def content_hash(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+def canonical_content_hash(
+    *,
+    title: str,
+    source_name: str,
+    source_url: str | None,
+    topic: str,
+    language: str,
+    body: str,
+    medical_disclaimer: str,
+) -> str:
+    """Stable SHA-256 hash covering all medically relevant fields of a version."""
+    canonical = "|".join(
+        [title, source_name, source_url or "", topic, language, body, medical_disclaimer]
+    )
+    return hashlib.sha256(canonical.encode("utf-8")).hexdigest()
 
 
 def deterministic_chunks(
@@ -72,6 +93,7 @@ def build_document(data: dict[str, Any]) -> KnowledgeDocumentDocument:
     body = str(data["body"])
     status = _parse_status(str(data["review_status"]))
     digest = content_hash(body)
+    content_version = str(data.get("version") or "1")
     return KnowledgeDocumentDocument(
         document_id=str(data["document_id"]),
         title=str(data["title"]),
@@ -80,7 +102,8 @@ def build_document(data: dict[str, Any]) -> KnowledgeDocumentDocument:
         source_url=data.get("source_url"),
         topic=str(data["topic"]),
         language=str(data.get("language") or "english"),
-        version=str(data.get("version") or "1"),
+        version=1,
+        content_version=content_version,
         review_status=status,
         reviewed_at=None,
         reviewed_by_role=data.get("reviewed_by_role"),
@@ -97,7 +120,9 @@ def build_document(data: dict[str, Any]) -> KnowledgeDocumentDocument:
     )
 
 
-def build_chunks(doc: KnowledgeDocumentDocument) -> list[KnowledgeChunkDocument]:
+def build_chunks(
+    doc: KnowledgeDocumentDocument, *, version_id: str | None = None
+) -> list[KnowledgeChunkDocument]:
     parts = deterministic_chunks(doc.body)
     out: list[KnowledgeChunkDocument] = []
     for idx, part in enumerate(parts):
@@ -105,6 +130,7 @@ def build_chunks(doc: KnowledgeDocumentDocument) -> list[KnowledgeChunkDocument]
         out.append(
             KnowledgeChunkDocument(
                 document_id=doc.document_id,
+                version_id=version_id,
                 chunk_id=chunk_id,
                 chunk_index=idx,
                 text=part,
@@ -113,7 +139,7 @@ def build_chunks(doc: KnowledgeDocumentDocument) -> list[KnowledgeChunkDocument]
                 source_title=doc.title,
                 source_name=doc.source_name,
                 source_url=doc.source_url,
-                document_version=doc.version,
+                document_version=doc.content_version,
                 review_status=doc.review_status,
                 content_hash=content_hash(part),
                 content=part,
@@ -144,3 +170,33 @@ class KnowledgeIngestionService:
         self, chunks: list[KnowledgeChunkDocument]
     ) -> list[KnowledgeChunkDocument]:
         return [c for c in chunks if c.review_status == KnowledgeStatus.APPROVED and c.active]
+
+
+async def ingest_approved_version(
+    version: KnowledgeDocumentVersionDocument,
+    knowledge_repo: KnowledgeRepository,
+) -> int:
+    """Deterministically chunk and upsert an APPROVED version; retire superseded chunks.
+
+    Idempotent: safe to call again (e.g. on ingestion retry or restore).
+    """
+    doc_for_chunks = KnowledgeDocumentDocument(
+        document_id=version.document_id,
+        title=version.title,
+        slug=version.document_id,
+        source_name=version.source_name,
+        source_url=version.source_url,
+        topic=version.topic,
+        language=version.language,
+        content_version=str(version.version_number),
+        review_status=KnowledgeStatus.APPROVED,
+        content_hash=version.content_hash,
+        body=version.body,
+        medical_disclaimer=version.medical_disclaimer,
+        status=KnowledgeStatus.APPROVED,
+        active=True,
+    )
+    chunks = build_chunks(doc_for_chunks, version_id=version.version_id)
+    count = await knowledge_repo.upsert_chunks(chunks)
+    await knowledge_repo.retire_old_chunks(version.document_id, str(version.version_number))
+    return count

@@ -49,9 +49,15 @@ export function LoginPage() {
     setSubmitting(true);
     setFormError(null);
     try {
-      await login({ email: values.email, password: values.password });
+      const signedInUser = await login({ email: values.email, password: values.password });
       success("Signed in successfully");
-      const target = isSafeInternalPath(from) ? from : ROUTES.DASHBOARD;
+      const roleHome =
+        signedInUser.role === "admin"
+          ? ROUTES.ADMIN_KNOWLEDGE
+          : signedInUser.role === "medical_expert"
+            ? ROUTES.MEDICAL_REVIEW
+            : ROUTES.DASHBOARD;
+      const target = isSafeInternalPath(from) ? from : roleHome;
       navigate(target, { replace: true });
     } catch (err) {
       const appErr = err as AppError;

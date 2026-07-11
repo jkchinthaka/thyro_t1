@@ -1,10 +1,10 @@
 # ThyroCare AI API (Backend)
 
-FastAPI + PyMongo Async persistence through Phase 11 (auth, profile, medications, appointments, symptoms, safe chat foundation).
+FastAPI + PyMongo Async persistence through Phase 12 (auth, profile, medications, appointments, symptoms, safe chat foundation, knowledge governance).
 
 > **Medical disclaimer:** Educational/support prototype only. Chat answers (when enabled) use approved sources with citations. No diagnosis, lab interpretation, or medication advice. Free-text chat is not an emergency classifier.
 
-## Current scope (through Phase 11)
+## Current scope (through Phase 12)
 
 Includes Phase 4–10 capabilities plus:
 
@@ -12,8 +12,9 @@ Includes Phase 4–10 capabilities plus:
 - Controlled knowledge ingest (PENDING_REVIEW seed; APPROVED-only retrieval)
 - Lexical retrieval foundation + provider abstraction (default disabled)
 - Citation/grounding validation, prompt-injection protection, medical-safety policy
+- Knowledge governance: ADMIN-authored drafts, versioning, MEDICAL_EXPERT-only review/approval, append-only review records, deterministic re-ingestion (Phase 12)
 
-**Not included yet:** production LLM credentials, admin knowledge CMS, vector search requirement, autonomous agents/tools.
+**Not included yet:** production LLM credentials, vector search requirement, autonomous agents/tools, Phase 13 scope of any kind. FastAPI is not publicly deployed.
 
 ## Prerequisites
 
@@ -118,6 +119,30 @@ Organization/tracking only — reminders are not sent. See `docs/appointment-arc
 
 Tracking + safety awareness only — no diagnosis; free text never used for safety. See `docs/symptom-architecture.md`.
 
+### Knowledge governance (Phase 12)
+
+All routes are mounted under `/api/v1/governance` and require an authenticated ADMIN or MEDICAL_EXPERT (PATIENT is always denied). Only **MEDICAL_EXPERT** can approve, request changes, reject, or restore — ADMIN cannot, even though ADMIN authors content. There is no auto-approve and no LLM/AI approval path.
+
+| Method | Path                                                                      | Role            | Notes                                                                                                                                                                         |
+| ------ | ------------------------------------------------------------------------- | --------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| POST   | `/api/v1/governance/knowledge`                                            | ADMIN           | Create draft                                                                                                                                                                  |
+| GET    | `/api/v1/governance/knowledge`                                            | ADMIN / EXPERT  | List documents; filter by status/topic/language                                                                                                                               |
+| GET    | `/api/v1/governance/knowledge/{document_id}`                              | ADMIN / EXPERT  | Document detail with versions                                                                                                                                                 |
+| GET    | `/api/v1/governance/knowledge/{document_id}/versions`                     | ADMIN / EXPERT  | List versions                                                                                                                                                                 |
+| GET    | `/api/v1/governance/knowledge/{document_id}/versions/{version_id}`        | ADMIN / EXPERT  | Get one version                                                                                                                                                               |
+| PATCH  | `/api/v1/governance/knowledge/{document_id}/versions/{version_id}`        | ADMIN           | Update draft; `expected_version`; 409 on conflict                                                                                                                             |
+| POST   | `/api/v1/governance/knowledge/{document_id}/versions/{version_id}/submit` | ADMIN           | Submit for review                                                                                                                                                             |
+| POST   | `/api/v1/governance/knowledge/{document_id}/versions/new`                 | ADMIN           | New draft from an approved version                                                                                                                                            |
+| GET    | `/api/v1/governance/knowledge/{document_id}/compare`                      | ADMIN / EXPERT  | Diff two versions                                                                                                                                                             |
+| GET    | `/api/v1/governance/knowledge/{document_id}/review-history`               | ADMIN / EXPERT  | Append-only review records                                                                                                                                                    |
+| POST   | `/api/v1/governance/knowledge/{document_id}/retire`                       | ADMIN / EXPERT  | Retire approved content; reason required                                                                                                                                      |
+| POST   | `/api/v1/governance/knowledge/{document_id}/restore`                      | **EXPERT only** | Restore retired content; `expected_content_hash`                                                                                                                              |
+| GET    | `/api/v1/governance/review-queue`                                         | ADMIN / EXPERT  | List `PENDING_REVIEW` versions                                                                                                                                                |
+| GET    | `/api/v1/governance/review-queue/{document_id}/{version_id}`              | ADMIN / EXPERT  | Inspect a queue item                                                                                                                                                          |
+| POST   | `/api/v1/governance/review-queue/{document_id}/{version_id}/decision`     | **EXPERT only** | `approve` \| `request_changes` \| `reject`; requires `expected_version` + `expected_content_hash`; comments required for request_changes/reject; 409 on version/hash mismatch |
+
+Approving (or restoring) triggers deterministic re-ingestion into `knowledge_chunks`; the response's `ingestion_status` may be `"failed"` (partial success) — the review decision is still recorded and ingestion can be retried. Patient-facing chat/knowledge endpoints never expose drafts, pending-review content, or review comments — only `APPROVED` and active chunks. See `docs/knowledge-governance-architecture.md`, `docs/medical-review-workflow.md`, `docs/knowledge-versioning-and-hashing.md`, `docs/knowledge-publication-and-ingestion.md`, `docs/knowledge-governance-rbac.md`.
+
 Local cookies: `COOKIE_SECURE=false`, `COOKIE_SAMESITE=lax`, refresh path `/api/v1/auth`. Frontend origin must be listed in `ALLOWED_ORIGINS` (default `http://localhost:5173`) with credentials enabled.
 
 ## Database notes
@@ -131,8 +156,9 @@ Local cookies: `COOKIE_SECURE=false`, `COOKIE_SAMESITE=lax`, refresh path `/api/
 ## Tests
 
 ```powershell
-pytest                         # unit suite (no Mongo required)
-pytest -m integration          # optional; requires authorized local/test Mongo
+pytest                                          # unit suite (no Mongo required)
+pytest tests/test_knowledge_governance.py -v    # governance-specific tests
+pytest -m integration                           # optional; requires authorized local/test Mongo
 ruff check app tests
 ruff format --check app tests
 ```
@@ -140,7 +166,8 @@ ruff format --check app tests
 ## Known limitations
 
 - Email verification and password reset are not implemented
-- Symptom CRUD is not implemented
 - Medication/appointment reminders / pharmacy / prescription upload are not implemented
 - In-memory rate limiting only (not multi-instance safe)
 - Integration index creation requires Mongo authorization
+- No production LLM provider wiring and no automatic/AI approval for knowledge governance (human MEDICAL_EXPERT decision only)
+- FastAPI is not publicly deployed

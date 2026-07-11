@@ -2,6 +2,7 @@ export { Card } from "./Card";
 export { Badge } from "./Badge";
 export { Btn, Button } from "./Button";
 export { Input } from "./Input";
+export { Textarea } from "./Textarea";
 export { Avatar } from "./Avatar";
 export { BrandLogo } from "./BrandLogo";
 export { ProtectedRoute } from "./ProtectedRoute";

@@ -151,3 +151,7 @@ require_patient = require_roles(UserRole.PATIENT)
 require_admin = require_roles(UserRole.ADMIN)
 require_medical_expert = require_roles(UserRole.MEDICAL_EXPERT)
 require_admin_or_medical_expert = require_roles(UserRole.ADMIN, UserRole.MEDICAL_EXPERT)
+
+# Phase 12 knowledge governance role aliases — same authorization, clearer intent at call sites.
+require_knowledge_manager = require_admin
+require_knowledge_reviewer = require_medical_expert

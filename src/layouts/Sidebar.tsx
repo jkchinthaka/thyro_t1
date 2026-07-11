@@ -3,7 +3,7 @@ import { NavLink, useNavigate, useLocation } from "react-router";
 import { ChevronRight, ChevronLeft, AlertTriangle, LogOut, Menu, X } from "lucide-react";
 import { BrandLogo } from "@/components/common";
 import { BLUE, TEAL } from "@/constants/colors";
-import { navItems } from "@/constants/navigation";
+import { getNavItemsForRole } from "@/constants/navigation";
 import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/context/AuthContext";
 
@@ -26,7 +26,14 @@ function NavBody({
   onNavigate?: () => void;
 }) {
   const navigate = useNavigate();
-  const { logout, user } = useAuth();
+  const { logout, user, role } = useAuth();
+  const items = getNavItemsForRole(role);
+  const homePath =
+    role === "admin"
+      ? ROUTES.ADMIN_KNOWLEDGE
+      : role === "medical_expert"
+        ? ROUTES.MEDICAL_REVIEW
+        : ROUTES.DASHBOARD;
 
   const handleLogout = async () => {
     onNavigate?.();
@@ -41,7 +48,7 @@ function NavBody({
           type="button"
           onClick={() => {
             onNavigate?.();
-            navigate(ROUTES.DASHBOARD);
+            navigate(homePath);
           }}
           className="flex items-center gap-3 min-w-0 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 rounded-lg"
           aria-label="ThyroCare dashboard"
@@ -76,8 +83,8 @@ function NavBody({
         ) : null}
       </div>
 
-      <nav className="flex-1 py-4 space-y-0.5 px-2 overflow-y-auto" aria-label="Patient navigation">
-        {navItems.map((item) => {
+      <nav className="flex-1 py-4 space-y-0.5 px-2 overflow-y-auto" aria-label="Main navigation">
+        {items.map((item) => {
           const Icon = item.icon;
           return (
             <NavLink

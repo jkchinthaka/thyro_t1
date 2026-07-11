@@ -33,7 +33,7 @@ async def main() -> int:
         await repo.upsert_document(doc)
         related = [c for c in chunks if c.document_id == doc.document_id]
         await repo.upsert_chunks(related)
-        await repo.retire_old_chunks(doc.document_id, doc.version)
+        await repo.retire_old_chunks(doc.document_id, doc.content_version)
     audit = AuditService(database)
     await audit.record(
         AuditActions.KNOWLEDGE_INGESTED,
