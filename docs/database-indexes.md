@@ -6,7 +6,7 @@ All indexes are defined in `backend/app/db/indexes.py` as named `IndexSpec` entr
 
 | Collection                  | Index name                                    | Fields                                 | Unique        | TTL | Rationale                                                |
 | --------------------------- | --------------------------------------------- | -------------------------------------- | ------------- | --- | -------------------------------------------------------- |
-| users                       | ux_users_email_normalized_active              | email_normalized                       | yes (partial) | no  | Unique active email                                      |
+| users                       | ux_users_email_normalized_active              | email_normalized                       | yes (partial `is_deleted: false`) | no  | Unique active email (Atlas-compatible equality filter) |
 | users                       | ix_users_role                                 | role                                   | no            | no  | Role queries                                             |
 | users                       | ix_users_account_status                       | account_status                         | no            | no  | Lifecycle filter                                         |
 | patient_profiles            | ux_patient_profiles_user_id                   | user_id                                | yes           | no  | One profile/user                                         |

@@ -33,7 +33,7 @@ INDEX_SPECS: tuple[IndexSpec, ...] = (
         "ux_users_email_normalized_active",
         [("email_normalized", ASCENDING)],
         unique=True,
-        partial_filter={"is_deleted": {"$ne": True}},
+        partial_filter={"is_deleted": False},
         rationale="Unique login email for non-deleted users",
     ),
     IndexSpec(
@@ -534,12 +534,53 @@ async def ensure_indexes(database: AsyncDatabase | None = None) -> int:
             created += 1
             logger.info("Index ensured: %s.%s", spec.collection, spec.name)
         except OperationFailure as exc:
+            # IndexOptionsConflict / IndexKeySpecsConflict: drop by name and recreate
+            # so Atlas can replace an incompatible prior definition (e.g. $ne partial).
+            code = getattr(exc, "code", None)
+            if code in {85, 86}:
+                logger.warning(
+                    "Recreating incompatible index %s.%s (code=%s)",
+                    spec.collection,
+                    spec.name,
+                    code,
+                )
+                await db[spec.collection].drop_index(spec.name)
+                await db[spec.collection].create_index(spec.keys, **kwargs)
+                created += 1
+                logger.info("Index recreated: %s.%s", spec.collection, spec.name)
+                continue
             logger.error(
                 "Index conflict or failure for %s.%s (code=%s)",
                 spec.collection,
                 spec.name,
-                getattr(exc, "code", None),
+                code,
             )
             raise
     mongo_state.initialized = True
     return created
+
+
+def assert_partial_filters_atlas_compatible() -> None:
+    """Reject Atlas-unsupported operators in partialFilterExpression definitions."""
+    forbidden_ops = {"$ne", "$not", "$nin", "$exists"}
+    for spec in INDEX_SPECS:
+        if not spec.partial_filter:
+            continue
+        _assert_partial_filter_node(spec.name, spec.partial_filter, forbidden_ops)
+
+
+def _assert_partial_filter_node(index_name: str, node: Any, forbidden_ops: set[str]) -> None:
+    if isinstance(node, dict):
+        for key, value in node.items():
+            if key in forbidden_ops:
+                # Atlas allows {"field": {"$exists": True}} in some versions, but
+                # "$exists: false" and $ne/$not/$nin are unsafe for this project.
+                if key == "$exists" and value is True:
+                    continue
+                raise RuntimeError(
+                    f"Unsupported partial filter operator {key} on index {index_name}"
+                )
+            _assert_partial_filter_node(index_name, value, forbidden_ops)
+    elif isinstance(node, list):
+        for item in node:
+            _assert_partial_filter_node(index_name, item, forbidden_ops)

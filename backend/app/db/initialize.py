@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from app.core.config import Settings
 from app.core.logging import get_logger
-from app.db.indexes import ensure_indexes
+from app.db.indexes import assert_partial_filters_atlas_compatible, ensure_indexes
 from app.db.mongodb import get_database, mongo_state
+from app.db.user_index_prep import prepare_users_for_active_email_index
 
 logger = get_logger(__name__)
 
@@ -16,8 +17,15 @@ async def initialize_database(settings: Settings) -> None:
         logger.info("initialize_database(): skipped — MongoDB not connected")
         return
 
+    database = get_database()
+    assert database is not None
+
+    # Must run before the unique active-email partial index is created.
+    await prepare_users_for_active_email_index(database)
+
     if settings.database_auto_initialize:
-        count = await ensure_indexes()
+        assert_partial_filters_atlas_compatible()
+        count = await ensure_indexes(database)
         logger.info("Database indexes ensured (%s definitions)", count)
     else:
         logger.info("DATABASE_AUTO_INITIALIZE=false — skipping index creation")
