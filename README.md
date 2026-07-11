@@ -31,6 +31,13 @@ Mock clinical UI data remains under `src/data/mock/` for appointments, symptoms,
 
 See [`docs/medication-architecture.md`](docs/medication-architecture.md) · [`docs/phase-8-validation.md`](docs/phase-8-validation.md) · [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
 
+### Cloudflare frontend deployment
+
+- Live static SPA: https://thyrot1.chinthakajayaweera1.workers.dev (Worker `thyrot1`)
+- Committed config: `wrangler.jsonc`; Wrangler pinned as `devDependency`
+- Build: `npm run ci:build` · Deploy: `npm run cf:deploy` (no second Vite build)
+- **Does not deploy FastAPI** — see [`docs/cloudflare-frontend-deployment.md`](docs/cloudflare-frontend-deployment.md) and [`docs/backend-production-deployment-checklist.md`](docs/backend-production-deployment-checklist.md)
+
 Accessibility improvements move toward WCAG 2.1 AA practices; formal certification has not been performed. See [`docs/accessibility-improvements.md`](docs/accessibility-improvements.md).
 
 ---
@@ -100,6 +107,9 @@ npm run typecheck      # TypeScript project build check
 npm run lint           # ESLint
 npm run format         # Prettier write
 npm run format:check   # Prettier check
+npm run ci:build       # typecheck + lint + format:check + vite build
+npm run cf:dry-run     # Wrangler deploy dry-run (uses dist; no Vite)
+npm run cf:deploy      # Wrangler deploy --autoconfig=false
 ```
 
 Environment variables (browser-safe `VITE_*` only) are documented in `.env.example` and read via `src/config/env.ts`.

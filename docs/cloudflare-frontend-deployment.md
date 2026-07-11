@@ -1,0 +1,74 @@
+# Cloudflare frontend deployment
+
+## Identifiers
+
+| Item                       | Value                                           |
+| -------------------------- | ----------------------------------------------- |
+| GitHub repository          | https://github.com/jkchinthaka/thyro_t1.git     |
+| Worker name                | `thyrot1`                                       |
+| Production workers.dev URL | https://thyrot1.chinthakajayaweera1.workers.dev |
+| Config file                | `wrangler.jsonc` (committed)                    |
+| Wrangler version           | `4.110.0` (devDependency)                       |
+
+## Important boundary
+
+**Cloudflare static asset deployment does not deploy FastAPI.**  
+The Worker serves only the Vite `dist/` SPA. Authentication, profile, and medication APIs require a separately hosted backend.
+
+## Required Cloudflare project settings
+
+| Setting                   | Value                              |
+| ------------------------- | ---------------------------------- |
+| Build command             | `npm run ci:build`                 |
+| Deploy command            | `npm run cf:deploy`                |
+| Output / assets directory | `dist`                             |
+| Node version              | 20+ (validated locally on Node 24) |
+
+`ci:build` runs typecheck → lint → format:check → **one** Vite build.  
+`cf:deploy` runs `wrangler deploy --autoconfig=false` and **must not** run Vite again.
+
+## Environment variables (build-time)
+
+Set in the Cloudflare build environment (not committed):
+
+| Variable            | Required when             | Notes                                                             |
+| ------------------- | ------------------------- | ----------------------------------------------------------------- |
+| `VITE_API_BASE_URL` | `VITE_APP_ENV=production` | Public HTTPS API base ending with `/api/v1`. **Never localhost.** |
+| `VITE_APP_NAME`     | optional                  | Defaults to ThyroCare AI                                          |
+| `VITE_APP_ENV`      | optional                  | Use `production` only when a real API URL is configured           |
+
+Vite embeds these into the JS bundle at **build** time. Changing them requires a new build and deploy.
+
+See `.env.production.example`. Do not commit `.env.production`.
+
+### Frontend-only status
+
+Until a public backend exists, builds may omit `VITE_APP_ENV=production`. Production bundles **never** fall back to localhost. API features will not work until a public `VITE_API_BASE_URL` is set and the app is rebuilt.
+
+## SPA fallback
+
+`wrangler.jsonc` sets `assets.not_found_handling` to `single-page-application` so routes like `/login` and `/profile` refresh correctly.
+
+## workers_dev / preview_urls
+
+- `workers_dev: true` — serves on `*.workers.dev`
+- `preview_urls: false` — preview URLs disabled explicitly
+
+## Redeploy
+
+- Push to `main` (if Git integration is connected), or
+- Locally: `npm run ci:build` then `npm run cf:deploy` (requires Cloudflare auth)
+
+## Rollback
+
+Use the Cloudflare dashboard → Workers → `thyrot1` → Deployments → rollback to a previous version.
+
+## Logs
+
+Cloudflare dashboard → Workers → `thyrot1` → Logs / Observability (`observability.enabled` is true in config).
+
+## Verify a single build
+
+1. Cloudflare build logs should show one Vite build via `ci:build`.
+2. Deploy logs for `cf:deploy` / Wrangler should **not** show `vite build`.
+3. Local dry-run: `npm run cf:dry-run` after `npm run build` — Wrangler must not invoke Vite.

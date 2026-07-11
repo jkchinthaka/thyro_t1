@@ -55,8 +55,17 @@ Phase 9 — appointments (do not start until approved).
 
 ## Change log
 
-| Date       | Change                                      |
-| ---------- | ------------------------------------------- |
-| 2026-07-11 | Phase 0–6 complete                          |
-| 2026-07-11 | Phase 7 patient profile management complete |
-| 2026-07-11 | Phase 8 medication management complete      |
+| Date       | Change                                           |
+| ---------- | ------------------------------------------------ |
+| 2026-07-11 | Phase 0–6 complete                               |
+| 2026-07-11 | Phase 7 patient profile management complete      |
+| 2026-07-11 | Phase 8 medication management complete           |
+| 2026-07-11 | Deployment-hardening patch (Cloudflare/Wrangler) |
+
+## Deployment hardening (not a numbered phase)
+
+- Pin Wrangler 4.110.0, commit `wrangler.jsonc`, `ci:build` / `cf:deploy` scripts
+- npm audit cleared (react-router 7.18.1, vite 6.4.3)
+- Production env validation for API URL; docs for CORS/cookies and backend boundary
+- Recharts v3 deferred — see `docs/recharts-v3-migration-plan.md`
+- Does **not** start Phase 9

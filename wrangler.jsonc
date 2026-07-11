@@ -1,0 +1,16 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "thyrot1",
+  "compatibility_date": "2026-07-11",
+  // Static SPA only — Cloudflare build command produces ./dist once.
+  // Do not add a Wrangler "build" command (avoids a second Vite build).
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": {
+    "enabled": true,
+  },
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application",
+  },
+}
