@@ -6,11 +6,12 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview",
+    "preview": "npm run build && wrangler dev",
     "typecheck": "tsc -b --pretty false",
     "lint": "eslint .",
     "format": "prettier --write .",
-    "format:check": "prettier --check ."
+    "format:check": "prettier --check .",
+    "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
@@ -75,6 +76,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@cloudflare/vite-plugin": "^1.44.0",
     "@eslint/js": "^9.22.0",
     "@tailwindcss/vite": "4.1.12",
     "@types/node": "^22.13.10",
@@ -91,7 +93,8 @@
     "tailwindcss": "4.1.12",
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.26.1",
-    "vite": "6.3.5"
+    "vite": "6.3.5",
+    "wrangler": "^4.110.0"
   },
   "peerDependencies": {
     "react": "18.3.1",
