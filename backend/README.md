@@ -1,10 +1,10 @@
 # ThyroCare AI API (Backend)
 
-FastAPI + PyMongo Async persistence, authentication, patient profile, medication tracking, and appointments for ThyroCare AI (Phases 4–9).
+FastAPI + PyMongo Async persistence, authentication, patient profile, medication tracking, appointments, and symptoms for ThyroCare AI (Phases 4–10).
 
-> **Medical disclaimer:** This API is part of a patient-support research prototype. It does **not** replace professional medical advice, diagnosis, or emergency care. Medication and appointment endpoints are for **tracking/organization only**. The patient profile is support metadata, not a medical record.
+> **Medical disclaimer:** This API is part of a patient-support research prototype. It does **not** replace professional medical advice, diagnosis, or emergency care. Medication, appointment, and symptom endpoints are for **tracking/organization and safety awareness only**. Symptom safety classification uses structured answers and versioned rules only — never free-text inference. The patient profile is support metadata, not a medical record.
 
-## Current scope (through Phase 9)
+## Current scope (through Phase 10)
 
 Included:
 
@@ -21,6 +21,7 @@ Included:
 - **Patient profile:** `GET` / `PATCH /api/v1/profiles/me` (PATIENT ownership, optimistic concurrency)
 - **Medications:** CRUD, dose logs, schedule, adherence (PATIENT ownership, soft delete, version conflicts)
 - **Appointments:** CRUD, status, calendar, upcoming (PATIENT ownership, soft delete, version conflicts)
+- **Symptoms:** CRUD, active list, status, structured safety-check (PATIENT ownership, soft delete, version conflicts, deterministic rules)
 - Structured logging, CORS (credentials + exact origins), security headers
 - Pytest suite and Ruff
 - Dockerfile foundation
@@ -28,11 +29,11 @@ Included:
 **Not included yet:**
 
 - Password-reset email, email verification, MFA, social login
-- Symptom CRUD endpoints
 - Chatbot / RAG / AI
 - Medication/appointment SMS/email reminders
-- Admin profile / medication / appointment management
+- Admin profile / medication / appointment / symptom management
 - Seed users or demo / default admin credentials
+- Clinically approved safety copy (engineering REVIEW_REQUIRED until medical sign-off)
 
 ## Prerequisites
 
@@ -121,6 +122,21 @@ All medication routes require an active PATIENT. Ownership is derived from the J
 | DELETE | `/api/v1/appointments/{id}`        | Soft delete                        |
 
 Organization/tracking only — reminders are not sent. See `docs/appointment-architecture.md`.
+
+### Symptoms (Phase 10)
+
+| Method | Path                            | Notes                              |
+| ------ | ------------------------------- | ---------------------------------- |
+| GET    | `/api/v1/symptoms`              | List owned; filters + pagination   |
+| POST   | `/api/v1/symptoms`              | Create + structured safety_answers |
+| POST   | `/api/v1/symptoms/safety-check` | Assessment only; no persistence    |
+| GET    | `/api/v1/symptoms/active`       | Active + improving                 |
+| GET    | `/api/v1/symptoms/{id}`         | Get owned; foreign → 404           |
+| PATCH  | `/api/v1/symptoms/{id}`         | Update; `expected_version`         |
+| PATCH  | `/api/v1/symptoms/{id}/status`  | Status transition                  |
+| DELETE | `/api/v1/symptoms/{id}`         | Soft delete                        |
+
+Tracking + safety awareness only — no diagnosis; free text never used for safety. See `docs/symptom-architecture.md`.
 
 Local cookies: `COOKIE_SECURE=false`, `COOKIE_SAMESITE=lax`, refresh path `/api/v1/auth`. Frontend origin must be listed in `ALLOWED_ORIGINS` (default `http://localhost:5173`) with credentials enabled.
 

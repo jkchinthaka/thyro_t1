@@ -66,9 +66,57 @@ class AppointmentLocationType(StrEnum):
 
 
 class SymptomGuidanceLevel(StrEnum):
+    """Legacy symptom_log guidance levels (foundation). Prefer SafetyLevel for Phase 10."""
+
     SELF_CARE = "self_care"
     CONTACT_PROVIDER = "contact_provider"
     URGENT_MEDICAL_HELP = "urgent_medical_help"
+
+
+class SymptomSeverity(StrEnum):
+    MILD = "mild"
+    MODERATE = "moderate"
+    SEVERE = "severe"
+
+
+class SymptomStatus(StrEnum):
+    ACTIVE = "active"
+    IMPROVING = "improving"
+    RESOLVED = "resolved"
+
+
+class SymptomFrequency(StrEnum):
+    ONCE = "once"
+    OCCASIONAL = "occasional"
+    DAILY = "daily"
+    FREQUENT = "frequent"
+    CONTINUOUS = "continuous"
+
+
+class SymptomType(StrEnum):
+    FATIGUE = "fatigue"
+    NECK_PAIN = "neck_pain"
+    NECK_SWELLING = "neck_swelling"
+    VOICE_CHANGE = "voice_change"
+    SWALLOWING_DIFFICULTY = "swallowing_difficulty"
+    BREATHING_DIFFICULTY = "breathing_difficulty"
+    PALPITATIONS = "palpitations"
+    DIZZINESS = "dizziness"
+    NUMBNESS_OR_TINGLING = "numbness_or_tingling"
+    MUSCLE_CRAMPING = "muscle_cramping"
+    TEMPERATURE_SENSITIVITY = "temperature_sensitivity"
+    SLEEP_DIFFICULTY = "sleep_difficulty"
+    MOOD_CHANGE = "mood_change"
+    DIGESTIVE_CHANGE = "digestive_change"
+    WEIGHT_CHANGE = "weight_change"
+    OTHER = "other"
+
+
+class SafetyLevel(StrEnum):
+    ROUTINE_TRACKING = "routine_tracking"
+    CONTACT_HEALTHCARE_TEAM = "contact_healthcare_team"
+    URGENT_MEDICAL_REVIEW = "urgent_medical_review"
+    EMERGENCY = "emergency"
 
 
 class KnowledgeStatus(StrEnum):

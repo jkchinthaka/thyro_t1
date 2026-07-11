@@ -28,7 +28,13 @@ All indexes are defined in `backend/app/db/indexes.py` as named `IndexSpec` entr
 | appointments        | ix_appointments_user_deleted_start   | user_id, is_deleted, scheduled_start | no            | no  | Soft-delete + order |
 | appointments        | ix_appointments_user_type_start      | user_id, type, scheduled_start       | no            | no  | Type filter         |
 | appointments        | ix_appointments_user_created         | user_id, created_at                  | no            | no  | Recents             |
-| symptom_logs        | ix_symptom_logs_user_created         | user_id, created_at                  | no            | no  | History             |
+| symptoms            | ix_symptoms_user_started             | user_id, started_at                  | no            | no  | Timeline            |
+| symptoms            | ix_symptoms_user_status_started      | user_id, status, started_at          | no            | no  | Status filter       |
+| symptoms            | ix_symptoms_user_type_started        | user_id, symptom_type, started_at    | no            | no  | Type filter         |
+| symptoms            | ix_symptoms_user_severity_started    | user_id, severity, started_at        | no            | no  | Severity filter     |
+| symptoms            | ix_symptoms_user_deleted_started     | user_id, is_deleted, started_at      | no            | no  | Soft-delete aware   |
+| symptoms            | ix_symptoms_user_created             | user_id, created_at                  | no            | no  | Recent              |
+| symptom_logs        | ix_symptom_logs_user_created         | user_id, created_at                  | no            | no  | Legacy history      |
 | symptom_logs        | ix_symptom_logs_emergency_created    | emergency_detected, created_at       | no            | no  | Triage              |
 | chat_sessions       | ix_chat_sessions_user_last_message   | user_id, last_message_at             | no            | no  | Recents             |
 | chat_sessions       | ix_chat_sessions_user_archived       | user_id, archived_at                 | no            | no  | Archive             |

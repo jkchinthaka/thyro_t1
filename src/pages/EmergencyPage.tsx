@@ -143,8 +143,9 @@ export function EmergencyPage() {
 
         <p className="text-center text-xs text-muted-foreground">
           <Shield className="w-3.5 h-3.5 inline mr-1" />
-          ThyroCare AI emergency guidance is supplemental only. Always call emergency services for
-          life-threatening situations.
+          ThyroCare AI emergency guidance is supplemental only. This application cannot contact
+          emergency services for you. Always call emergency services for life-threatening
+          situations. This is not a diagnosis.
         </p>
       </div>
     </div>

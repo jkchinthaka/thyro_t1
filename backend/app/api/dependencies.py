@@ -24,6 +24,7 @@ from app.repositories.knowledge_repository import KnowledgeRepository
 from app.repositories.medication_repository import MedicationRepository
 from app.repositories.patient_profile_repository import PatientProfileRepository
 from app.repositories.refresh_token_repository import RefreshTokenRepository
+from app.repositories.symptom_log_repository import SymptomLogRepository
 from app.repositories.symptom_repository import SymptomRepository
 from app.repositories.user_repository import UserRepository
 from app.services.audit_service import AuditActions, AuditService
@@ -63,6 +64,10 @@ def get_symptom_repository(database: DatabaseDep) -> SymptomRepository:
     return SymptomRepository(database)
 
 
+def get_symptom_log_repository(database: DatabaseDep) -> SymptomLogRepository:
+    return SymptomLogRepository(database)
+
+
 def get_chat_repository(database: DatabaseDep) -> ChatRepository:
     return ChatRepository(database)
 
@@ -86,6 +91,7 @@ PatientProfileRepositoryDep = Annotated[
 MedicationRepositoryDep = Annotated[MedicationRepository, Depends(get_medication_repository)]
 AppointmentRepositoryDep = Annotated[AppointmentRepository, Depends(get_appointment_repository)]
 SymptomRepositoryDep = Annotated[SymptomRepository, Depends(get_symptom_repository)]
+SymptomLogRepositoryDep = Annotated[SymptomLogRepository, Depends(get_symptom_log_repository)]
 ChatRepositoryDep = Annotated[ChatRepository, Depends(get_chat_repository)]
 KnowledgeRepositoryDep = Annotated[KnowledgeRepository, Depends(get_knowledge_repository)]
 RefreshTokenRepositoryDep = Annotated[RefreshTokenRepository, Depends(get_refresh_token_repository)]

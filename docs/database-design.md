@@ -4,7 +4,7 @@ Persistence foundation for ThyroCare AI. No public CRUD or auth APIs in this pha
 
 ## Collections
 
-See `app/db/collections.py` for canonical names: users, patient_profiles, refresh_tokens, medications, medication_logs, appointments, symptom_logs, chat_sessions, chat_messages, knowledge_documents, knowledge_chunks, user_feedback, emergency_events, resources, notifications, audit_logs, schema_migrations.
+See `app/db/collections.py` for canonical names: users, patient_profiles, refresh_tokens, medications, medication_logs, appointments, symptoms, symptom_logs, chat_sessions, chat_messages, knowledge_documents, knowledge_chunks, user_feedback, emergency_events, resources, notifications, audit_logs, schema_migrations.
 
 ## Conventions
 

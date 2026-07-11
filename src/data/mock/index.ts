@@ -28,4 +28,3 @@ export {
   mockEmergencyWarningSigns,
   mockEmergencyContacts,
 } from "./dashboard.mock";
-export { mockSymptoms, mockSymptomRecommendations } from "./symptoms.mock";

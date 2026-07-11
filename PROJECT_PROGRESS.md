@@ -21,7 +21,8 @@
 | 7     | Patient profile management             | **Complete** | 2026-07-11 |
 | 8     | Medication management & adherence      | **Complete** | 2026-07-11 |
 | 9     | Appointment and follow-up management   | **Complete** | 2026-07-11 |
-| 10–22 | Remaining roadmap                      | Not started  | —          |
+| 10    | Symptom tracking & safety escalation   | **Complete** | 2026-07-12 |
+| 11–22 | Remaining roadmap                      | Not started  | —          |
 
 ---
 
@@ -66,11 +67,33 @@ Phase 9 — appointments ← **done**.
 ### Validation
 
 - See `docs/phase-9-validation.md`.
-- Phase 10: **not started**
+- Phase 10: **complete** (see below)
 
 ### Next phase
 
-Phase 10 — symptoms (do not start until approved).
+Phase 10 — symptoms ← **done**.
+
+---
+
+## Phase 10 — Completion report
+
+### What was done
+
+1. Planned in `docs/phase-10-symptom-plan.md`.
+2. Symptom model/enums/schemas, safety rules, repository, API.
+3. Deterministic structured safety assessment; Emergency escalation.
+4. Soft delete, optimistic concurrency, privacy-preserving audits.
+5. Symptoms page + dashboard symptom card; symptom mocks removed.
+6. Documented architecture, data dictionary, rules, content review, validation.
+
+### Validation
+
+- See `docs/phase-10-validation.md`.
+- Phase 11: **not started**
+
+### Next phase
+
+Phase 11 — governed knowledge / RAG chatbot (do not start until approved).
 
 ---
 
@@ -83,6 +106,7 @@ Phase 10 — symptoms (do not start until approved).
 | 2026-07-11 | Phase 8 medication management complete           |
 | 2026-07-11 | Deployment-hardening patch (Cloudflare/Wrangler) |
 | 2026-07-11 | Phase 9 appointment / follow-up management       |
+| 2026-07-12 | Phase 10 symptom tracking & safety escalation    |
 
 ## Deployment hardening (not a numbered phase)
 

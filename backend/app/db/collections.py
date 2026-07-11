@@ -16,6 +16,7 @@ class CollectionName(StrEnum):
     MEDICATIONS = "medications"
     MEDICATION_LOGS = "medication_logs"
     APPOINTMENTS = "appointments"
+    SYMPTOMS = "symptoms"
     SYMPTOM_LOGS = "symptom_logs"
     CHAT_SESSIONS = "chat_sessions"
     CHAT_MESSAGES = "chat_messages"

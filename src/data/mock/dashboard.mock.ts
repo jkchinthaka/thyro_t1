@@ -37,7 +37,7 @@ export const mockLandingFeatures = [
   {
     icon: Activity,
     title: "Symptom Checker",
-    desc: "AI-powered assessment with instant clinical guidance",
+    desc: "Track symptoms with structured safety awareness guidance",
     color: AMBER,
   },
   {
@@ -102,8 +102,8 @@ export const mockDashboardCards: {
     icon: Activity,
     color: AMBER,
     bg: "#FFFBEB",
-    value: "Last: 2 days ago",
-    sub: "All normal",
+    value: "No entries yet",
+    sub: "Open Symptoms",
   },
   {
     id: "followup",

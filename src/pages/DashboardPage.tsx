@@ -22,12 +22,14 @@ import {
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useMedications } from "@/hooks/useMedications";
 import { useAppointments } from "@/hooks/useAppointments";
+import { useSymptoms } from "@/hooks/useSymptoms";
 
 export function DashboardPage() {
   useDocumentTitle("Dashboard");
   const navigate = useNavigate();
   const { todaySchedule, adherence, loading: medLoading } = useMedications();
   const { upcoming, loading: apptLoading } = useAppointments();
+  const { active: activeSymptoms, symptoms: allSymptoms, loading: symLoading } = useSymptoms();
   const weekData = mockDashboardWeekData;
 
   const quickStats = useMemo(() => {
@@ -85,9 +87,29 @@ export function DashboardPage() {
           sub: `${when} · ${upcoming.length} upcoming`,
         };
       }
+      if (c.id === "symptoms") {
+        if (symLoading) {
+          return { ...c, value: "Loading…", sub: "Symptom tracking" };
+        }
+        if (activeSymptoms.length === 0 && allSymptoms.length === 0) {
+          return { ...c, value: "No entries yet", sub: "Open Symptoms" };
+        }
+        const recent = allSymptoms[0];
+        const when = recent
+          ? new Date(recent.started_at).toLocaleDateString(undefined, {
+              month: "short",
+              day: "numeric",
+            })
+          : "—";
+        return {
+          ...c,
+          value: `${activeSymptoms.length} active`,
+          sub: recent ? `Last: ${when}` : "Open Symptoms",
+        };
+      }
       return c;
     });
-  }, [todaySchedule, medLoading, upcoming, apptLoading]);
+  }, [todaySchedule, medLoading, upcoming, apptLoading, activeSymptoms, allSymptoms, symLoading]);
 
   return (
     <>

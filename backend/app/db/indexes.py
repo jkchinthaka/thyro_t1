@@ -175,7 +175,44 @@ INDEX_SPECS: tuple[IndexSpec, ...] = (
         [("user_id", ASCENDING), ("created_at", DESCENDING)],
         rationale="Recent appointments for owner",
     ),
-    # symptom_logs
+    # symptoms (Phase 10)
+    IndexSpec(
+        CollectionName.SYMPTOMS.value,
+        "ix_symptoms_user_started",
+        [("user_id", ASCENDING), ("started_at", DESCENDING)],
+        rationale="Owner symptom timeline by start time",
+    ),
+    IndexSpec(
+        CollectionName.SYMPTOMS.value,
+        "ix_symptoms_user_status_started",
+        [("user_id", ASCENDING), ("status", ASCENDING), ("started_at", DESCENDING)],
+        rationale="Filter by status for owner",
+    ),
+    IndexSpec(
+        CollectionName.SYMPTOMS.value,
+        "ix_symptoms_user_type_started",
+        [("user_id", ASCENDING), ("symptom_type", ASCENDING), ("started_at", DESCENDING)],
+        rationale="Filter by symptom type for owner",
+    ),
+    IndexSpec(
+        CollectionName.SYMPTOMS.value,
+        "ix_symptoms_user_severity_started",
+        [("user_id", ASCENDING), ("severity", ASCENDING), ("started_at", DESCENDING)],
+        rationale="Filter by severity for owner",
+    ),
+    IndexSpec(
+        CollectionName.SYMPTOMS.value,
+        "ix_symptoms_user_deleted_started",
+        [("user_id", ASCENDING), ("is_deleted", ASCENDING), ("started_at", DESCENDING)],
+        rationale="Soft-delete aware owner timeline",
+    ),
+    IndexSpec(
+        CollectionName.SYMPTOMS.value,
+        "ix_symptoms_user_created",
+        [("user_id", ASCENDING), ("created_at", DESCENDING)],
+        rationale="Recent symptoms for owner",
+    ),
+    # symptom_logs (legacy foundation)
     IndexSpec(
         CollectionName.SYMPTOM_LOGS.value,
         "ix_symptom_logs_user_created",

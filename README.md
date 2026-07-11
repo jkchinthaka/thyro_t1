@@ -20,9 +20,10 @@ Educational patient-support prototype for differentiated thyroid cancer survivor
 - **Phase 7:** Complete (patient self-profile GET/PATCH + Profile page integration)
 - **Phase 8:** Complete (medication CRUD, dose logs, schedule, adherence + Medication page)
 - **Phase 9:** Complete (appointment/follow-up management + Follow-Up page)
-- **Phase 10+:** Not started
+- **Phase 10:** Complete (symptom tracking + deterministic safety escalation)
+- **Phase 11+:** Not started
 
-Mock clinical UI data remains under `src/data/mock/` for appointments, symptoms, diet, chat, etc., and is **not** live clinical data. Medication tracking uses the real API.
+Mock clinical UI data remains under `src/data/mock/` for diet, chat, analytics, etc., and is **not** live clinical data. Auth, profile, medications, appointments, and symptoms use the real API.
 
 **Authentication** uses real backend endpoints. Access tokens live in memory only; refresh tokens are HttpOnly cookies. Page reload restores the session via refresh.
 
@@ -32,7 +33,9 @@ Mock clinical UI data remains under `src/data/mock/` for appointments, symptoms,
 
 **Appointments** use `/api/v1/appointments` for CRUD, status, calendar, and upcoming (organization only — no real reminders).
 
-See [`docs/appointment-architecture.md`](docs/appointment-architecture.md) · [`docs/phase-9-validation.md`](docs/phase-9-validation.md) · [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
+**Symptoms** use `/api/v1/symptoms` for CRUD, active list, status, and structured safety-check (tracking + safety awareness only — no diagnosis; free text is never used for safety classification).
+
+See [`docs/symptom-architecture.md`](docs/symptom-architecture.md) · [`docs/phase-10-validation.md`](docs/phase-10-validation.md) · [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
 
 ### Cloudflare frontend deployment
 
@@ -98,7 +101,7 @@ See [`backend/README.md`](backend/README.md).
 
 **Local auth notes:** Frontend at `http://localhost:5173` must match `ALLOWED_ORIGINS`. Access tokens stay in memory; refresh uses an HttpOnly cookie. Production requires `COOKIE_SECURE=true` and a strong `JWT_SECRET_KEY` (never commit secrets).
 
-**Still deferred:** password-reset email, email verification, MFA, appointments/symptoms APIs, chatbot/AI, admin management UI, medication reminders/SMS.
+**Still deferred:** password-reset email, email verification, MFA, chatbot/AI/RAG, admin management UI, medication/appointment SMS reminders.
 
 ### Developer scripts (frontend)
 
@@ -188,8 +191,8 @@ src/
 6. Patient self-profile management ← **done (Phase 7)**
 7. Medication management & adherence ← **done (Phase 8)**
 8. Appointment / follow-up management ← **done (Phase 9)**
-9. Symptoms (Phase 10+)
-10. Governed medical knowledge + safe RAG chatbot
+9. Symptom tracking + safety escalation ← **done (Phase 10)**
+10. Governed medical knowledge + safe RAG chatbot (Phase 11+)
 11. Admin / medical expert workflows
 12. Tests, security, Docker Compose, deployment docs
 
