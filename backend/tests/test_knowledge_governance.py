@@ -322,6 +322,7 @@ async def test_full_review_workflow_and_ingestion_sync(
                 "decision": "approve",
                 "expected_version": submit_version,
                 "expected_content_hash": version_hash,
+                "comments": "Reviewed and clinically appropriate.",
             },
         )
         assert approved.status_code == 200, approved.text
@@ -337,14 +338,23 @@ async def test_full_review_workflow_and_ingestion_sync(
         assert approved_doc is not None
         assert approved_doc.review_status == KnowledgeStatus.APPROVED
 
-        # Append-only review record recorded.
+        # Append-only review record recorded (including optional approve comments).
         reviews = await client.get(
             f"/api/v1/governance/knowledge/{document_id}/review-history",
             headers=expert_headers,
         )
         assert reviews.status_code == 200
         assert reviews.json()[0]["decision"] == "approve"
-        assert "comments" in reviews.json()[0]
+        assert reviews.json()[0]["comments"] == "Reviewed and clinically appropriate."
+
+        # Idempotent re-ingestion without re-approval.
+        reingest = await client.post(
+            f"/api/v1/governance/knowledge/{document_id}/versions/{version_id}/reingest",
+            headers=admin_headers,
+            json={"expected_content_hash": version_hash},
+        )
+        assert reingest.status_code == 200, reingest.text
+        assert reingest.json()["ingestion_status"] == "completed"
 
         # New version from approved (ADMIN only).
         doc_version_after_approve = approval_body["document"]["version"]
@@ -589,7 +599,46 @@ async def test_compare_versions(memory_db: MemoryDatabase, monkeypatch: pytest.M
 def test_seed_files_still_pending_review_not_auto_approved() -> None:
     from app.services.knowledge_ingestion_service import KnowledgeIngestionService
 
-    docs, _chunks = KnowledgeIngestionService().load_all()
+    docs, _chunks, _versions = KnowledgeIngestionService().load_all()
     assert docs
     assert all(d.review_status == KnowledgeStatus.PENDING_REVIEW for d in docs)
     assert all(d.active is False for d in docs)
+    assert all(d.current_version_id for d in docs)
+    assert all(v.review_status == KnowledgeStatus.PENDING_REVIEW for v in _versions)
+    assert {d.document_id for d in docs} == {v.document_id for v in _versions}
+
+
+@pytest.mark.asyncio
+async def test_seed_versions_appear_on_review_queue(
+    memory_db: MemoryDatabase, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from app.repositories.knowledge_governance_repository import KnowledgeGovernanceRepository
+    from app.services.knowledge_ingestion_service import KnowledgeIngestionService
+
+    _setup_app_env(monkeypatch)
+    expert_token, _ = await _register_expert(memory_db)
+    expert_headers = {"Authorization": f"Bearer {expert_token}"}
+
+    docs, chunks, versions = KnowledgeIngestionService().load_all()
+    knowledge_repo = KnowledgeRepository(memory_db)  # type: ignore[arg-type]
+    gov = KnowledgeGovernanceRepository(memory_db)  # type: ignore[arg-type]
+    for doc in docs:
+        await knowledge_repo.upsert_document(doc)
+        related = [c for c in chunks if c.document_id == doc.document_id]
+        await knowledge_repo.upsert_chunks(related)
+    for version in versions:
+        await gov.upsert_seed_version(version)
+
+    app = create_application()
+    app.dependency_overrides[get_database] = lambda: memory_db
+    transport = ASGITransport(app=app)
+    async with AsyncClient(transport=transport, base_url="http://testserver") as client:
+        queue = await client.get("/api/v1/governance/review-queue", headers=expert_headers)
+        assert queue.status_code == 200, queue.text
+        queued_ids = {item["document_id"] for item in queue.json()["items"]}
+        assert queued_ids == {d.document_id for d in docs}
+        # Seed chunks must not be patient-retrievable until approved.
+        assert await knowledge_repo.list_approved_chunks() == []
+
+    app.dependency_overrides.clear()
+    get_settings.cache_clear()

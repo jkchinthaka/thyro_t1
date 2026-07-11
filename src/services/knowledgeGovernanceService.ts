@@ -240,3 +240,19 @@ export async function submitReviewDecision(
     throw toAppError(error);
   }
 }
+
+export async function retryKnowledgeIngestion(
+  documentId: string,
+  versionId: string,
+  payload: { expected_content_hash: string },
+): Promise<KnowledgeApprovalResult> {
+  try {
+    const { data } = await api.post<KnowledgeApprovalResult>(
+      `/governance/knowledge/${documentId}/versions/${versionId}/reingest`,
+      payload,
+    );
+    return data;
+  } catch (error) {
+    throw toAppError(error);
+  }
+}

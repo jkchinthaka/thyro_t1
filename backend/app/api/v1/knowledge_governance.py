@@ -34,6 +34,7 @@ from app.schemas.knowledge_governance import (
     KnowledgeRequestChangesRequest,
     KnowledgeRestoreRequest,
     KnowledgeRetireRequest,
+    KnowledgeRetryIngestRequest,
     KnowledgeReviewDecisionRequest,
     KnowledgeReviewQueueResponse,
     KnowledgeReviewRecordPublic,
@@ -370,3 +371,25 @@ async def restore_document(
     service: GovernanceServiceDep,
 ) -> KnowledgeApprovalResult:
     return await service.restore(user, document_id, payload)
+
+
+@router.post(
+    "/knowledge/{document_id}/versions/{version_id}/reingest",
+    response_model=KnowledgeApprovalResult,
+    summary="Retry approved-content ingestion without re-approval",
+    description=_GOVERNANCE_NOTICE,
+    responses={409: {"description": "Content-hash conflict"}},
+)
+async def retry_ingestion(
+    document_id: str,
+    version_id: str,
+    payload: KnowledgeRetryIngestRequest,
+    user: KnowledgeViewer,
+    service: GovernanceServiceDep,
+) -> KnowledgeApprovalResult:
+    return await service.retry_ingestion(
+        user,
+        document_id,
+        version_id,
+        expected_content_hash=payload.expected_content_hash,
+    )

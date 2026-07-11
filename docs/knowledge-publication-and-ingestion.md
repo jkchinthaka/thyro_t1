@@ -28,6 +28,7 @@ Ingestion is wrapped in a broad `try/except` so an ingestion failure **never rol
 - If ingestion raises, the service records an audit event (`KNOWLEDGE_INGESTION_FAILED`) and returns `KnowledgeApprovalResult` with `ingestion_status="failed"` and a safe message: _"Ingestion failed. The approval was recorded; retry ingestion."_
 - If ingestion succeeds, `ingestion_status="completed"` and `KNOWLEDGE_INGESTION_COMPLETED` is audited.
 - Callers (console / API clients) must treat `ingestion_status="failed"` as "approved but not yet live for patients" and can retry ingestion without re-approving, since the approval record and content hash are already durable.
+- Retry endpoint: `POST /api/v1/governance/knowledge/{document_id}/versions/{version_id}/reingest` with `{ "expected_content_hash": "..." }` (ADMIN or MEDICAL_EXPERT). The admin/medical version detail page exposes **Retry publication**.
 
 ## What is never published
 

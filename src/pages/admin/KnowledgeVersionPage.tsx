@@ -6,10 +6,11 @@ import { ArrowLeft, Archive, FilePlus, RotateCcw } from "lucide-react";
 import { Badge, Btn, Card, ErrorState, LoadingState, Textarea } from "@/components/common";
 import { SafeKnowledgeContent } from "@/components/knowledge";
 import {
-  KNOWLEDGE_DRAFT_CONFLICT_MESSAGE,
-  KNOWLEDGE_FORBIDDEN_MESSAGE,
-} from "@/constants/knowledgeMessages";
-import { adminKnowledgeDetailPath, adminKnowledgeVersionPath, ROUTES } from "@/constants/routes";
+  adminKnowledgeDetailPath,
+  adminKnowledgeVersionPath,
+  medicalKnowledgeVersionPath,
+  ROUTES,
+} from "@/constants/routes";
 import {
   knowledgeRetireFormSchema,
   type KnowledgeRetireFormValues,
@@ -20,7 +21,13 @@ import {
   getKnowledgeReviewHistory,
   restoreKnowledgeDocument,
   retireKnowledgeDocument,
+  retryKnowledgeIngestion,
 } from "@/services/knowledgeGovernanceService";
+import {
+  KNOWLEDGE_DRAFT_CONFLICT_MESSAGE,
+  KNOWLEDGE_FORBIDDEN_MESSAGE,
+  KNOWLEDGE_INGESTION_FAILED_MESSAGE,
+} from "@/constants/knowledgeMessages";
 import type {
   KnowledgeDocumentDetail,
   KnowledgeReviewRecord,
@@ -139,9 +146,19 @@ export function KnowledgeVersionPage() {
 
   const isCurrent = detail.document.current_version_id === version.version_id;
   const canRetire = isCurrent && detail.document.current_status === "approved";
-  const canCreateNewVersion = isCurrent && detail.document.current_status === "approved";
+  const canCreateNewVersion =
+    isCurrent && detail.document.current_status === "approved" && role === "admin";
   const canRestore =
     isCurrent && detail.document.current_status === "retired" && role === "medical_expert";
+  const canRetryIngest =
+    isCurrent &&
+    detail.document.current_status === "approved" &&
+    version.review_status === "approved";
+  const libraryHome = role === "medical_expert" ? ROUTES.MEDICAL_KNOWLEDGE : ROUTES.ADMIN_KNOWLEDGE;
+  const versionPathFor = (docId: string, verId: string) =>
+    role === "medical_expert"
+      ? medicalKnowledgeVersionPath(docId, verId)
+      : adminKnowledgeVersionPath(docId, verId);
 
   const versionHistory = [...detail.versions].sort((a, b) => b.version_number - a.version_number);
   const versionReviewRecords = history.filter((r) => r.version_id === version.version_id);
@@ -203,11 +220,15 @@ export function KnowledgeVersionPage() {
     if (!window.confirm("Restore this retired content back to approved status?")) return;
     setBusy(true);
     try {
-      await restoreKnowledgeDocument(documentId, {
+      const result = await restoreKnowledgeDocument(documentId, {
         expected_version: detail.document.version,
         expected_content_hash: detail.current_version.content_hash,
       });
-      success("Content restored");
+      if (result.ingestion_status === "failed") {
+        showError(KNOWLEDGE_INGESTION_FAILED_MESSAGE);
+      } else {
+        success("Content restored");
+      }
       await load();
     } catch (err) {
       const appErr = err as AppError;
@@ -224,6 +245,34 @@ export function KnowledgeVersionPage() {
     }
   };
 
+  const onRetryIngest = async () => {
+    if (busy || !version) return;
+    setBusy(true);
+    try {
+      const result = await retryKnowledgeIngestion(documentId, version.version_id, {
+        expected_content_hash: version.content_hash,
+      });
+      if (result.ingestion_status === "failed") {
+        showError(KNOWLEDGE_INGESTION_FAILED_MESSAGE);
+      } else {
+        success("Publication/ingestion completed");
+      }
+      await load();
+    } catch (err) {
+      const appErr = err as AppError;
+      if (appErr?.status === 409) {
+        showError(KNOWLEDGE_DRAFT_CONFLICT_MESSAGE);
+        await load();
+      } else if (appErr?.status === 403) {
+        showError(KNOWLEDGE_FORBIDDEN_MESSAGE);
+      } else {
+        showError(appErr?.message || "Unable to retry ingestion.");
+      }
+    } finally {
+      setBusy(false);
+    }
+  };
+
   return (
     <>
       <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
@@ -232,9 +281,11 @@ export function KnowledgeVersionPage() {
             size="sm"
             variant="ghost"
             type="button"
-            onClick={() => navigate(adminKnowledgeDetailPath(documentId))}
+            onClick={() =>
+              navigate(role === "admin" ? adminKnowledgeDetailPath(documentId) : libraryHome)
+            }
           >
-            <ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back to document
+            <ArrowLeft className="w-4 h-4" aria-hidden="true" /> Back
           </Btn>
           <h2
             className="text-lg font-bold text-foreground truncate"
@@ -324,9 +375,7 @@ export function KnowledgeVersionPage() {
                           size="sm"
                           variant="ghost"
                           type="button"
-                          onClick={() =>
-                            navigate(adminKnowledgeVersionPath(documentId, v.version_id))
-                          }
+                          onClick={() => navigate(versionPathFor(documentId, v.version_id))}
                         >
                           View
                         </Btn>
@@ -419,7 +468,7 @@ export function KnowledgeVersionPage() {
             </dl>
           </Card>
 
-          {canCreateNewVersion || canRetire || canRestore ? (
+          {canCreateNewVersion || canRetire || canRestore || canRetryIngest ? (
             <Card>
               <h3
                 className="font-bold text-foreground mb-3"
@@ -438,6 +487,18 @@ export function KnowledgeVersionPage() {
                     onClick={() => void onCreateNewVersion()}
                   >
                     <FilePlus className="w-4 h-4" aria-hidden="true" /> Create new draft version
+                  </Btn>
+                ) : null}
+                {canRetryIngest ? (
+                  <Btn
+                    size="sm"
+                    variant="ghost"
+                    type="button"
+                    className="w-full justify-center"
+                    disabled={busy}
+                    onClick={() => void onRetryIngest()}
+                  >
+                    <RotateCcw className="w-4 h-4" aria-hidden="true" /> Retry publication
                   </Btn>
                 ) : null}
                 {canRetire ? (
@@ -516,7 +577,7 @@ export function KnowledgeVersionPage() {
               variant="ghost"
               type="button"
               className="w-full justify-center"
-              onClick={() => navigate(ROUTES.ADMIN_KNOWLEDGE)}
+              onClick={() => navigate(libraryHome)}
             >
               Back to Knowledge Management
             </Btn>

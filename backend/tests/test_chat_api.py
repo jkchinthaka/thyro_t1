@@ -308,7 +308,7 @@ async def test_chat_http_flow(memory_db: MemoryDatabase, monkeypatch: pytest.Mon
 
 
 def test_seed_files_are_pending_review() -> None:
-    docs, _chunks = KnowledgeIngestionService().load_all()
+    docs, _chunks, _versions = KnowledgeIngestionService().load_all()
     assert docs
     assert all(d.review_status == KnowledgeStatus.PENDING_REVIEW for d in docs)
 

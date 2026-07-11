@@ -8,9 +8,9 @@ There is **no auto-approve** and **no LLM/AI approval path** — every decision 
 
 ## Review queue
 
-`GET /api/v1/governance/knowledge/review-queue` lists all versions with `review_status == PENDING_REVIEW`, ordered by `submitted_for_review_at` (oldest first). Each item exposes `document_id`, `version_id`, `version_number`, `title`, `topic`, `language`, `content_hash`, and submission metadata — never the reviewer's own prior comments or other documents' drafts.
+`GET /api/v1/governance/review-queue` lists all versions with `review_status == PENDING_REVIEW`, ordered by `submitted_for_review_at` (oldest first). Each item exposes `document_id`, `version_id`, `version_number`, `title`, `topic`, `language`, `content_hash`, and submission metadata — never the reviewer's own prior comments or other documents' drafts.
 
-`GET /api/v1/governance/knowledge/review-queue/{document_id}/{version_id}` returns the full document detail (including version history) scoped to that item so the reviewer can inspect content and, via `GET /knowledge/{document_id}/compare`, diff it against the prior approved version.
+`GET /api/v1/governance/review-queue/{document_id}/{version_id}` returns the full document detail (including version history) scoped to that item so the reviewer can inspect content and, via `GET /api/v1/governance/knowledge/{document_id}/compare`, diff it against the prior approved version.
 
 ## Recording a decision
 

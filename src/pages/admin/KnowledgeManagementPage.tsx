@@ -2,7 +2,12 @@ import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Plus, RefreshCw } from "lucide-react";
 import { Badge, Btn, Card, EmptyState, ErrorState, LoadingState } from "@/components/common";
-import { adminKnowledgeDetailPath, ROUTES } from "@/constants/routes";
+import {
+  adminKnowledgeDetailPath,
+  adminKnowledgeVersionPath,
+  medicalKnowledgeVersionPath,
+  ROUTES,
+} from "@/constants/routes";
 import { listKnowledgeDocuments } from "@/services/knowledgeGovernanceService";
 import {
   KNOWLEDGE_LANGUAGE_OPTIONS,
@@ -12,7 +17,9 @@ import {
   type KnowledgeStatus,
 } from "@/types/knowledgeGovernance";
 import type { AppError } from "@/types/api";
+import { useAuth } from "@/context/AuthContext";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useToast } from "@/hooks/useToast";
 
 const PAGE_SIZE = 20;
 
@@ -46,8 +53,11 @@ function formatDate(iso: string): string {
 }
 
 export function KnowledgeManagementPage() {
-  useDocumentTitle("Knowledge Management");
+  const { role } = useAuth();
+  const isAdmin = role === "admin";
+  useDocumentTitle(isAdmin ? "Knowledge Management" : "Knowledge Library");
   const navigate = useNavigate();
+  const { error: showError } = useToast();
   const [items, setItems] = useState<KnowledgeDocument[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -84,6 +94,24 @@ export function KnowledgeManagementPage() {
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
 
+  const openDocument = (doc: KnowledgeDocument) => {
+    if (!doc.current_version_id) {
+      showError(
+        "This document has no governance version yet. Re-run knowledge seed ingestion or open after a draft is created.",
+      );
+      return;
+    }
+    if (isAdmin) {
+      if (doc.current_status === "draft" || doc.current_status === "changes_requested") {
+        navigate(adminKnowledgeDetailPath(doc.document_id));
+        return;
+      }
+      navigate(adminKnowledgeVersionPath(doc.document_id, doc.current_version_id));
+      return;
+    }
+    navigate(medicalKnowledgeVersionPath(doc.document_id, doc.current_version_id));
+  };
+
   return (
     <>
       <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
@@ -92,20 +120,23 @@ export function KnowledgeManagementPage() {
             className="text-lg font-bold text-foreground"
             style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
           >
-            Knowledge Management
+            {isAdmin ? "Knowledge Management" : "Knowledge Library"}
           </h2>
           <p className="text-sm text-muted-foreground">
-            Draft, submit, and manage patient educational content. Only approved content reaches
-            patients.
+            {isAdmin
+              ? "Draft, submit, and manage patient educational content. Only approved content reaches patients."
+              : "Inspect approved, pending, and retired educational content. Restore and retire from version detail."}
           </p>
         </div>
         <div className="flex items-center gap-2">
           <Btn size="sm" variant="ghost" type="button" onClick={() => void refresh()}>
             <RefreshCw className="w-4 h-4" aria-hidden="true" /> Refresh
           </Btn>
-          <Btn size="sm" type="button" onClick={() => navigate(ROUTES.ADMIN_KNOWLEDGE_NEW)}>
-            <Plus className="w-4 h-4" aria-hidden="true" /> New Draft
-          </Btn>
+          {isAdmin ? (
+            <Btn size="sm" type="button" onClick={() => navigate(ROUTES.ADMIN_KNOWLEDGE_NEW)}>
+              <Plus className="w-4 h-4" aria-hidden="true" /> New Draft
+            </Btn>
+          ) : null}
         </div>
       </div>
 
@@ -189,11 +220,17 @@ export function KnowledgeManagementPage() {
         <Card>
           <EmptyState
             title="No knowledge documents found"
-            description="Create a new draft, or adjust your filters."
+            description={
+              isAdmin
+                ? "Create a new draft, or adjust your filters."
+                : "No documents match your filters."
+            }
             action={
-              <Btn size="sm" type="button" onClick={() => navigate(ROUTES.ADMIN_KNOWLEDGE_NEW)}>
-                <Plus className="w-4 h-4" aria-hidden="true" /> New Draft
-              </Btn>
+              isAdmin ? (
+                <Btn size="sm" type="button" onClick={() => navigate(ROUTES.ADMIN_KNOWLEDGE_NEW)}>
+                  <Plus className="w-4 h-4" aria-hidden="true" /> New Draft
+                </Btn>
+              ) : undefined
             }
           />
         </Card>
@@ -232,12 +269,7 @@ export function KnowledgeManagementPage() {
                   </td>
                   <td className="px-4 py-3 text-muted-foreground">{formatDate(doc.updated_at)}</td>
                   <td className="px-4 py-3 text-right">
-                    <Btn
-                      size="sm"
-                      variant="ghost"
-                      type="button"
-                      onClick={() => navigate(adminKnowledgeDetailPath(doc.document_id))}
-                    >
+                    <Btn size="sm" variant="ghost" type="button" onClick={() => openDocument(doc)}>
                       Open
                     </Btn>
                   </td>

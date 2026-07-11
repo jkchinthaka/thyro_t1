@@ -144,6 +144,8 @@ export const router = createBrowserRouter([
             element: <DashboardLayout />,
             children: [
               { path: ROUTES.MEDICAL_REVIEW, element: <MedicalReviewQueuePage /> },
+              { path: ROUTES.MEDICAL_KNOWLEDGE, element: <KnowledgeManagementPage /> },
+              { path: ROUTES.MEDICAL_KNOWLEDGE_VERSION, element: <KnowledgeVersionPage /> },
               { path: ROUTES.MEDICAL_REVIEW_DETAIL, element: <MedicalReviewDetailPage /> },
             ],
           },

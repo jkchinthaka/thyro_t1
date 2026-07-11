@@ -93,7 +93,7 @@ export interface KnowledgeVersion {
 export interface KnowledgeDocument {
   document_id: string;
   slug: string;
-  title?: string;
+  title: string;
   current_version_id: string | null;
   current_version_number?: number | null;
   current_status: KnowledgeStatus;

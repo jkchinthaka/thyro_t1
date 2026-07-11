@@ -19,6 +19,20 @@ function isSafeInternalPath(path: string | undefined): path is string {
   return true;
 }
 
+function roleAllowsPath(role: string, path: string): boolean {
+  if (role === "admin") {
+    return path.startsWith("/admin") || path === ROUTES.PROFILE || path === ROUTES.EMERGENCY;
+  }
+  if (role === "medical_expert") {
+    return (
+      path.startsWith("/medical-review") || path === ROUTES.PROFILE || path === ROUTES.EMERGENCY
+    );
+  }
+  // Patients: allow clinical app paths, not governance consoles.
+  if (path.startsWith("/admin") || path.startsWith("/medical-review")) return false;
+  return true;
+}
+
 export function LoginPage() {
   useDocumentTitle("Login");
   const navigate = useNavigate();
@@ -57,7 +71,8 @@ export function LoginPage() {
           : signedInUser.role === "medical_expert"
             ? ROUTES.MEDICAL_REVIEW
             : ROUTES.DASHBOARD;
-      const target = isSafeInternalPath(from) ? from : roleHome;
+      const target =
+        isSafeInternalPath(from) && roleAllowsPath(signedInUser.role, from) ? from : roleHome;
       navigate(target, { replace: true });
     } catch (err) {
       const appErr = err as AppError;

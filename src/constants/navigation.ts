@@ -42,9 +42,10 @@ export const adminNavItems: NavItem[] = [
   { path: ROUTES.PROFILE, label: "Profile", icon: User },
 ];
 
-/** Medical expert navigation (Phase 12) — review queue only; no patient clinical nav. */
+/** Medical expert navigation (Phase 12) — review queue + library for restore/retire. */
 export const medicalNavItems: NavItem[] = [
   { path: ROUTES.MEDICAL_REVIEW, label: "Review Queue", icon: ShieldCheck },
+  { path: ROUTES.MEDICAL_KNOWLEDGE, label: "Knowledge Library", icon: ClipboardList },
   { path: ROUTES.PROFILE, label: "Profile", icon: User },
 ];
 

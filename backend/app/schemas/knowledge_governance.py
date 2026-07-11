@@ -201,6 +201,14 @@ class KnowledgeRestoreRequest(BaseModel):
     expected_content_hash: str = Field(min_length=1, max_length=128)
 
 
+class KnowledgeRetryIngestRequest(BaseModel):
+    """Retry publication for an already-approved version without re-approving."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    expected_content_hash: str = Field(min_length=1, max_length=128)
+
+
 # ---- Responses --------------------------------------------------------------------
 
 

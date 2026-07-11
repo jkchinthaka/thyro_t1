@@ -35,6 +35,8 @@ export const ROUTES = {
   // Medical expert — knowledge review (Phase 12)
   MEDICAL_REVIEW: "/medical-review",
   MEDICAL_REVIEW_DETAIL: "/medical-review/:documentId/:versionId",
+  MEDICAL_KNOWLEDGE: "/medical-review/library",
+  MEDICAL_KNOWLEDGE_VERSION: "/medical-review/library/:documentId/versions/:versionId",
 } as const;
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];
@@ -47,6 +49,11 @@ export function adminKnowledgeDetailPath(documentId: string): string {
 /** Builds a concrete admin knowledge version detail path. */
 export function adminKnowledgeVersionPath(documentId: string, versionId: string): string {
   return `/admin/knowledge/${documentId}/versions/${versionId}`;
+}
+
+/** Builds a concrete medical library version path (restore/retire). */
+export function medicalKnowledgeVersionPath(documentId: string, versionId: string): string {
+  return `/medical-review/library/${documentId}/versions/${versionId}`;
 }
 
 /** Builds a concrete medical review-queue item detail path. */
@@ -85,6 +92,7 @@ export const ROUTE_TITLES: Record<string, string> = {
   [ROUTES.ADMIN_KNOWLEDGE]: "Knowledge Management",
   [ROUTES.ADMIN_KNOWLEDGE_NEW]: "New Knowledge Draft",
   [ROUTES.MEDICAL_REVIEW]: "Medical Review Queue",
+  [ROUTES.MEDICAL_KNOWLEDGE]: "Knowledge Library",
 };
 
 /**
@@ -100,6 +108,9 @@ export function resolveRouteTitle(pathname: string): string {
   }
   if (pathname.startsWith("/admin/knowledge/")) {
     return "Knowledge Document";
+  }
+  if (pathname.startsWith("/medical-review/library/")) {
+    return "Knowledge Version Detail";
   }
   if (pathname.startsWith("/medical-review/")) {
     return "Review Knowledge Content";

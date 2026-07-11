@@ -401,6 +401,7 @@ class KnowledgeGovernanceService:
                 reviewer_role=user.role.value,
                 decision=KnowledgeReviewDecision.APPROVE,
                 reviewed_content_hash=version.content_hash,
+                comments=payload.review_summary,
             )
         )
 
@@ -784,6 +785,51 @@ class KnowledgeGovernanceService:
         return KnowledgeApprovalResult(
             document=_document_public(updated_document),
             version=_version_public(updated_version),
+            ingestion_status=ingestion_status,
+            ingestion_message=ingestion_message,
+        )
+
+    async def retry_ingestion(
+        self,
+        user: UserDocument,
+        document_id: str,
+        version_id: str,
+        *,
+        expected_content_hash: str,
+    ) -> KnowledgeApprovalResult:
+        """Re-run deterministic ingestion for an already-approved version (no re-approval)."""
+        document = await self._require_document(document_id)
+        version = await self._require_version(document_id, version_id)
+        if version.review_status != KnowledgeStatus.APPROVED:
+            raise ValidationException("Only approved versions can be re-ingested")
+        if document.current_status != KnowledgeStatus.APPROVED:
+            raise ValidationException("Document must be approved before retrying ingestion")
+        if version.content_hash != expected_content_hash:
+            raise ConflictException("Content changed since approval. Reload and try again.")
+
+        ingestion_status = "completed"
+        ingestion_message: str | None = None
+        try:
+            await ingest_approved_version(version, self.knowledge)
+            await self.audit.record(
+                AuditActions.KNOWLEDGE_INGESTION_COMPLETED,
+                actor_user_id=user.id,
+                entity_type="knowledge_document",
+                changes_summary=f"document_id={document_id};version_id={version_id};retry=1",
+            )
+        except Exception:  # noqa: BLE001
+            ingestion_status = "failed"
+            ingestion_message = "Ingestion failed. The approval was recorded; retry ingestion."
+            await self.audit.record(
+                AuditActions.KNOWLEDGE_INGESTION_FAILED,
+                actor_user_id=user.id,
+                entity_type="knowledge_document",
+                changes_summary=f"document_id={document_id};version_id={version_id};retry=1",
+            )
+
+        return KnowledgeApprovalResult(
+            document=_document_public(document),
+            version=_version_public(version),
             ingestion_status=ingestion_status,
             ingestion_message=ingestion_message,
         )

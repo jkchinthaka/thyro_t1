@@ -79,7 +79,8 @@ export function KnowledgeEditorPage() {
     register,
     handleSubmit,
     reset,
-    formState: { errors },
+    getValues,
+    formState: { errors, isDirty },
   } = useForm<KnowledgeDraftFormValues>({
     resolver: zodResolver(knowledgeDraftFormSchema),
     defaultValues: defaultCreateValues(),
@@ -104,6 +105,10 @@ export function KnowledgeEditorPage() {
       setDetail(result);
       if (result.current_version) {
         reset(versionToForm(result.current_version, result.document.slug));
+      } else {
+        setLoadError(
+          "This document has no editable governance version. Re-run seed ingestion or create a new draft version.",
+        );
       }
     } catch (err) {
       const appErr = err as AppError;
@@ -189,8 +194,30 @@ export function KnowledgeEditorPage() {
     if (!documentId || !currentVersion || submitting) return;
     setSubmitting(true);
     try {
-      const updated = await submitKnowledgeForReview(documentId, currentVersion.version_id, {
-        expected_version: currentVersion.version,
+      let versionId = currentVersion.version_id;
+      let expectedVersion = currentVersion.version;
+      if (isDirty) {
+        const draftValues = getValues();
+        const saved = await updateKnowledgeDraftVersion(documentId, currentVersion.version_id, {
+          title: draftValues.title,
+          source_name: draftValues.source_name,
+          source_url: draftValues.source_url || null,
+          topic: draftValues.topic,
+          language: draftValues.language,
+          body: draftValues.body,
+          medical_disclaimer: draftValues.medical_disclaimer || "",
+          expected_version: currentVersion.version,
+        });
+        setDetail(saved);
+        if (!saved.current_version) {
+          throw new Error("Draft saved without a current version");
+        }
+        reset(versionToForm(saved.current_version, saved.document.slug));
+        versionId = saved.current_version.version_id;
+        expectedVersion = saved.current_version.version;
+      }
+      const updated = await submitKnowledgeForReview(documentId, versionId, {
+        expected_version: expectedVersion,
         submission_note: values.submission_note || null,
       });
       setDetail(updated);

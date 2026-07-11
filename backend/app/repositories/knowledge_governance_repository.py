@@ -158,6 +158,28 @@ class KnowledgeGovernanceRepository(BaseRepository[KnowledgeDocumentDocument]):
             raise map_pymongo_error(exc) from exc
         return version
 
+    async def upsert_seed_version(
+        self, version: KnowledgeDocumentVersionDocument
+    ) -> KnowledgeDocumentVersionDocument:
+        """Idempotent seed sync. Never overwrite an already-approved version body."""
+        existing = await self.get_version(version.version_id)
+        if existing is not None and existing.review_status == KnowledgeStatus.APPROVED:
+            return existing
+        payload = version.model_dump(by_alias=True)
+        payload["_id"] = to_object_id(payload["_id"])
+        payload["updated_at"] = utc_now()
+        try:
+            await self._versions.update_one(
+                {"version_id": version.version_id},
+                {"$set": payload},
+                upsert=True,
+            )
+        except PyMongoError as exc:
+            raise map_pymongo_error(exc) from exc
+        found = await self.get_version(version.version_id)
+        assert found is not None
+        return found
+
     async def list_versions(
         self,
         document_id: str,

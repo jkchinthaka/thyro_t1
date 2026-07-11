@@ -5,8 +5,8 @@ import { ROUTES } from "@/constants/routes";
 import { PageLoader } from "@/components/common/PageLoader";
 
 /**
- * Role-guard foundation for future admin / expert routes.
- * No admin pages are mounted in Phase 6.
+ * Role-guard for ADMIN and MEDICAL_EXPERT governance routes.
+ * Backend authorization remains authoritative.
  */
 export function RoleProtectedRoute({ allowedRoles }: { allowedRoles: UserRole[] }) {
   const { isAuthenticated, role, status } = useAuth();
