@@ -1,11 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { Bell, Search } from "lucide-react";
 import { Avatar } from "@/components/common";
 import { mockNotificationCount, mockUser } from "@/data/mock";
-import type { Screen, SetScreen } from "@/types";
+import { ROUTES } from "@/constants/routes";
 
-export function TopBar({ title, setScreen }: { title: string; setScreen: SetScreen }) {
+export function TopBar({ title }: { title: string }) {
   const [notifs, setNotifs] = useState(mockNotificationCount);
+  const navigate = useNavigate();
+
   return (
     <header className="flex items-center gap-4 px-6 py-4 bg-card border-b border-border sticky top-0 z-10">
       <h1 className="text-lg font-bold text-foreground flex-1" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>{title}</h1>
@@ -25,7 +28,7 @@ export function TopBar({ title, setScreen }: { title: string; setScreen: SetScre
           <span className="absolute top-1 right-1 w-4 h-4 rounded-full bg-red-500 text-white text-[9px] font-bold flex items-center justify-center">{notifs}</span>
         )}
       </button>
-      <button onClick={() => setScreen("profile")} className="cursor-pointer">
+      <button type="button" onClick={() => navigate(ROUTES.PROFILE)} className="cursor-pointer">
         <Avatar name={mockUser.name} size={9} />
       </button>
     </header>

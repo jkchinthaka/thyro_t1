@@ -11,13 +11,18 @@ Educational patient-support prototype for differentiated thyroid cancer survivor
 ## Current status
 
 - **Phase 0:** Complete (baseline + backups + build verified)
-- **Phase 1:** Complete (modular pages/components; UI preserved; no Router yet)
-- **Phase 2+:** Not started
+- **Phase 1:** Complete (modular pages/components; UI preserved)
+- **Phase 2:** Complete (React Router, protected layouts, lazy pages)
+- **Phase 3+:** Not started
 
 Mock data remains under `src/data/mock/` and is **not** live clinical data.
 
+**Authentication is mock-only** for routing demos. Real JWT auth is deferred to Phase 6.
+
 Baseline audit: [`docs/baseline-audit.md`](docs/baseline-audit.md)  
 Phase 1 validation: [`docs/phase-1-validation.md`](docs/phase-1-validation.md)  
+Phase 2 architecture: [`docs/phase-2-routing-architecture.md`](docs/phase-2-routing-architecture.md)  
+Phase 2 validation: [`docs/phase-2-validation.md`](docs/phase-2-validation.md)  
 Progress log: [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
 
 ---
@@ -29,6 +34,7 @@ Progress log: [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
 | UI | React 18.3 |
 | Language | TypeScript |
 | Bundler | Vite 6 |
+| Routing | react-router 7 |
 | Styling | Tailwind CSS 4 |
 | Charts | Recharts |
 | Icons | lucide-react |
@@ -52,38 +58,70 @@ npm run build
 
 ---
 
-## Existing screens
+## Frontend routes
 
-Landing · Login · Register · Dashboard · AI Chat · Medication · Diet · Symptoms · Follow-up · Progress/Analytics · Resources · Profile · Emergency
+### Public
+
+| URL | Screen |
+|-----|--------|
+| `/` | Landing |
+| `/login` | Login |
+| `/register` | Register |
+| `/emergency` | Emergency |
+
+### Patient (mock-auth protected)
+
+| URL | Screen |
+|-----|--------|
+| `/dashboard` | Dashboard |
+| `/chat` | AI Chat |
+| `/medications` | Medication |
+| `/diet` | Diet |
+| `/symptoms` | Symptoms |
+| `/follow-ups` | Follow-up |
+| `/analytics` | Progress / Analytics |
+| `/resources` | Resources |
+| `/profile` | Profile |
+
+### System
+
+| URL | Screen |
+|-----|--------|
+| `/unauthorized` | Unauthorized |
+| unknown paths | Not Found |
+
+Sign in / register uses **temporary mock authentication** (sessionStorage flag). It is not secure and must be replaced in Phase 6.
+
+Vite local development supports SPA fallback automatically. Production hosts will need rewrite-to-`index.html` configuration during deployment.
 
 ---
 
-## Project structure (after Phase 1)
+## Project structure (after Phase 2)
 
 ```
 src/
-  app/App.tsx              # Screen-state shell only (~51 lines)
-  app/providers.tsx        # Placeholder providers
-  app/router.tsx           # Deferred to Phase 2
-  pages/                   # One file per screen
-  components/common/       # Card, Button, Input, Badge, Avatar, BrandLogo
-  components/chat|medication|.../
-  layouts/                 # Sidebar, TopBar, DashboardLayout
+  app/App.tsx              # Providers + RouterProvider shell
+  app/providers.tsx        # Mock AuthProvider
+  app/router.tsx           # createBrowserRouter route table
+  pages/                   # Lazy-loaded route pages
+  layouts/                 # Public, Auth, Dashboard (Outlet)
+  context/AuthContext.tsx  # Temporary mock auth
+  components/common/       # Guards, ScrollToTop, UI atoms
   data/mock/               # Explicit demo datasets (*.mock.ts)
-  constants/ types/ styles/
+  constants/routes.ts      # Central path constants
 ```
 
 ---
 
 ## Roadmap (high level)
 
-1. Modular frontend + routing  
-2. Quality / accessibility foundation  
-3. FastAPI + MongoDB backend  
-4. Auth, profiles, clinical support modules  
-5. Governed medical knowledge + safe RAG chatbot  
-6. Admin / medical expert workflows  
-7. Tests, security, Docker, deployment docs  
+1. Modular frontend + routing ← **done through Phase 2**
+2. Quality / accessibility foundation
+3. FastAPI + MongoDB backend
+4. Auth, profiles, clinical support modules
+5. Governed medical knowledge + safe RAG chatbot
+6. Admin / medical expert workflows
+7. Tests, security, Docker, deployment docs
 
 See `PROJECT_PROGRESS.md` for phase tracking.
 

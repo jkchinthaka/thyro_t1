@@ -2,9 +2,8 @@ import { useState, useRef, useEffect } from "react";
 import { Send, Mic, Paperclip, Plus } from "lucide-react";
 import { Card, Btn } from "@/components/common";
 import { ChatBubble, TypingIndicator, ChatSafetyBanner } from "@/components/chat";
-import { DashboardLayout } from "@/layouts";
 import { BLUE, TEAL } from "@/constants/colors";
-import type { ChatMsg, SetScreen } from "@/types";
+import type { ChatMsg } from "@/types";
 import {
   mockUser,
   mockInitialMessages,
@@ -14,7 +13,7 @@ import {
   mockChatReply,
 } from "@/data/mock";
 
-export function ChatPage({ setScreen }: { setScreen: SetScreen }) {
+export function ChatPage() {
   const [msgs, setMsgs] = useState<ChatMsg[]>(mockInitialMessages);
   const [input, setInput] = useState("");
   const [typing, setTyping] = useState(false);
@@ -40,7 +39,7 @@ export function ChatPage({ setScreen }: { setScreen: SetScreen }) {
   };
 
   return (
-    <DashboardLayout screen="chat" setScreen={setScreen} title="AI Health Assistant">
+    <>
       <div className="flex gap-4 h-[calc(100vh-130px)]">
         {/* Chat history sidebar */}
         <Card className="w-56 flex-shrink-0 hidden lg:flex flex-col p-3 gap-2">
@@ -58,7 +57,7 @@ export function ChatPage({ setScreen }: { setScreen: SetScreen }) {
 
         {/* Main chat */}
         <Card className="flex-1 flex flex-col p-0 overflow-hidden">
-          <ChatSafetyBanner setScreen={setScreen} />
+          <ChatSafetyBanner />
 
           {/* Quick actions */}
           <div className="px-4 py-2.5 border-b border-border flex gap-2 overflow-x-auto scrollbar-hide">
@@ -117,6 +116,6 @@ export function ChatPage({ setScreen }: { setScreen: SetScreen }) {
           </div>
         </Card>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

@@ -1,8 +1,10 @@
 ﻿/**
  * Application-level providers.
- * Phase 1: none required (no Auth/Theme providers yet).
- * Phase 2+: wrap Router, Auth, Query, Toast providers here.
+ * Phase 2: mock AuthProvider for protected routing.
+ * Temporary mock authentication for routing demonstration. Replace during Phase 6.
  */
+import { AuthProvider } from "@/context/AuthContext";
+
 export function AppProviders({ children }: { children: React.ReactNode }) {
-  return <>{children}</>;
+  return <AuthProvider>{children}</AuthProvider>;
 }

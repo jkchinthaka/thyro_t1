@@ -1,10 +1,8 @@
 import { useState } from "react";
 import { CheckCircle } from "lucide-react";
 import { Card, Badge } from "@/components/common";
-import { DashboardLayout } from "@/layouts";
 import { BLUE, TEAL, GREEN } from "@/constants/colors";
 import { iodineSeverityLabels } from "@/constants/status";
-import type { SetScreen } from "@/types";
 import {
   mockFoodsToEat,
   mockFoodsToAvoid,
@@ -12,7 +10,7 @@ import {
   mockDietStatus,
 } from "@/data/mock";
 
-export function DietPage({ setScreen }: { setScreen: SetScreen }) {
+export function DietPage() {
   const [tab, setTab] = useState<"eat" | "avoid" | "meals">("eat");
 
   const foodsToEat = mockFoodsToEat;
@@ -20,7 +18,7 @@ export function DietPage({ setScreen }: { setScreen: SetScreen }) {
   const meals = mockMeals;
 
   return (
-    <DashboardLayout screen="diet" setScreen={setScreen} title="Low-Iodine Diet Guide">
+    <>
       {/* Day status */}
       <div className="rounded-2xl p-5 mb-5 text-white" style={{ background: `linear-gradient(135deg, ${GREEN}, ${TEAL})` }}>
         <div className="flex items-center justify-between flex-wrap gap-3">
@@ -107,6 +105,6 @@ export function DietPage({ setScreen }: { setScreen: SetScreen }) {
           ))}
         </div>
       )}
-    </DashboardLayout>
+    </>
   );
 }

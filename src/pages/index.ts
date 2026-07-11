@@ -11,3 +11,5 @@ export { AnalyticsPage } from "./AnalyticsPage";
 export { ResourcesPage } from "./ResourcesPage";
 export { ProfilePage } from "./ProfilePage";
 export { EmergencyPage } from "./EmergencyPage";
+export { UnauthorizedPage } from "./UnauthorizedPage";
+export { NotFoundPage } from "./NotFoundPage";

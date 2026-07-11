@@ -1,18 +1,16 @@
 import { useState } from "react";
 import { Camera, Edit2 } from "lucide-react";
 import { Card, Badge, Btn } from "@/components/common";
-import { DashboardLayout } from "@/layouts";
 import { BLUE, TEAL } from "@/constants/colors";
-import type { SetScreen } from "@/types";
 import { mockUser } from "@/data/mock";
 
-export function ProfilePage({ setScreen }: { setScreen: SetScreen }) {
+export function ProfilePage() {
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [tab, setTab] = useState<"personal" | "medical" | "settings">("personal");
 
   return (
-    <DashboardLayout screen="profile" setScreen={setScreen} title="My Profile">
+    <>
       <div className="max-w-3xl">
         {/* Profile header */}
         <Card className="mb-5">
@@ -109,6 +107,6 @@ export function ProfilePage({ setScreen }: { setScreen: SetScreen }) {
           </Card>
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 }

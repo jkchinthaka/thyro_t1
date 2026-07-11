@@ -1,19 +1,17 @@
 import { useState } from "react";
 import { Clock, Play, Info } from "lucide-react";
 import { Card, Badge } from "@/components/common";
-import { DashboardLayout } from "@/layouts";
 import { BLUE, TEAL } from "@/constants/colors";
-import type { SetScreen } from "@/types";
 import { mockArticles, mockFaqs, mockVideos } from "@/data/mock";
 
-export function ResourcesPage({ setScreen }: { setScreen: SetScreen }) {
+export function ResourcesPage() {
   const [tab, setTab] = useState<"articles" | "videos" | "faqs">("articles");
 
   const articles = mockArticles;
   const faqs = mockFaqs;
 
   return (
-    <DashboardLayout screen="education" setScreen={setScreen} title="Educational Resources">
+    <>
       <div className="flex gap-2 mb-5">
         {(["articles", "videos", "faqs"] as const).map(t => (
           <button
@@ -81,6 +79,6 @@ export function ResourcesPage({ setScreen }: { setScreen: SetScreen }) {
           ))}
         </div>
       )}
-    </DashboardLayout>
+    </>
   );
 }

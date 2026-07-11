@@ -1,11 +1,11 @@
+import { useNavigate } from "react-router";
 import { CheckCircle, Clock } from "lucide-react";
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from "recharts";
 import { Card, Badge } from "@/components/common";
-import { DashboardLayout } from "@/layouts";
 import { BLUE, GRAY } from "@/constants/colors";
-import type { Screen, SetScreen } from "@/types";
+import { SCREEN_PATH } from "@/constants/routes";
 import {
   mockDashboardCards,
   mockDashboardQuickStats,
@@ -13,12 +13,13 @@ import {
   mockDashboardReminders,
 } from "@/data/mock";
 
-export function DashboardPage({ setScreen }: { setScreen: SetScreen }) {
+export function DashboardPage() {
+  const navigate = useNavigate();
   const cards = mockDashboardCards;
   const weekData = mockDashboardWeekData;
 
   return (
-    <DashboardLayout screen="dashboard" setScreen={setScreen} title="Good morning, Sarah 👋">
+    <>
       {/* Quick stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {mockDashboardQuickStats.map(s => {
@@ -46,7 +47,7 @@ export function DashboardPage({ setScreen }: { setScreen: SetScreen }) {
           return (
             <button
               key={c.id}
-              onClick={() => setScreen(c.id as Screen)}
+              onClick={() => navigate(SCREEN_PATH[c.id] ?? "/dashboard")}
               className="text-left bg-white rounded-2xl border border-border p-4 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200 cursor-pointer group"
             >
               <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 group-hover:scale-110 transition-transform" style={{ background: c.bg }}>
@@ -100,6 +101,6 @@ export function DashboardPage({ setScreen }: { setScreen: SetScreen }) {
           </div>
         </Card>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

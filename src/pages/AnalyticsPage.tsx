@@ -3,10 +3,8 @@ import {
   PieChart, Pie, Cell,
 } from "recharts";
 import { Card } from "@/components/common";
-import { DashboardLayout } from "@/layouts";
 import { BLUE, TEAL, GRAY } from "@/constants/colors";
 import { moodLabels } from "@/constants/status";
-import type { SetScreen } from "@/types";
 import {
   mockWeeklyHealthData,
   mockWellnessBreakdown,
@@ -15,13 +13,13 @@ import {
   mockHealthScore,
 } from "@/data/mock";
 
-export function AnalyticsPage({ setScreen }: { setScreen: SetScreen }) {
+export function AnalyticsPage() {
   const weeklyData = mockWeeklyHealthData;
   const pieData = mockWellnessBreakdown;
   const moods = mockMoodEmojis;
 
   return (
-    <DashboardLayout screen="progress" setScreen={setScreen} title="Health Progress">
+    <>
       {/* Score hero */}
       <div className="rounded-3xl p-6 mb-5 text-white" style={{ background: `linear-gradient(135deg, ${BLUE}, ${TEAL})` }}>
         <div className="flex items-center justify-between flex-wrap gap-4">
@@ -98,6 +96,6 @@ export function AnalyticsPage({ setScreen }: { setScreen: SetScreen }) {
           </div>
         </Card>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

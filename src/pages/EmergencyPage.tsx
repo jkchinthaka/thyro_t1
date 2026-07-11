@@ -1,21 +1,29 @@
+import { useNavigate } from "react-router";
 import {
   AlertTriangle, Phone, ChevronLeft, MessageCircle, Shield,
 } from "lucide-react";
 import { Avatar } from "@/components/common";
-import type { SetScreen } from "@/types";
+import { ROUTES } from "@/constants/routes";
+import { useAuth } from "@/context/AuthContext";
 import {
   mockEmergencyCallOptions,
   mockEmergencyWarningSigns,
   mockEmergencyContacts,
 } from "@/data/mock";
 
-export function EmergencyPage({ setScreen }: { setScreen: SetScreen }) {
+export function EmergencyPage() {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
+
   return (
     <div className="min-h-screen bg-red-50" style={{ fontFamily: "'Inter', sans-serif" }}>
       {/* Red header */}
       <div className="bg-red-600 text-white px-6 py-5">
         <div className="max-w-3xl mx-auto flex items-center gap-4">
-          <button onClick={() => setScreen("dashboard")} className="p-2 rounded-xl bg-red-500 hover:bg-red-400 transition cursor-pointer">
+          <button
+            onClick={() => navigate(isAuthenticated ? ROUTES.DASHBOARD : ROUTES.HOME)}
+            className="p-2 rounded-xl bg-red-500 hover:bg-red-400 transition cursor-pointer"
+          >
             <ChevronLeft className="w-5 h-5" />
           </button>
           <div className="flex-1">

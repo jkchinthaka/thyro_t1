@@ -1,13 +1,14 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { AlertTriangle, Stethoscope, Heart, CheckCircle } from "lucide-react";
 import { Card, Btn } from "@/components/common";
-import { DashboardLayout } from "@/layouts";
 import { BLUE, TEAL, GREEN, AMBER, RED } from "@/constants/colors";
 import { severityLabels } from "@/constants/status";
-import type { SetScreen } from "@/types";
+import { ROUTES } from "@/constants/routes";
 import { mockSymptoms, mockSymptomRecommendations } from "@/data/mock";
 
-export function SymptomsPage({ setScreen }: { setScreen: SetScreen }) {
+export function SymptomsPage() {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState<string[]>(["fatigue"]);
   const [severity, setSeverity] = useState(3);
   const [assessed, setAssessed] = useState(false);
@@ -18,7 +19,7 @@ export function SymptomsPage({ setScreen }: { setScreen: SetScreen }) {
   const isCritical = selected.includes("heart-palp") && severity >= 4;
 
   return (
-    <DashboardLayout screen="symptoms" setScreen={setScreen} title="Symptom Checker">
+    <>
       <div className="max-w-3xl">
         {isCritical && (
           <div className="rounded-2xl p-4 mb-4 bg-red-50 border border-red-300 flex items-start gap-3">
@@ -26,7 +27,7 @@ export function SymptomsPage({ setScreen }: { setScreen: SetScreen }) {
             <div>
               <p className="font-bold text-red-800">Emergency Warning</p>
               <p className="text-sm text-red-700 mt-0.5">Heart palpitations with high severity may require immediate medical attention. Please contact your doctor or call emergency services.</p>
-              <button onClick={() => setScreen("emergency")} className="mt-2 text-sm font-bold text-red-600 hover:underline cursor-pointer">Go to Emergency Support →</button>
+              <button onClick={() => navigate(ROUTES.EMERGENCY)} className="mt-2 text-sm font-bold text-red-600 hover:underline cursor-pointer">Go to Emergency Support →</button>
             </div>
           </div>
         )}
@@ -102,6 +103,6 @@ export function SymptomsPage({ setScreen }: { setScreen: SetScreen }) {
           </Card>
         )}
       </div>
-    </DashboardLayout>
+    </>
   );
 }

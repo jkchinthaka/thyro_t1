@@ -9,20 +9,20 @@ import {
   BookOpen,
   User,
 } from "lucide-react";
-import type { Screen } from "@/types";
+import { ROUTES } from "./routes";
 
 export const navItems: {
-  id: Screen;
+  path: string;
   label: string;
   icon: typeof Home;
 }[] = [
-  { id: "dashboard", label: "Dashboard", icon: Home },
-  { id: "chat", label: "AI Chat", icon: MessageCircle },
-  { id: "medication", label: "Medication", icon: Pill },
-  { id: "diet", label: "Diet Guide", icon: Salad },
-  { id: "symptoms", label: "Symptoms", icon: Activity },
-  { id: "followup", label: "Follow-up", icon: Calendar },
-  { id: "progress", label: "Progress", icon: TrendingUp },
-  { id: "education", label: "Resources", icon: BookOpen },
-  { id: "profile", label: "Profile", icon: User },
+  { path: ROUTES.DASHBOARD, label: "Dashboard", icon: Home },
+  { path: ROUTES.CHAT, label: "AI Chat", icon: MessageCircle },
+  { path: ROUTES.MEDICATIONS, label: "Medication", icon: Pill },
+  { path: ROUTES.DIET, label: "Diet Guide", icon: Salad },
+  { path: ROUTES.SYMPTOMS, label: "Symptoms", icon: Activity },
+  { path: ROUTES.FOLLOW_UPS, label: "Follow-up", icon: Calendar },
+  { path: ROUTES.ANALYTICS, label: "Progress", icon: TrendingUp },
+  { path: ROUTES.RESOURCES, label: "Resources", icon: BookOpen },
+  { path: ROUTES.PROFILE, label: "Profile", icon: User },
 ];

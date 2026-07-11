@@ -1,5 +1,6 @@
 import type { ComponentType } from "react";
 
+/** Legacy screen ids used by mock dashboard cards (mapped to routes via SCREEN_PATH). */
 export type Screen =
   | "landing"
   | "login"
@@ -14,9 +15,6 @@ export type Screen =
   | "education"
   | "profile"
   | "emergency";
-
-/** Callback used by pages/layouts until React Router (Phase 2). */
-export type SetScreen = (screen: Screen) => void;
 
 export interface ChatMsg {
   id: number;
@@ -40,7 +38,7 @@ export type ResourcesTab = "articles" | "videos" | "faqs";
 export type ProfileTab = "personal" | "medical" | "settings";
 
 export interface NavItem {
-  id: Screen;
+  path: string;
   label: string;
   icon: ComponentType<{ className?: string }>;
 }

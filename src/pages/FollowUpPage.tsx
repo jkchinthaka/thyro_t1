@@ -1,19 +1,17 @@
 import { Plus, CheckCircle, Calendar, AlertTriangle } from "lucide-react";
 import { Card, Badge, Btn } from "@/components/common";
-import { DashboardLayout } from "@/layouts";
 import { BLUE, TEAL } from "@/constants/colors";
-import type { SetScreen } from "@/types";
 import {
   mockAppointments,
   mockTshHistory,
   mockNextAppointment,
 } from "@/data/mock";
 
-export function FollowUpPage({ setScreen }: { setScreen: SetScreen }) {
+export function FollowUpPage() {
   const appointments = mockAppointments;
 
   return (
-    <DashboardLayout screen="followup" setScreen={setScreen} title="Follow-up Care">
+    <>
       <div className="grid lg:grid-cols-3 gap-5">
         <div className="lg:col-span-2">
           <div className="flex items-center justify-between mb-4">
@@ -81,6 +79,6 @@ export function FollowUpPage({ setScreen }: { setScreen: SetScreen }) {
           </Card>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

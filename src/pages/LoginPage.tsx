@@ -1,14 +1,26 @@
 import { useState } from "react";
+import { useNavigate, useLocation } from "react-router";
 import { User, Star } from "lucide-react";
 import { Btn, Input, BrandLogo } from "@/components/common";
 import { BLUE, TEAL } from "@/constants/colors";
-import type { SetScreen } from "@/types";
+import { ROUTES } from "@/constants/routes";
+import { useAuth } from "@/context/AuthContext";
 import { mockUser } from "@/data/mock";
 
-export function LoginPage({ setScreen }: { setScreen: SetScreen }) {
+export function LoginPage() {
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { login } = useAuth();
   const [email, setEmail] = useState(mockUser.email);
   const [password, setPassword] = useState(mockUser.passwordPlaceholder);
   const [remember, setRemember] = useState(false);
+
+  const from = (location.state as { from?: { pathname?: string } } | null)?.from?.pathname;
+
+  const handleSignIn = () => {
+    login();
+    navigate(from && from !== ROUTES.LOGIN ? from : ROUTES.DASHBOARD, { replace: true });
+  };
 
   return (
     <div className="min-h-screen bg-background grid lg:grid-cols-2" style={{ fontFamily: "'Inter', sans-serif" }}>
@@ -35,7 +47,7 @@ export function LoginPage({ setScreen }: { setScreen: SetScreen }) {
             <button className="text-sm font-semibold text-primary hover:underline cursor-pointer">Forgot password?</button>
           </div>
 
-          <Btn className="w-full justify-center" size="lg" onClick={() => setScreen("dashboard")}>
+          <Btn className="w-full justify-center" size="lg" onClick={handleSignIn}>
             Sign In
           </Btn>
 
@@ -51,7 +63,7 @@ export function LoginPage({ setScreen }: { setScreen: SetScreen }) {
 
           <p className="text-center text-sm text-muted-foreground">
             No account?{" "}
-            <button onClick={() => setScreen("register")} className="font-semibold text-primary hover:underline cursor-pointer">Create one</button>
+            <button onClick={() => navigate(ROUTES.REGISTER)} className="font-semibold text-primary hover:underline cursor-pointer">Create one</button>
           </p>
         </div>
       </div>

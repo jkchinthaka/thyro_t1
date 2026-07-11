@@ -1,18 +1,26 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import { ChevronLeft, ArrowRight } from "lucide-react";
 import { Card, Btn, Input, BrandLogo } from "@/components/common";
-import { BLUE, TEAL } from "@/constants/colors";
-import type { SetScreen } from "@/types";
+import { ROUTES } from "@/constants/routes";
+import { useAuth } from "@/context/AuthContext";
 
-export function RegisterPage({ setScreen }: { setScreen: SetScreen }) {
+export function RegisterPage() {
+  const navigate = useNavigate();
+  const { register } = useAuth();
   const [rai, setRai] = useState<"yes" | "no" | null>(null);
   const [gender, setGender] = useState<string>("female");
+
+  const handleCreateAccount = () => {
+    register();
+    navigate(ROUTES.DASHBOARD, { replace: true });
+  };
 
   return (
     <div className="min-h-screen bg-background" style={{ fontFamily: "'Inter', sans-serif" }}>
       <div className="max-w-2xl mx-auto px-6 py-10">
         <div className="flex items-center gap-2 mb-8">
-          <button onClick={() => setScreen("landing")} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition cursor-pointer">
+          <button onClick={() => navigate(ROUTES.HOME)} className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition cursor-pointer">
             <ChevronLeft className="w-4 h-4" /> Back
           </button>
         </div>
@@ -70,12 +78,12 @@ export function RegisterPage({ setScreen }: { setScreen: SetScreen }) {
               <input type="checkbox" className="mt-1 rounded" />
               <span className="text-sm text-muted-foreground">I agree to the <span className="text-primary font-semibold">Terms of Service</span> and <span className="text-primary font-semibold">Privacy Policy</span></span>
             </label>
-            <Btn className="w-full justify-center" size="lg" onClick={() => setScreen("dashboard")}>
+            <Btn className="w-full justify-center" size="lg" onClick={handleCreateAccount}>
               Create Account <ArrowRight className="w-5 h-5" />
             </Btn>
             <p className="text-center text-sm text-muted-foreground">
               Already have an account?{" "}
-              <button onClick={() => setScreen("login")} className="font-semibold text-primary hover:underline cursor-pointer">Sign in</button>
+              <button onClick={() => navigate(ROUTES.LOGIN)} className="font-semibold text-primary hover:underline cursor-pointer">Sign in</button>
             </p>
           </div>
         </Card>

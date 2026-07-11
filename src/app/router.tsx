@@ -1,6 +1,78 @@
-﻿/**
- * React Router configuration — deferred to Phase 2.
- * Do not implement BrowserRouter or route tables in Phase 1.
- * Navigation remains screen-state based via App.tsx.
- */
-export {};
+﻿import { Suspense, lazy } from "react";
+import { createBrowserRouter, Outlet } from "react-router";
+import { ScrollToTop, PageLoader, ProtectedRoute, RouteErrorPage } from "@/components/common";
+import { PublicLayout, AuthLayout, DashboardLayout } from "@/layouts";
+import { ROUTES } from "@/constants/routes";
+
+const LandingPage = lazy(() => import("@/pages/LandingPage").then(m => ({ default: m.LandingPage })));
+const LoginPage = lazy(() => import("@/pages/LoginPage").then(m => ({ default: m.LoginPage })));
+const RegisterPage = lazy(() => import("@/pages/RegisterPage").then(m => ({ default: m.RegisterPage })));
+const EmergencyPage = lazy(() => import("@/pages/EmergencyPage").then(m => ({ default: m.EmergencyPage })));
+const DashboardPage = lazy(() => import("@/pages/DashboardPage").then(m => ({ default: m.DashboardPage })));
+const ChatPage = lazy(() => import("@/pages/ChatPage").then(m => ({ default: m.ChatPage })));
+const MedicationPage = lazy(() => import("@/pages/MedicationPage").then(m => ({ default: m.MedicationPage })));
+const DietPage = lazy(() => import("@/pages/DietPage").then(m => ({ default: m.DietPage })));
+const SymptomsPage = lazy(() => import("@/pages/SymptomsPage").then(m => ({ default: m.SymptomsPage })));
+const FollowUpPage = lazy(() => import("@/pages/FollowUpPage").then(m => ({ default: m.FollowUpPage })));
+const AnalyticsPage = lazy(() => import("@/pages/AnalyticsPage").then(m => ({ default: m.AnalyticsPage })));
+const ResourcesPage = lazy(() => import("@/pages/ResourcesPage").then(m => ({ default: m.ResourcesPage })));
+const ProfilePage = lazy(() => import("@/pages/ProfilePage").then(m => ({ default: m.ProfilePage })));
+const UnauthorizedPage = lazy(() => import("@/pages/UnauthorizedPage").then(m => ({ default: m.UnauthorizedPage })));
+const NotFoundPage = lazy(() => import("@/pages/NotFoundPage").then(m => ({ default: m.NotFoundPage })));
+
+function RootLayout() {
+  return (
+    <>
+      <ScrollToTop />
+      <div className="min-h-screen bg-background" style={{ fontFamily: "'Inter', sans-serif" }}>
+        <Suspense fallback={<PageLoader />}>
+          <Outlet />
+        </Suspense>
+      </div>
+    </>
+  );
+}
+
+export const router = createBrowserRouter([
+  {
+    element: <RootLayout />,
+    errorElement: <RouteErrorPage />,
+    children: [
+      {
+        element: <PublicLayout />,
+        children: [
+          { path: ROUTES.HOME, element: <LandingPage /> },
+          { path: ROUTES.EMERGENCY, element: <EmergencyPage /> },
+        ],
+      },
+      {
+        element: <AuthLayout />,
+        children: [
+          { path: ROUTES.LOGIN, element: <LoginPage /> },
+          { path: ROUTES.REGISTER, element: <RegisterPage /> },
+        ],
+      },
+      {
+        element: <ProtectedRoute />,
+        children: [
+          {
+            element: <DashboardLayout />,
+            children: [
+              { path: ROUTES.DASHBOARD, element: <DashboardPage /> },
+              { path: ROUTES.CHAT, element: <ChatPage /> },
+              { path: ROUTES.MEDICATIONS, element: <MedicationPage /> },
+              { path: ROUTES.DIET, element: <DietPage /> },
+              { path: ROUTES.SYMPTOMS, element: <SymptomsPage /> },
+              { path: ROUTES.FOLLOW_UPS, element: <FollowUpPage /> },
+              { path: ROUTES.ANALYTICS, element: <AnalyticsPage /> },
+              { path: ROUTES.RESOURCES, element: <ResourcesPage /> },
+              { path: ROUTES.PROFILE, element: <ProfilePage /> },
+            ],
+          },
+        ],
+      },
+      { path: ROUTES.UNAUTHORIZED, element: <UnauthorizedPage /> },
+      { path: ROUTES.NOT_FOUND, element: <NotFoundPage /> },
+    ],
+  },
+]);

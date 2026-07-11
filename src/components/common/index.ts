@@ -4,3 +4,8 @@ export { Btn, Button } from "./Button";
 export { Input } from "./Input";
 export { Avatar } from "./Avatar";
 export { BrandLogo } from "./BrandLogo";
+export { ProtectedRoute } from "./ProtectedRoute";
+export { RoleProtectedRoute } from "./RoleProtectedRoute";
+export { ScrollToTop } from "./ScrollToTop";
+export { PageLoader } from "./PageLoader";
+export { RouteErrorPage } from "./RouteErrorPage";

@@ -5,9 +5,7 @@ import {
 } from "recharts";
 import { Card, Badge, Btn } from "@/components/common";
 import { MedicationCard } from "@/components/medication";
-import { DashboardLayout } from "@/layouts";
 import { TEAL, GREEN, GRAY } from "@/constants/colors";
-import type { SetScreen } from "@/types";
 import {
   mockMedications,
   mockAdherenceData,
@@ -15,14 +13,14 @@ import {
   mockInitialTaken,
 } from "@/data/mock";
 
-export function MedicationPage({ setScreen }: { setScreen: SetScreen }) {
+export function MedicationPage() {
   const [taken, setTaken] = useState<string[]>([...mockInitialTaken]);
 
   const meds = mockMedications;
   const adherenceData = mockAdherenceData;
 
   return (
-    <DashboardLayout screen="medication" setScreen={setScreen} title="Medication Management">
+    <>
       <div className="grid lg:grid-cols-3 gap-5">
         {/* Medications list */}
         <div className="lg:col-span-2 space-y-4">
@@ -83,6 +81,6 @@ export function MedicationPage({ setScreen }: { setScreen: SetScreen }) {
           </Card>
         </div>
       </div>
-    </DashboardLayout>
+    </>
   );
 }

@@ -1,12 +1,14 @@
+import { useNavigate } from "react-router";
 import {
-  Phone, Heart, ArrowRight, MessageCircle, Shield,
+  Phone, ArrowRight, MessageCircle, Shield,
 } from "lucide-react";
 import { Card, Badge, Btn, BrandLogo } from "@/components/common";
 import { BLUE, TEAL } from "@/constants/colors";
-import type { SetScreen } from "@/types";
+import { ROUTES } from "@/constants/routes";
 import { mockLandingFeatures, mockLandingStats } from "@/data/mock";
 
-export function LandingPage({ setScreen }: { setScreen: SetScreen }) {
+export function LandingPage() {
+  const navigate = useNavigate();
   const features = mockLandingFeatures;
 
   return (
@@ -19,10 +21,10 @@ export function LandingPage({ setScreen }: { setScreen: SetScreen }) {
             <span className="font-bold text-foreground" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>ThyroCare AI</span>
           </div>
           <div className="flex items-center gap-3">
-            <Btn variant="ghost" size="sm" onClick={() => setScreen("login")}>Sign In</Btn>
-            <Btn size="sm" onClick={() => setScreen("register")}>Get Started</Btn>
+            <Btn variant="ghost" size="sm" onClick={() => navigate(ROUTES.LOGIN)}>Sign In</Btn>
+            <Btn size="sm" onClick={() => navigate(ROUTES.REGISTER)}>Get Started</Btn>
             <button
-              onClick={() => setScreen("emergency")}
+              onClick={() => navigate(ROUTES.EMERGENCY)}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-red-50 text-red-600 text-sm font-semibold hover:bg-red-100 transition cursor-pointer"
             >
               <Phone className="w-3.5 h-3.5" /> Emergency
@@ -45,8 +47,8 @@ export function LandingPage({ setScreen }: { setScreen: SetScreen }) {
             ThyroCare AI is your intelligent companion for life after thyroidectomy — providing personalized guidance, medication support, dietary advice, and 24/7 AI chat for differentiated thyroid cancer survivors.
           </p>
           <div className="flex flex-wrap gap-3">
-            <Btn size="lg" onClick={() => setScreen("register")}>Start Your Journey <ArrowRight className="w-5 h-5" /></Btn>
-            <Btn variant="ghost" size="lg" onClick={() => setScreen("chat")}>Try AI Chat Free</Btn>
+            <Btn size="lg" onClick={() => navigate(ROUTES.REGISTER)}>Start Your Journey <ArrowRight className="w-5 h-5" /></Btn>
+            <Btn variant="ghost" size="lg" onClick={() => navigate(ROUTES.CHAT)}>Try AI Chat Free</Btn>
           </div>
           <div className="flex items-center gap-6 pt-2">
             {mockLandingStats.map(([val, label]) => (
@@ -112,10 +114,10 @@ export function LandingPage({ setScreen }: { setScreen: SetScreen }) {
           <h2 className="text-3xl font-bold mb-3" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>Begin Your Recovery Journey Today</h2>
           <p className="opacity-90 mb-6 max-w-md mx-auto">Join thousands of thyroid cancer survivors who trust ThyroCare AI for their daily healthcare support.</p>
           <div className="flex justify-center gap-3 flex-wrap">
-            <button onClick={() => setScreen("register")} className="px-7 py-3.5 bg-white rounded-xl font-bold text-blue-600 hover:bg-blue-50 transition cursor-pointer">
+            <button onClick={() => navigate(ROUTES.REGISTER)} className="px-7 py-3.5 bg-white rounded-xl font-bold text-blue-600 hover:bg-blue-50 transition cursor-pointer">
               Create Free Account
             </button>
-            <button onClick={() => setScreen("login")} className="px-7 py-3.5 bg-white/20 rounded-xl font-bold text-white border border-white/30 hover:bg-white/30 transition cursor-pointer">
+            <button onClick={() => navigate(ROUTES.LOGIN)} className="px-7 py-3.5 bg-white/20 rounded-xl font-bold text-white border border-white/30 hover:bg-white/30 transition cursor-pointer">
               Sign In
             </button>
           </div>

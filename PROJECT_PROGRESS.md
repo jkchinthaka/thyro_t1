@@ -13,7 +13,7 @@
 |-------|-------|--------|------|
 | 0 | Project discovery and safety | **Complete** | 2026-07-11 |
 | 1 | Frontend structural refactor | **Complete** | 2026-07-11 |
-| 2 | Routing and application shell | Not started | — |
+| 2 | Routing and application shell | **Complete** | 2026-07-11 |
 | 3–22 | Remaining roadmap | Not started | — |
 
 ---
@@ -50,9 +50,40 @@
 - `docs/phase-1-validation.md`
 - `docs/dependency-cleanup-recommendations.md`
 
+---
+
+## Phase 2 — Completion report
+
+### What was done
+
+1. Wrote `docs/phase-2-routing-plan.md` before routing code changes.
+2. Used existing `react-router@7.13.0` (`createBrowserRouter` + `RouterProvider`).
+3. Added centralized `ROUTES` path constants.
+4. Added temporary mock `AuthContext` (sessionStorage flag only — not real auth).
+5. Added `ProtectedRoute`, `RoleProtectedRoute`, `ScrollToTop`, `PageLoader`, `RouteErrorPage`.
+6. Nested Public / Auth / Dashboard layouts with `Outlet`.
+7. Lazy-loaded all pages; removed per-page `DashboardLayout` duplication.
+8. Replaced all `setScreen` navigation with URL navigation.
+9. Added Unauthorized + NotFound pages.
+10. Reduced `App.tsx` to providers + `RouterProvider` (~14 lines).
+11. Validated `npm run build` (PASS); main bundle ~255 kB (was ~655 kB).
+
+### Validation
+
+- Production build: **PASS**
+- Direct URLs / refresh / history: supported via SPA router
+- Authentication: **mock-only** (Phase 6 will replace)
+- Phase 3: **not started**
+
+### Artifacts
+
+- `docs/phase-2-routing-plan.md`
+- `docs/phase-2-routing-architecture.md`
+- `docs/phase-2-validation.md`
+
 ### Next phase
 
-Phase 2 — React Router, protected layouts, lazy routes. Do not start until approved.
+Phase 3 — tooling / lint / quality foundation. Do not start until approved.
 
 ---
 
@@ -62,3 +93,4 @@ Phase 2 — React Router, protected layouts, lazy routes. Do not start until app
 |------|--------|
 | 2026-07-11 | Phase 0 baseline established |
 | 2026-07-11 | Phase 1 frontend modularization complete |
+| 2026-07-11 | Phase 2 React Router + protected layouts complete |
