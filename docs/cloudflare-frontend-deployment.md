@@ -31,11 +31,11 @@ The Worker serves only the Vite `dist/` SPA. Authentication, profile, and medica
 
 Set in the Cloudflare build environment (not committed):
 
-| Variable            | Required when             | Notes                                                             |
-| ------------------- | ------------------------- | ----------------------------------------------------------------- |
+| Variable            | Required when      | Notes                                                         |
+| ------------------- | ------------------ | ------------------------------------------------------------- |
 | `VITE_API_BASE_URL` | yes for production | `https://thyro-t1.onrender.com/api/v1` (**Never localhost.**) |
-| `VITE_APP_NAME`     | recommended        | `ThyroCare AI`                                                  |
-| `VITE_APP_ENV`      | yes for production | `production`                                                    |
+| `VITE_APP_NAME`     | recommended        | `ThyroCare AI`                                                |
+| `VITE_APP_ENV`      | yes for production | `production`                                                  |
 
 Vite embeds these into the JS bundle at **build** time. Changing them requires a new build and deploy.
 
