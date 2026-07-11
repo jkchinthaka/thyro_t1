@@ -17,13 +17,16 @@ Educational patient-support prototype for differentiated thyroid cancer survivor
 - **Phase 4:** Complete (FastAPI backend foundation — health/infra only)
 - **Phase 5:** Complete (PyMongo Async models, repositories, indexes — no public CRUD)
 - **Phase 6:** Complete (secure auth: JWT access + HttpOnly refresh + CSRF + RBAC)
-- **Phase 7+:** Not started
+- **Phase 7:** Complete (patient self-profile GET/PATCH + Profile page integration)
+- **Phase 8+:** Not started
 
-Mock clinical UI data remains under `src/data/mock/` and is **not** live clinical data.
+Mock clinical UI data remains under `src/data/mock/` for medications, appointments, symptoms, chat, etc., and is **not** live clinical data.
 
 **Authentication** uses real backend endpoints. Access tokens live in memory only; refresh tokens are HttpOnly cookies. Page reload restores the session via refresh.
 
-See [`docs/authentication-architecture.md`](docs/authentication-architecture.md) · [`docs/phase-6-validation.md`](docs/phase-6-validation.md) · [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
+**Patient profile** loads and saves via `/api/v1/profiles/me` (support metadata only — not a medical record).
+
+See [`docs/patient-profile-architecture.md`](docs/patient-profile-architecture.md) · [`docs/phase-7-validation.md`](docs/phase-7-validation.md) · [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
 
 Accessibility improvements move toward WCAG 2.1 AA practices; formal certification has not been performed. See [`docs/accessibility-improvements.md`](docs/accessibility-improvements.md).
 
@@ -165,11 +168,12 @@ src/
 2. Quality / accessibility foundation ← done (Phase 3)
 3. FastAPI backend foundation ← done (Phase 4)
 4. MongoDB models & repositories ← done (Phase 5)
-5. Secure authentication & RBAC ← **done (Phase 6)**
-6. Patient profiles + clinical support modules (Phase 7+)
-7. Governed medical knowledge + safe RAG chatbot
-8. Admin / medical expert workflows
-9. Tests, security, Docker Compose, deployment docs
+5. Secure authentication & RBAC ← done (Phase 6)
+6. Patient self-profile management ← **done (Phase 7)**
+7. Clinical support modules (medications, appointments, symptoms) (Phase 8+)
+8. Governed medical knowledge + safe RAG chatbot
+9. Admin / medical expert workflows
+10. Tests, security, Docker Compose, deployment docs
 
 See `PROJECT_PROGRESS.md` for phase tracking.
 

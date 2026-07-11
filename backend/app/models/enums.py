@@ -83,3 +83,38 @@ class AssessmentSource(StrEnum):
     USER_FORM = "user_form"
     RULE_ENGINE = "rule_engine"
     SYSTEM = "system"
+
+
+class AgeRange(StrEnum):
+    UNDER_18 = "under_18"
+    AGE_18_29 = "age_18_29"
+    AGE_30_39 = "age_30_39"
+    AGE_40_49 = "age_40_49"
+    AGE_50_59 = "age_50_59"
+    AGE_60_69 = "age_60_69"
+    AGE_70_PLUS = "age_70_plus"
+    PREFER_NOT_TO_SAY = "prefer_not_to_say"
+
+
+class PreferredLanguage(StrEnum):
+    ENGLISH = "english"
+    SINHALA = "sinhala"
+    TAMIL = "tamil"
+
+
+class RAITreatmentStatus(StrEnum):
+    NOT_PLANNED = "not_planned"
+    PLANNED = "planned"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    NOT_APPLICABLE = "not_applicable"
+    UNKNOWN = "unknown"
+
+
+class TreatmentStage(StrEnum):
+    POST_SURGERY = "post_surgery"
+    PRE_RAI = "pre_rai"
+    POST_RAI = "post_rai"
+    FOLLOW_UP = "follow_up"
+    LONG_TERM_SURVIVORSHIP = "long_term_survivorship"
+    UNKNOWN = "unknown"

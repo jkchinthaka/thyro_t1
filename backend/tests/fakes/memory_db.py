@@ -104,6 +104,10 @@ class MemoryCollection:
                 if "$set" in update:
                     doc.update(update["$set"])
                     modified = 1
+                if "$inc" in update:
+                    for key, amount in update["$inc"].items():
+                        doc[key] = int(doc.get(key, 0)) + int(amount)
+                    modified = 1
                 break
 
         class _Result:

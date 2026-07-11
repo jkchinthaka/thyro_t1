@@ -24,6 +24,7 @@ class AuditActions:
     LOGOUT_COMPLETED = "LOGOUT_COMPLETED"
     TOKEN_FAMILY_REVOKED = "TOKEN_FAMILY_REVOKED"
     AUTHORIZATION_DENIED = "AUTHORIZATION_DENIED"
+    PROFILE_UPDATED = "PROFILE_UPDATED"
 
 
 def email_fingerprint(email_normalized: str) -> str:

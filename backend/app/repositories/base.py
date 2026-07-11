@@ -190,7 +190,24 @@ class BaseRepository(Generic[T]):
         }
         if deleted_by is not None:
             updates["deleted_by"] = to_object_id(deleted_by)
-        return await self.update_one(document_id, updates, include_deleted=False)
+        oid = to_object_id(document_id)
+        try:
+            payload = dict(updates)
+            if "updated_at" in self.model_type.model_fields:
+                payload["updated_at"] = utc_now()
+            filters = self._merge_filters({"_id": oid}, include_deleted=False)
+            result: UpdateResult = await self._collection.update_one(
+                filters,
+                {"$set": payload},
+            )
+            if result.matched_count == 0:
+                raise RepositoryNotFoundError("Document not found")
+            found = await self.get_by_id(oid, include_deleted=True)
+            if found is None:
+                raise RepositoryNotFoundError("Document not found")
+            return found
+        except PyMongoError as exc:
+            raise map_pymongo_error(exc) from exc
 
     async def restore(self, document_id: ObjectId | str) -> T:
         if not self.supports_soft_delete:

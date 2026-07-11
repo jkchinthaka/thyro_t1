@@ -1,44 +1,146 @@
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Camera, Edit2 } from "lucide-react";
-import { Card, Badge, Btn, Input } from "@/components/common";
+import { Card, Badge, Btn, Input, LoadingState, ErrorState } from "@/components/common";
 import { BLUE, TEAL } from "@/constants/colors";
-import { mockUser } from "@/data/mock";
-import { profilePersonalSchema, type ProfilePersonalValues } from "@/schemas/profileSchemas";
+import { useAuth } from "@/context/AuthContext";
+import { profileFormSchema, type ProfileFormSchemaValues } from "@/schemas/profileSchemas";
+import { getMyProfile, updateMyProfile } from "@/services/profileService";
 import { useToast } from "@/hooks/useToast";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import type { AppError } from "@/types/api";
+import {
+  AGE_RANGE_OPTIONS,
+  LANGUAGE_OPTIONS,
+  RAI_OPTIONS,
+  TREATMENT_STAGE_OPTIONS,
+  type AgeRange,
+  type PreferredLanguage,
+  type RAITreatmentStatus,
+  type TreatmentStage,
+  type PatientProfileResponse,
+  type ProfileFormValues,
+} from "@/types/profile";
+
+function toFormValues(data: PatientProfileResponse): ProfileFormValues {
+  const p = data.profile;
+  return {
+    age_range: p.age_range ?? "",
+    preferred_language: p.preferred_language ?? "",
+    surgery_date: p.surgery_date ?? "",
+    rai_treatment_status: p.rai_treatment_status ?? "",
+    treatment_stage: p.treatment_stage ?? "",
+    emergency_contact_name: p.emergency_contact_name ?? "",
+    emergency_contact_phone: p.emergency_contact_phone ?? "",
+    current_medication_summary: p.current_medication_summary ?? "",
+  };
+}
+
+function emptyToNull(value: string | undefined): string | null {
+  if (value === undefined || value.trim() === "") return null;
+  return value.trim();
+}
+
+function labelFor(
+  options: { value: string; label: string }[],
+  value: string | null | undefined,
+): string {
+  if (!value) return "—";
+  return options.find((o) => o.value === value)?.label ?? value;
+}
 
 export function ProfilePage() {
   useDocumentTitle("Profile");
-  const { success } = useToast();
+  const { user: authUser } = useAuth();
+  const { success, error: showError } = useToast();
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
   const [appointmentReminders, setAppointmentReminders] = useState(true);
   const [weeklyReports, setWeeklyReports] = useState(true);
   const [tab, setTab] = useState<"personal" | "medical" | "settings">("personal");
   const [editing, setEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [conflict, setConflict] = useState(false);
+  const [data, setData] = useState<PatientProfileResponse | null>(null);
 
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    formState: { errors, isDirty },
     reset,
-  } = useForm<ProfilePersonalValues>({
-    resolver: zodResolver(profilePersonalSchema),
+  } = useForm<ProfileFormSchemaValues>({
+    resolver: zodResolver(profileFormSchema),
     defaultValues: {
-      fullName: mockUser.name,
-      email: mockUser.email,
-      phone: mockUser.phone,
-      location: mockUser.location,
-      emergencyContact: mockUser.emergencyContact,
+      age_range: "",
+      preferred_language: "",
+      surgery_date: "",
+      rai_treatment_status: "",
+      treatment_stage: "",
+      emergency_contact_name: "",
+      emergency_contact_phone: "",
+      current_medication_summary: "",
     },
   });
 
-  const onSave = (_values: ProfilePersonalValues) => {
-    void _values;
-    success("Profile saved");
-    setEditing(false);
+  const loadProfile = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    setConflict(false);
+    try {
+      const result = await getMyProfile();
+      setData(result);
+      reset(toFormValues(result));
+    } catch (err) {
+      const appErr = err as AppError;
+      setLoadError(appErr?.message || "Unable to load profile.");
+    } finally {
+      setLoading(false);
+    }
+  }, [reset]);
+
+  useEffect(() => {
+    void loadProfile();
+  }, [loadProfile]);
+
+  const onSave = async (values: ProfileFormSchemaValues) => {
+    if (!data || saving) return;
+    setSaving(true);
+    setConflict(false);
+    try {
+      const result = await updateMyProfile({
+        expected_version: data.profile.version,
+        age_range: (emptyToNull(values.age_range ?? "") as AgeRange | null) ?? null,
+        preferred_language:
+          (emptyToNull(values.preferred_language ?? "") as PreferredLanguage | null) ?? null,
+        surgery_date: emptyToNull(values.surgery_date),
+        rai_treatment_status:
+          (emptyToNull(values.rai_treatment_status ?? "") as RAITreatmentStatus | null) ?? null,
+        treatment_stage:
+          (emptyToNull(values.treatment_stage ?? "") as TreatmentStage | null) ?? null,
+        emergency_contact_name: emptyToNull(values.emergency_contact_name),
+        emergency_contact_phone: emptyToNull(values.emergency_contact_phone),
+        current_medication_summary: emptyToNull(values.current_medication_summary),
+      });
+      setData(result);
+      reset(toFormValues(result));
+      setEditing(false);
+      success("Profile saved");
+    } catch (err) {
+      const appErr = err as AppError;
+      if (appErr?.status === 409) {
+        setConflict(true);
+        showError(
+          "Your profile was updated elsewhere. Reload the latest profile before saving again.",
+        );
+      } else {
+        showError(appErr?.message || "Unable to save profile.");
+      }
+    } finally {
+      setSaving(false);
+    }
   };
 
   const settings = [
@@ -68,21 +170,81 @@ export function ProfilePage() {
     },
   ];
 
+  if (loading) {
+    return <LoadingState message="Loading profile…" />;
+  }
+
+  if (loadError || !data) {
+    return (
+      <ErrorState
+        title="Unable to load profile"
+        message={loadError || "Something went wrong."}
+        onRetry={() => void loadProfile()}
+      />
+    );
+  }
+
+  const account = data.account;
+  const profile = data.profile;
+  const displayName = account.full_name || authUser?.full_name || "Patient";
+
+  const personalView = [
+    { label: "Full Name", value: account.full_name },
+    { label: "Email", value: account.email },
+    { label: "Age range", value: labelFor(AGE_RANGE_OPTIONS, profile.age_range) },
+    { label: "Language", value: labelFor(LANGUAGE_OPTIONS, profile.preferred_language) },
+    { label: "Emergency contact", value: profile.emergency_contact_name || "—" },
+    { label: "Emergency phone", value: profile.emergency_contact_phone || "—" },
+  ];
+
+  const medicalView = [
+    { label: "Surgery date", value: profile.surgery_date || "—" },
+    {
+      label: "RAI treatment",
+      value: labelFor(RAI_OPTIONS, profile.rai_treatment_status),
+    },
+    {
+      label: "Treatment stage",
+      value: labelFor(TREATMENT_STAGE_OPTIONS, profile.treatment_stage),
+    },
+    {
+      label: "Medication summary",
+      value: profile.current_medication_summary || "—",
+    },
+    {
+      label: "Consent",
+      value: profile.consent_accepted ? "Accepted" : "Not recorded",
+    },
+    {
+      label: "Medical disclaimer",
+      value: profile.disclaimer_accepted ? "Acknowledged" : "Not recorded",
+    },
+  ];
+
   return (
     <>
       <div className="max-w-3xl">
         <Card className="mb-5">
           <div className="flex items-center gap-5 flex-wrap">
             <div className="relative">
-              <img
-                src={mockUser.avatarUrl}
-                alt={mockUser.name}
-                className="w-20 h-20 rounded-2xl object-cover"
-              />
+              <div
+                className="w-20 h-20 rounded-2xl flex items-center justify-center text-white font-bold text-xl"
+                style={{ background: `linear-gradient(135deg, ${BLUE}, ${TEAL})` }}
+                aria-hidden="true"
+              >
+                {displayName
+                  .split(" ")
+                  .map((w) => w[0])
+                  .join("")
+                  .toUpperCase()
+                  .slice(0, 2)}
+              </div>
               <button
                 type="button"
                 className="absolute -bottom-1 -right-1 w-7 h-7 bg-primary rounded-full flex items-center justify-center cursor-pointer shadow focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                 aria-label="Change profile photo"
+                disabled
+                title="Photo upload is not available yet"
               >
                 <Camera className="w-3.5 h-3.5 text-white" aria-hidden="true" />
               </button>
@@ -92,15 +254,15 @@ export function ProfilePage() {
                 className="text-2xl font-bold text-foreground"
                 style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
               >
-                {mockUser.name}
+                {displayName}
               </h2>
-              <p className="text-muted-foreground text-sm break-all">{mockUser.email}</p>
+              <p className="text-muted-foreground text-sm break-all">{account.email}</p>
               <div className="flex gap-2 mt-2 flex-wrap">
-                {mockUser.badges.map((b) => (
-                  <Badge key={b.label} color={b.color}>
-                    {b.label}
-                  </Badge>
-                ))}
+                <Badge color="blue">{account.role}</Badge>
+                <Badge color="teal">{profile.profile_completion_percentage}% complete</Badge>
+                {profile.rai_treatment_status ? (
+                  <Badge color="green">{labelFor(RAI_OPTIONS, profile.rai_treatment_status)}</Badge>
+                ) : null}
               </div>
             </div>
             <Btn
@@ -110,13 +272,34 @@ export function ProfilePage() {
               onClick={() => {
                 setTab("personal");
                 setEditing(true);
-                reset();
+                setConflict(false);
+                reset(toFormValues(data));
               }}
             >
               <Edit2 className="w-4 h-4" aria-hidden="true" /> Edit Profile
             </Btn>
           </div>
         </Card>
+
+        {conflict ? (
+          <Card className="mb-5 border-amber-200 bg-amber-50">
+            <p className="text-sm text-foreground" role="alert">
+              Your profile was updated elsewhere. Reload the latest profile before saving again.
+            </p>
+            <Btn
+              className="mt-3"
+              variant="ghost"
+              size="sm"
+              type="button"
+              onClick={() => {
+                setEditing(false);
+                void loadProfile();
+              }}
+            >
+              Reload Profile
+            </Btn>
+          </Card>
+        ) : null}
 
         <div
           className="flex gap-2 mb-5 overflow-x-auto"
@@ -145,42 +328,77 @@ export function ProfilePage() {
             {editing ? (
               <form className="space-y-4" onSubmit={handleSubmit(onSave)} noValidate>
                 <div className="grid sm:grid-cols-2 gap-4">
-                  <Input
-                    label="Full Name"
-                    error={errors.fullName?.message}
-                    {...register("fullName")}
-                  />
-                  <Input
-                    label="Email"
-                    type="email"
-                    error={errors.email?.message}
-                    {...register("email")}
-                  />
-                  <Input label="Phone" error={errors.phone?.message} {...register("phone")} />
-                  <Input
-                    label="Location"
-                    error={errors.location?.message}
-                    {...register("location")}
-                  />
-                  <div className="sm:col-span-2">
-                    <Input
-                      label="Emergency Contact"
-                      error={errors.emergencyContact?.message}
-                      {...register("emergencyContact")}
-                    />
+                  <Input label="Full Name" value={account.full_name} disabled readOnly />
+                  <Input label="Email" type="email" value={account.email} disabled readOnly />
+                  <div className="space-y-1.5">
+                    <label
+                      htmlFor="age_range"
+                      className="block text-sm font-semibold text-foreground"
+                    >
+                      Age range
+                    </label>
+                    <select
+                      id="age_range"
+                      className="w-full rounded-xl border border-border bg-input-background py-3 px-4 text-sm"
+                      {...register("age_range")}
+                    >
+                      <option value="">Select…</option>
+                      {AGE_RANGE_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                    {errors.age_range ? (
+                      <p className="text-xs text-red-600" role="alert">
+                        {errors.age_range.message}
+                      </p>
+                    ) : null}
                   </div>
+                  <div className="space-y-1.5">
+                    <label
+                      htmlFor="preferred_language"
+                      className="block text-sm font-semibold text-foreground"
+                    >
+                      Language
+                    </label>
+                    <select
+                      id="preferred_language"
+                      className="w-full rounded-xl border border-border bg-input-background py-3 px-4 text-sm"
+                      {...register("preferred_language")}
+                    >
+                      <option value="">Select…</option>
+                      {LANGUAGE_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <Input
+                    label="Emergency contact name"
+                    error={errors.emergency_contact_name?.message}
+                    {...register("emergency_contact_name")}
+                  />
+                  <Input
+                    label="Emergency contact phone"
+                    error={errors.emergency_contact_phone?.message}
+                    {...register("emergency_contact_phone")}
+                  />
                 </div>
                 <div className="flex gap-2 flex-wrap">
-                  <Btn type="submit" size="sm">
-                    Save changes
+                  <Btn type="submit" size="sm" disabled={saving || !isDirty} aria-busy={saving}>
+                    {saving ? "Saving…" : "Save changes"}
                   </Btn>
                   <Btn
                     type="button"
                     variant="ghost"
                     size="sm"
+                    disabled={saving}
                     onClick={() => {
                       setEditing(false);
-                      reset();
+                      setConflict(false);
+                      reset(toFormValues(data));
                     }}
                   >
                     Cancel
@@ -189,7 +407,7 @@ export function ProfilePage() {
               </form>
             ) : (
               <div className="grid sm:grid-cols-2 gap-4">
-                {mockUser.personalFields.map((f) => (
+                {personalView.map((f) => (
                   <div key={f.label}>
                     <div className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
                       {f.label}
@@ -206,18 +424,111 @@ export function ProfilePage() {
 
         {tab === "medical" && (
           <Card role="tabpanel">
-            <div className="grid sm:grid-cols-2 gap-4">
-              {mockUser.medicalFields.map((f) => (
-                <div key={f.label}>
-                  <div className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
-                    {f.label}
+            {editing ? (
+              <form className="space-y-4" onSubmit={handleSubmit(onSave)} noValidate>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <Input
+                    label="Surgery date"
+                    type="date"
+                    error={errors.surgery_date?.message}
+                    {...register("surgery_date")}
+                  />
+                  <div className="space-y-1.5">
+                    <label
+                      htmlFor="rai_treatment_status"
+                      className="block text-sm font-semibold text-foreground"
+                    >
+                      RAI treatment
+                    </label>
+                    <select
+                      id="rai_treatment_status"
+                      className="w-full rounded-xl border border-border bg-input-background py-3 px-4 text-sm"
+                      {...register("rai_treatment_status")}
+                    >
+                      <option value="">Select…</option>
+                      {RAI_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
                   </div>
-                  <div className="bg-muted rounded-xl px-4 py-3 text-sm text-foreground font-medium">
-                    {f.value}
+                  <div className="space-y-1.5">
+                    <label
+                      htmlFor="treatment_stage"
+                      className="block text-sm font-semibold text-foreground"
+                    >
+                      Treatment stage
+                    </label>
+                    <select
+                      id="treatment_stage"
+                      className="w-full rounded-xl border border-border bg-input-background py-3 px-4 text-sm"
+                      {...register("treatment_stage")}
+                    >
+                      <option value="">Select…</option>
+                      {TREATMENT_STAGE_OPTIONS.map((o) => (
+                        <option key={o.value} value={o.value}>
+                          {o.label}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div className="sm:col-span-2">
+                    <Input
+                      label="Current medication summary"
+                      error={errors.current_medication_summary?.message}
+                      {...register("current_medication_summary")}
+                    />
+                  </div>
+                  <div>
+                    <div className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+                      Consent
+                    </div>
+                    <div className="bg-muted rounded-xl px-4 py-3 text-sm">
+                      {profile.consent_accepted ? "Accepted" : "Not recorded"} (read-only)
+                    </div>
+                  </div>
+                  <div>
+                    <div className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+                      Disclaimer
+                    </div>
+                    <div className="bg-muted rounded-xl px-4 py-3 text-sm">
+                      {profile.disclaimer_accepted ? "Acknowledged" : "Not recorded"} (read-only)
+                    </div>
                   </div>
                 </div>
-              ))}
-            </div>
+                <div className="flex gap-2 flex-wrap">
+                  <Btn type="submit" size="sm" disabled={saving || !isDirty} aria-busy={saving}>
+                    {saving ? "Saving…" : "Save changes"}
+                  </Btn>
+                  <Btn
+                    type="button"
+                    variant="ghost"
+                    size="sm"
+                    disabled={saving}
+                    onClick={() => {
+                      setEditing(false);
+                      reset(toFormValues(data));
+                    }}
+                  >
+                    Cancel
+                  </Btn>
+                </div>
+              </form>
+            ) : (
+              <div className="grid sm:grid-cols-2 gap-4">
+                {medicalView.map((f) => (
+                  <div key={f.label}>
+                    <div className="block text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-1">
+                      {f.label}
+                    </div>
+                    <div className="bg-muted rounded-xl px-4 py-3 text-sm text-foreground font-medium">
+                      {f.value}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
           </Card>
         )}
 
@@ -252,7 +563,13 @@ export function ProfilePage() {
               </div>
             ))}
             <div className="pt-2">
-              <Btn variant="danger" size="sm" type="button">
+              <Btn
+                variant="danger"
+                size="sm"
+                type="button"
+                disabled
+                title="Coming in a later phase"
+              >
                 Delete Account
               </Btn>
             </div>

@@ -33,8 +33,9 @@ ThyroCare AI API — patient-support research system for post-thyroidectomy thyr
 **Medical disclaimer:** This system provides informational support only. It does **not** replace
 professional medical advice, diagnosis, or emergency care.
 
-**Phase 4–6 scope:** infrastructure, persistence foundation, and secure authentication.
-Patient clinical CRUD and AI HTTP endpoints are **not** implemented yet.
+**Phase 4–7 scope:** infrastructure, persistence, authentication, and patient self-profile.
+Patient clinical CRUD (medications, appointments, symptoms) and AI HTTP endpoints
+are **not** implemented yet.
 
 Authentication:
 - Bearer JWT access tokens (short-lived, memory-only on the client)
