@@ -50,6 +50,15 @@ class MemoryCollection:
                 if "$gt" in expected:
                     if actual is None or not (actual > expected["$gt"]):
                         return False
+                if "$gte" in expected:
+                    if actual is None or not (actual >= expected["$gte"]):
+                        return False
+                if "$lte" in expected:
+                    if actual is None or not (actual <= expected["$lte"]):
+                        return False
+                if "$lt" in expected:
+                    if actual is None or not (actual < expected["$lt"]):
+                        return False
                 continue
             if actual != expected:
                 return False
@@ -88,6 +97,15 @@ class MemoryCollection:
                     from pymongo.errors import DuplicateKeyError
 
                     raise DuplicateKeyError("E11000 duplicate")
+        if "medication_id" in payload and "scheduled_for" in payload:
+            for existing in self.docs:
+                if (
+                    existing.get("medication_id") == payload["medication_id"]
+                    and existing.get("scheduled_for") == payload["scheduled_for"]
+                ):
+                    from pymongo.errors import DuplicateKeyError
+
+                    raise DuplicateKeyError("E11000 duplicate log occurrence")
         self.docs.append(payload)
 
         class _Result:

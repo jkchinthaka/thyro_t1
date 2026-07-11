@@ -19,35 +19,37 @@
 | 5     | MongoDB models & repository foundation | **Complete** | 2026-07-11 |
 | 6     | Secure authentication & RBAC           | **Complete** | 2026-07-11 |
 | 7     | Patient profile management             | **Complete** | 2026-07-11 |
-| 8–22  | Remaining roadmap                      | Not started  | —          |
-
----
-
-## Phase 6 — Completion report
-
-- Secure authentication; commit `10c102f`.
+| 8     | Medication management & adherence      | **Complete** | 2026-07-11 |
+| 9–22  | Remaining roadmap                      | Not started  | —          |
 
 ---
 
 ## Phase 7 — Completion report
 
+- Patient self-profile; commit `f498103` (and predecessors).
+
+---
+
+## Phase 8 — Completion report
+
 ### What was done
 
-1. Planned in `docs/phase-7-profile-plan.md`.
-2. Added profile enums, `version` concurrency, schemas, phone normalization, completion service.
-3. Implemented `GET`/`PATCH /api/v1/profiles/me` with PATIENT ownership.
-4. Wired Profile page to real API; preserved layout; 409 conflict UX.
-5. Documented architecture, data dictionary, and validation.
+1. Planned in `docs/phase-8-medication-plan.md`.
+2. Medication/log models, enums, schemas, indexes, timezone utilities.
+3. Schedule and adherence services (SKIPPED excluded from denominator).
+4. Repositories + medication service + PATIENT API routes.
+5. Audit events with field names only.
+6. Frontend Medication page + Dashboard adherence/med card; mock medications removed.
+7. Documented architecture, data dictionary, adherence, validation.
 
 ### Validation
 
-- Backend ruff / pytest: **PASS** (75 unit tests, 1 skipped)
-- Frontend typecheck / lint / format / build: **PASS**
-- Phase 8: **not started**
+- See `docs/phase-8-validation.md` (filled after final suite run).
+- Phase 9: **not started**
 
 ### Next phase
 
-Phase 8 — medications (do not start until approved).
+Phase 9 — appointments (do not start until approved).
 
 ---
 
@@ -57,3 +59,4 @@ Phase 8 — medications (do not start until approved).
 | ---------- | ------------------------------------------- |
 | 2026-07-11 | Phase 0–6 complete                          |
 | 2026-07-11 | Phase 7 patient profile management complete |
+| 2026-07-11 | Phase 8 medication management complete      |

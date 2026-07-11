@@ -108,6 +108,12 @@ INDEX_SPECS: tuple[IndexSpec, ...] = (
         [("user_id", ASCENDING), ("created_at", DESCENDING)],
         rationale="Recent medications for owner",
     ),
+    IndexSpec(
+        CollectionName.MEDICATIONS.value,
+        "ix_medications_user_start",
+        [("user_id", ASCENDING), ("start_date", ASCENDING)],
+        rationale="Owner medications by start date",
+    ),
     # medication_logs
     IndexSpec(
         CollectionName.MEDICATION_LOGS.value,
@@ -117,15 +123,22 @@ INDEX_SPECS: tuple[IndexSpec, ...] = (
     ),
     IndexSpec(
         CollectionName.MEDICATION_LOGS.value,
-        "ix_medication_logs_med_scheduled",
+        "ux_medication_logs_med_scheduled",
         [("medication_id", ASCENDING), ("scheduled_for", ASCENDING)],
-        rationale="Per-medication adherence timeline",
+        unique=True,
+        rationale="One log per medication occurrence (AS_NEEDED uses explicit scheduled_for)",
     ),
     IndexSpec(
         CollectionName.MEDICATION_LOGS.value,
         "ix_medication_logs_user_status",
         [("user_id", ASCENDING), ("status", ASCENDING)],
         rationale="Filter logs by adherence status",
+    ),
+    IndexSpec(
+        CollectionName.MEDICATION_LOGS.value,
+        "ix_medication_logs_user_med_recorded",
+        [("user_id", ASCENDING), ("medication_id", ASCENDING), ("recorded_at", DESCENDING)],
+        rationale="Owner medication log history by recorded time",
     ),
     # appointments
     IndexSpec(

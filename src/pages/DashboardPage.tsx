@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { useNavigate } from "react-router";
 import { CheckCircle, Clock } from "lucide-react";
 import {
@@ -19,18 +20,58 @@ import {
   mockDashboardReminders,
 } from "@/data/mock";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
+import { useMedications } from "@/hooks/useMedications";
 
 export function DashboardPage() {
   useDocumentTitle("Dashboard");
   const navigate = useNavigate();
-  const cards = mockDashboardCards;
+  const { todaySchedule, adherence, loading: medLoading } = useMedications();
   const weekData = mockDashboardWeekData;
+
+  const quickStats = useMemo(() => {
+    return mockDashboardQuickStats.map((s) => {
+      if (s.label !== "Medication Adherence") return s;
+      if (medLoading) return { ...s, value: "…" };
+      const pct = adherence?.adherence_percentage;
+      return {
+        ...s,
+        value: pct === null || pct === undefined ? "—" : `${Math.round(pct)}%`,
+      };
+    });
+  }, [adherence, medLoading]);
+
+  const cards = useMemo(() => {
+    const pending = todaySchedule.filter((i) => !i.log_status).length;
+    const taken = todaySchedule.filter((i) => i.log_status === "taken").length;
+    const next = todaySchedule.find((i) => !i.log_status);
+    return mockDashboardCards.map((c) => {
+      if (c.id !== "medication") return c;
+      if (medLoading) {
+        return { ...c, value: "Loading…", sub: "Today's schedule" };
+      }
+      if (todaySchedule.length === 0) {
+        return { ...c, value: "No doses today", sub: "Open Medications" };
+      }
+      if (next) {
+        return {
+          ...c,
+          value: `${next.medication_name}`,
+          sub: `${next.scheduled_local_time} · ${pending} pending`,
+        };
+      }
+      return {
+        ...c,
+        value: `${taken} of ${todaySchedule.length} taken`,
+        sub: "Today's schedule complete",
+      };
+    });
+  }, [todaySchedule, medLoading]);
 
   return (
     <>
       {/* Quick stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        {mockDashboardQuickStats.map((s) => {
+        {quickStats.map((s) => {
           const Icon = s.icon;
           return (
             <Card key={s.label} className="flex items-start gap-3">

@@ -30,6 +30,16 @@ class MedicationLogStatus(StrEnum):
     SKIPPED = "skipped"
 
 
+class MedicationFrequency(StrEnum):
+    ONCE_DAILY = "once_daily"
+    TWICE_DAILY = "twice_daily"
+    THREE_TIMES_DAILY = "three_times_daily"
+    FOUR_TIMES_DAILY = "four_times_daily"
+    WEEKLY = "weekly"
+    AS_NEEDED = "as_needed"
+    CUSTOM = "custom"
+
+
 class AppointmentStatus(StrEnum):
     UPCOMING = "upcoming"
     COMPLETED = "completed"

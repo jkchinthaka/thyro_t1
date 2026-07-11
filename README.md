@@ -18,15 +18,18 @@ Educational patient-support prototype for differentiated thyroid cancer survivor
 - **Phase 5:** Complete (PyMongo Async models, repositories, indexes — no public CRUD)
 - **Phase 6:** Complete (secure auth: JWT access + HttpOnly refresh + CSRF + RBAC)
 - **Phase 7:** Complete (patient self-profile GET/PATCH + Profile page integration)
-- **Phase 8+:** Not started
+- **Phase 8:** Complete (medication CRUD, dose logs, schedule, adherence + Medication page)
+- **Phase 9+:** Not started
 
-Mock clinical UI data remains under `src/data/mock/` for medications, appointments, symptoms, chat, etc., and is **not** live clinical data.
+Mock clinical UI data remains under `src/data/mock/` for appointments, symptoms, diet, chat, etc., and is **not** live clinical data. Medication tracking uses the real API.
 
 **Authentication** uses real backend endpoints. Access tokens live in memory only; refresh tokens are HttpOnly cookies. Page reload restores the session via refresh.
 
 **Patient profile** loads and saves via `/api/v1/profiles/me` (support metadata only — not a medical record).
 
-See [`docs/patient-profile-architecture.md`](docs/patient-profile-architecture.md) · [`docs/phase-7-validation.md`](docs/phase-7-validation.md) · [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
+**Medications** use `/api/v1/medications` for CRUD, logs, schedule, and adherence (tracking only — not prescribing).
+
+See [`docs/medication-architecture.md`](docs/medication-architecture.md) · [`docs/phase-8-validation.md`](docs/phase-8-validation.md) · [`PROJECT_PROGRESS.md`](PROJECT_PROGRESS.md)
 
 Accessibility improvements move toward WCAG 2.1 AA practices; formal certification has not been performed. See [`docs/accessibility-improvements.md`](docs/accessibility-improvements.md).
 
@@ -85,7 +88,7 @@ See [`backend/README.md`](backend/README.md).
 
 **Local auth notes:** Frontend at `http://localhost:5173` must match `ALLOWED_ORIGINS`. Access tokens stay in memory; refresh uses an HttpOnly cookie. Production requires `COOKIE_SECURE=true` and a strong `JWT_SECRET_KEY` (never commit secrets).
 
-**Still deferred:** password-reset email, email verification, MFA, patient profile CRUD, medications/appointments/symptoms APIs, chatbot/AI, admin management UI.
+**Still deferred:** password-reset email, email verification, MFA, appointments/symptoms APIs, chatbot/AI, admin management UI, medication reminders/SMS.
 
 ### Developer scripts (frontend)
 
@@ -170,10 +173,11 @@ src/
 4. MongoDB models & repositories ← done (Phase 5)
 5. Secure authentication & RBAC ← done (Phase 6)
 6. Patient self-profile management ← **done (Phase 7)**
-7. Clinical support modules (medications, appointments, symptoms) (Phase 8+)
-8. Governed medical knowledge + safe RAG chatbot
-9. Admin / medical expert workflows
-10. Tests, security, Docker Compose, deployment docs
+7. Medication management & adherence ← **done (Phase 8)**
+8. Appointments / symptoms (Phase 9+)
+9. Governed medical knowledge + safe RAG chatbot
+10. Admin / medical expert workflows
+11. Tests, security, Docker Compose, deployment docs
 
 See `PROJECT_PROGRESS.md` for phase tracking.
 

@@ -33,8 +33,14 @@ ThyroCare AI API — patient-support research system for post-thyroidectomy thyr
 **Medical disclaimer:** This system provides informational support only. It does **not** replace
 professional medical advice, diagnosis, or emergency care.
 
-**Phase 4–7 scope:** infrastructure, persistence, authentication, and patient self-profile.
-Patient clinical CRUD (medications, appointments, symptoms) and AI HTTP endpoints
+**Medication tracking:** Medication endpoints are for patient self-tracking only. They do not
+prescribe medication, recommend dosage, interpret missed doses clinically, or guarantee outcomes.
+Follow your healthcare provider’s instructions. Do not change or stop medication without
+professional advice. Soft deletion and optimistic concurrency (`expected_version`) apply.
+Patients may access only their own records; foreign IDs return 404.
+
+**Phase 4–8 scope:** infrastructure, persistence, authentication, patient profile,
+and medication tracking. Appointment/symptom CRUD and AI HTTP endpoints
 are **not** implemented yet.
 
 Authentication:

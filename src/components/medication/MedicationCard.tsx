@@ -1,37 +1,44 @@
-import { CheckCircle, Plus } from "lucide-react";
+import { CheckCircle, Plus, X, AlertCircle } from "lucide-react";
 import { Card, Badge } from "@/components/common";
-import { TEAL } from "@/constants/colors";
-import type { ComponentType } from "react";
+import { BLUE, TEAL } from "@/constants/colors";
+import type { MedicationLogStatus } from "@/types/medication";
 
 export function MedicationCard({
-  med,
-  isTaken,
-  onToggle,
+  name,
+  dose,
+  time,
+  instruction,
+  logStatus,
+  busy,
+  onTaken,
+  onMissed,
+  onSkipped,
 }: {
-  med: {
-    id: string;
-    name: string;
-    dose: string;
-    time: string;
-    instruction: string;
-    color: string;
-    icon: ComponentType<{ className?: string; style?: React.CSSProperties }>;
-  };
-  isTaken: boolean;
-  onToggle: () => void;
+  name: string;
+  dose: string;
+  time: string;
+  instruction?: string | null;
+  logStatus: MedicationLogStatus | null;
+  busy?: boolean;
+  onTaken: () => void;
+  onMissed: () => void;
+  onSkipped: () => void;
 }) {
-  const Icon = med.icon;
+  const isTaken = logStatus === "taken";
+  const isMissed = logStatus === "missed";
+  const isSkipped = logStatus === "skipped";
+
   return (
     <Card
-      className={`border-l-4 transition-all ${isTaken ? "opacity-70" : ""}`}
-      style={{ borderLeftColor: med.color }}
+      className={`border-l-4 transition-all ${isTaken || isSkipped ? "opacity-70" : ""}`}
+      style={{ borderLeftColor: BLUE }}
     >
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-4 flex-wrap">
         <div
           className="w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0"
-          style={{ background: `${med.color}18` }}
+          style={{ background: `${BLUE}18` }}
         >
-          <Icon className="w-6 h-6" style={{ color: med.color }} />
+          <CheckCircle className="w-6 h-6" style={{ color: BLUE }} aria-hidden="true" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -39,37 +46,59 @@ export function MedicationCard({
               className="font-bold text-foreground"
               style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
             >
-              {med.name}
+              {name}
             </h3>
-            <Badge color={isTaken ? "green" : "blue"}>{isTaken ? "Taken" : "Pending"}</Badge>
+            <Badge color={isTaken ? "green" : isMissed ? "amber" : isSkipped ? "purple" : "blue"}>
+              {isTaken ? "Taken" : isMissed ? "Missed" : isSkipped ? "Skipped" : "Pending"}
+            </Badge>
           </div>
           <p className="text-sm text-muted-foreground">
-            {med.dose} · {med.time}
+            {dose} · {time}
           </p>
-          <p className="text-xs text-muted-foreground mt-0.5">{med.instruction}</p>
+          {instruction ? (
+            <p className="text-xs text-muted-foreground mt-0.5">{instruction}</p>
+          ) : null}
         </div>
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-pressed={isTaken}
-          aria-label={isTaken ? `Mark ${med.name} as pending` : `Mark ${med.name} as taken`}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-semibold transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
-            isTaken
-              ? "bg-green-100 text-green-700 hover:bg-green-200"
-              : "text-white hover:opacity-90"
-          }`}
-          style={!isTaken ? { background: `linear-gradient(135deg, ${med.color}, ${TEAL})` } : {}}
-        >
-          {isTaken ? (
-            <>
-              <CheckCircle className="w-4 h-4" aria-hidden="true" /> Taken
-            </>
-          ) : (
-            <>
-              <Plus className="w-4 h-4" aria-hidden="true" /> Mark Taken
-            </>
-          )}
-        </button>
+        <div className="flex gap-2 flex-wrap">
+          <button
+            type="button"
+            disabled={busy || isTaken}
+            onClick={onTaken}
+            aria-label={`Mark ${name} as taken`}
+            className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-semibold transition cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 disabled:opacity-50 ${
+              isTaken ? "bg-green-100 text-green-700" : "text-white hover:opacity-90"
+            }`}
+            style={!isTaken ? { background: `linear-gradient(135deg, ${BLUE}, ${TEAL})` } : {}}
+          >
+            {isTaken ? (
+              <>
+                <CheckCircle className="w-4 h-4" aria-hidden="true" /> Taken
+              </>
+            ) : (
+              <>
+                <Plus className="w-4 h-4" aria-hidden="true" /> Taken
+              </>
+            )}
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={onMissed}
+            aria-label={`Mark ${name} as missed`}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border border-border text-muted-foreground hover:bg-accent cursor-pointer disabled:opacity-50"
+          >
+            <AlertCircle className="w-4 h-4" aria-hidden="true" /> Missed
+          </button>
+          <button
+            type="button"
+            disabled={busy}
+            onClick={onSkipped}
+            aria-label={`Mark ${name} as skipped`}
+            className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold border border-border text-muted-foreground hover:bg-accent cursor-pointer disabled:opacity-50"
+          >
+            <X className="w-4 h-4" aria-hidden="true" /> Skip
+          </button>
+        </div>
       </div>
     </Card>
   );
