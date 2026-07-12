@@ -41,6 +41,8 @@ These must be **Cloudflare build variables** (Vite compile time), not Worker run
 
 Vite embeds these into the JS bundle at **build** time. Changing them requires a new build and deploy. A malformed value such as `https://thyro-t1.onrender.com.onrender.com/api/v1` breaks all API calls.
 
+**Dashboard checklist (Workers Builds / Cloudflare build env):** set the three variables above exactly. Do not set them as Worker runtime secrets. After correcting dashboard values, trigger a clean production rebuild so auto-deploys stop shipping a broken API base URL.
+
 See `.env.production.example`. Do not commit `.env.production`.
 
 ### Production API

@@ -48,3 +48,25 @@ See `docs/production-auth-cookie-and-cors.md` for SameSite / Secure combinations
 | Start command          | `uvicorn app.main:app --host 0.0.0.0 --port $PORT` |
 
 After each `main` push, confirm Render deployed the matching commit (Manual Deploy if auto-deploy is delayed). Medication create requires the BSON date/time serialization fix (`to_bson_safe`).
+
+## Trusted Render Shell commands
+
+Knowledge seed ingestion (run twice to confirm idempotency; keeps `PENDING_REVIEW`):
+
+```bash
+python -m app.scripts.ingest_approved_knowledge
+```
+
+Privileged account provisioning (ADMIN / MEDICAL_EXPERT only; never commit passwords):
+
+```bash
+python -m app.scripts.create_privileged_user --role admin
+python -m app.scripts.create_privileged_user --role medical_expert
+```
+
+Optional temporary password env for non-interactive shells (clear immediately after use):
+
+- `PRIVILEGED_USER_PASSWORD`
+- `PRIVILEGED_USER_PASSWORD_CONFIRM`
+
+Public registration always creates `PATIENT` only. Do not expose privileged creation via HTTP.
