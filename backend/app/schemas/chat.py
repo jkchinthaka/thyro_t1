@@ -8,7 +8,13 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.content.assistant_policy import ASSISTANT_DISCLAIMER
 from app.models.chat import CHAT_CONTENT_MAX_LENGTH
-from app.models.enums import ChatMessageRole, ChatResponseMode, ChatSessionStatus
+from app.models.enums import (
+    ChatMessageRole,
+    ChatResponseMode,
+    ChatSessionStatus,
+    FeedbackRating,
+    FeedbackReasonCode,
+)
 
 
 class ChatSessionCreate(BaseModel):
@@ -92,6 +98,36 @@ class ChatAssistantResponse(BaseModel):
     safety_check_url: str | None = "/symptoms"
     emergency_page_url: str | None = "/emergency"
     disclaimer: str = ASSISTANT_DISCLAIMER
+    evidence_coverage: str | None = None
+    follow_up_suggestions: list[str] = Field(default_factory=list)
+    retrieval_mode: str | None = None
+
+
+class ChatFeedbackRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    rating: FeedbackRating
+    reason_code: FeedbackReasonCode | None = None
+    comment: str | None = Field(default=None, max_length=500)
+
+
+class ChatFeedbackPublic(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    id: str
+    assistant_message_id: str
+    rating: FeedbackRating
+    reason_code: FeedbackReasonCode | None = None
+    comment: str | None = None
+    created_at: datetime
+    updated_at: datetime
+
+
+class ChatExportResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    exported_at: datetime
+    sessions: list[ChatSessionDetail]
 
 
 class MessageResponse(BaseModel):

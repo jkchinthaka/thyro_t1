@@ -17,6 +17,7 @@ export interface ChatCitation {
   source_url: string | null;
   document_version: string;
   excerpt: string;
+  approved?: boolean;
 }
 
 export interface ChatSession {
@@ -34,6 +35,8 @@ export interface ChatMessage {
   role: ChatMessageRole;
   content: string;
   response_mode: ChatResponseMode | null;
+  evidence_coverage?: string | null;
+  follow_up_suggestions?: string[];
   citations: ChatCitation[];
   safety_notice: string | null;
   created_at: string;
@@ -56,6 +59,8 @@ export interface ChatAssistantResponse {
   assistant_message: ChatMessage;
   response_mode: ChatResponseMode;
   citations: ChatCitation[];
+  evidence_coverage?: string | null;
+  follow_up_suggestions?: string[];
   safety_notice: string | null;
   safety_check_url: string | null;
   emergency_page_url: string | null;
@@ -70,5 +75,16 @@ export interface ChatMsg {
   time: string;
   response_mode?: ChatResponseMode | null;
   citations?: ChatCitation[];
+  evidence_coverage?: string | null;
+  follow_up_suggestions?: string[];
   safety_notice?: string | null;
+  isStreaming?: boolean;
+}
+
+export type ChatFeedbackRating = "up" | "down";
+
+export interface ChatFeedbackRequest {
+  rating: ChatFeedbackRating;
+  reason_code?: string;
+  comment?: string;
 }

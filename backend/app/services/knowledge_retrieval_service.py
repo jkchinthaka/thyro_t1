@@ -63,6 +63,7 @@ class KnowledgeRetrievalService:
                     topic=chunk.topic,
                     review_status=chunk.review_status,
                     score=score,
+                    active=bool(chunk.active),
                 )
             )
         scored.sort(key=lambda r: (-r.score, r.chunk_id))

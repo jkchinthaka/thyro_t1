@@ -125,6 +125,43 @@ INDEX_SPECS: tuple[IndexSpec, ...] = (
         unique=True,
         rationale="At most one Google identity per user",
     ),
+    # knowledge_chunk_embeddings (Phase 13B)
+    IndexSpec(
+        CollectionName.KNOWLEDGE_CHUNK_EMBEDDINGS.value,
+        "ux_chunk_embeddings_chunk_hash_model",
+        [
+            ("chunk_id", ASCENDING),
+            ("content_hash", ASCENDING),
+            ("embedding_model", ASCENDING),
+        ],
+        unique=True,
+        rationale="Idempotent embedding identity per chunk content and model",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_CHUNK_EMBEDDINGS.value,
+        "ix_chunk_embeddings_active_status",
+        [("active", ASCENDING), ("review_status", ASCENDING)],
+        rationale="Active approved embedding filtering",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_CHUNK_EMBEDDINGS.value,
+        "ix_chunk_embeddings_lang_topic",
+        [("language", ASCENDING), ("topic", ASCENDING)],
+        rationale="Language/topic filtered semantic retrieval",
+    ),
+    IndexSpec(
+        CollectionName.KNOWLEDGE_CHUNK_EMBEDDINGS.value,
+        "ix_chunk_embeddings_document",
+        [("document_id", ASCENDING)],
+        rationale="Document lifecycle embedding deactivation",
+    ),
+    IndexSpec(
+        CollectionName.CHAT_RESPONSE_FEEDBACK.value,
+        "ux_chat_feedback_user_message",
+        [("user_id", ASCENDING), ("assistant_message_id", ASCENDING)],
+        unique=True,
+        rationale="One active feedback record per user/message",
+    ),
     # medications
     IndexSpec(
         CollectionName.MEDICATIONS.value,

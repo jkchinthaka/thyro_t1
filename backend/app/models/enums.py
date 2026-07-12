@@ -193,6 +193,35 @@ class FeedbackType(StrEnum):
     REPORT = "report"
 
 
+class FeedbackRating(StrEnum):
+    UP = "up"
+    DOWN = "down"
+
+
+class FeedbackReasonCode(StrEnum):
+    HELPFUL = "HELPFUL"
+    CLEAR = "CLEAR"
+    SOURCE_HELPFUL = "SOURCE_HELPFUL"
+    NOT_RELEVANT = "NOT_RELEVANT"
+    UNCLEAR = "UNCLEAR"
+    MISSING_SOURCE = "MISSING_SOURCE"
+    TOO_GENERAL = "TOO_GENERAL"
+    SAFETY_CONCERN = "SAFETY_CONCERN"
+    OTHER = "OTHER"
+
+
+class EvidenceCoverage(StrEnum):
+    HIGH = "high"
+    PARTIAL = "partial"
+    INSUFFICIENT = "insufficient"
+
+
+class StructuredResponseCategory(StrEnum):
+    EDUCATION = "education"
+    BOUNDARY = "boundary"
+    INSUFFICIENT_EVIDENCE = "insufficient_evidence"
+
+
 class EmergencyEventStatus(StrEnum):
     DETECTED = "detected"
     ACKNOWLEDGED = "acknowledged"

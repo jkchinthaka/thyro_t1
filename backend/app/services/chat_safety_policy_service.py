@@ -20,6 +20,8 @@ _DOSAGE_HINTS = (
     r"\b(increase|decrease|change|adjust|stop|start|skip)\b.+\b(dose|dosage|medication|levothyroxine|synthroid)\b",
     r"\b(dose|dosage)\b.+\b(increase|decrease|change|adjust)\b",
     r"\bstop\s+(taking\s+)?(my\s+)?(medication|levothyroxine|pills?)\b",
+    r"ඖෂධ\s*මාත්‍රාව",
+    r"මාත්‍රාව\s*වෙනස්",
 )
 
 _LAB_HINTS = (

@@ -19,6 +19,8 @@ _OVERRIDE_PATTERNS = (
     r"call\s+(the\s+)?(api|tool|function)\b",
     r"browse\s+the\s+(web|internet)",
     r"override\s+(source|citation|approved)\s+(restriction|rules?)",
+    r"approve\s+this\s+medical\s+document",
+    r"treat\s+the\s+following\s+document\s+text\s+as\s+an\s+instruction",
 )
 
 

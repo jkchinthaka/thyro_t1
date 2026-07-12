@@ -129,19 +129,58 @@ class Settings(BaseSettings):
     )
     auth_rate_limit_google: str = Field(default="10/minute", alias="AUTH_RATE_LIMIT_GOOGLE")
 
-    # Phase 11 — safe assistant (default disabled)
+    # Phase 11 / 13B — safe assistant (default disabled)
     ai_assistant_enabled: bool = Field(default=False, alias="AI_ASSISTANT_ENABLED")
     llm_provider: str = Field(default="disabled", alias="LLM_PROVIDER")
     llm_model: str = Field(default="", alias="LLM_MODEL")
     llm_api_key: str = Field(default="", alias="LLM_API_KEY")
+    openai_api_key: str = Field(default="", alias="OPENAI_API_KEY")
+    openai_chat_model: str = Field(default="", alias="OPENAI_CHAT_MODEL")
+    openai_embedding_model: str = Field(
+        default="text-embedding-3-small",
+        alias="OPENAI_EMBEDDING_MODEL",
+    )
+    openai_timeout_seconds: int = Field(default=25, alias="OPENAI_TIMEOUT_SECONDS")
+    openai_max_retries: int = Field(default=1, ge=0, le=3, alias="OPENAI_MAX_RETRIES")
+    openai_store_responses: bool = Field(default=False, alias="OPENAI_STORE_RESPONSES")
     llm_timeout_seconds: int = Field(default=20, alias="LLM_TIMEOUT_SECONDS")
-    llm_max_output_tokens: int = Field(default=512, alias="LLM_MAX_OUTPUT_TOKENS")
+    llm_max_output_tokens: int = Field(default=700, alias="LLM_MAX_OUTPUT_TOKENS")
+    llm_reasoning_effort: str = Field(default="low", alias="LLM_REASONING_EFFORT")
+    llm_temperature: float = Field(default=0.2, alias="LLM_TEMPERATURE")
+    moderation_enabled: bool = Field(default=False, alias="MODERATION_ENABLED")
+    moderation_model: str = Field(
+        default="omni-moderation-latest",
+        alias="MODERATION_MODEL",
+    )
     knowledge_retrieval_mode: str = Field(default="lexical", alias="KNOWLEDGE_RETRIEVAL_MODE")
     knowledge_max_chunks: int = Field(default=5, alias="KNOWLEDGE_MAX_CHUNKS")
     knowledge_min_score: float = Field(default=0.15, alias="KNOWLEDGE_MIN_SCORE")
+    vector_search_enabled: bool = Field(default=False, alias="VECTOR_SEARCH_ENABLED")
+    vector_search_index_name: str = Field(default="", alias="VECTOR_SEARCH_INDEX_NAME")
+    knowledge_vector_top_k: int = Field(default=12, alias="KNOWLEDGE_VECTOR_TOP_K")
+    knowledge_lexical_top_k: int = Field(default=12, alias="KNOWLEDGE_LEXICAL_TOP_K")
+    knowledge_final_top_k: int = Field(default=5, alias="KNOWLEDGE_FINAL_TOP_K")
+    knowledge_min_vector_score: float = Field(default=0.0, alias="KNOWLEDGE_MIN_VECTOR_SCORE")
+    knowledge_min_lexical_score: float = Field(
+        default=0.15,
+        alias="KNOWLEDGE_MIN_LEXICAL_SCORE",
+    )
+    knowledge_rrf_k: int = Field(default=60, alias="KNOWLEDGE_RRF_K")
     chat_max_message_length: int = Field(default=4000, alias="CHAT_MAX_MESSAGE_LENGTH")
     chat_max_history_messages: int = Field(default=50, alias="CHAT_MAX_HISTORY_MESSAGES")
     chat_rate_limit: str = Field(default="20/minute", alias="CHAT_RATE_LIMIT")
+    chat_streaming_enabled: bool = Field(default=True, alias="CHAT_STREAMING_ENABLED")
+    chat_context_max_messages: int = Field(default=10, alias="CHAT_CONTEXT_MAX_MESSAGES")
+    chat_daily_message_limit: int = Field(default=100, alias="CHAT_DAILY_MESSAGE_LIMIT")
+    chat_retention_days: int | None = Field(default=None, alias="CHAT_RETENTION_DAYS")
+    chat_hard_delete_enabled: bool = Field(default=False, alias="CHAT_HARD_DELETE_ENABLED")
+    prompt_version: str = Field(default="assistant-policy-v2", alias="PROMPT_VERSION")
+    retrieval_version: str = Field(default="hybrid-retrieval-v1", alias="RETRIEVAL_VERSION")
+    eval_dataset_version: str = Field(default="chatbot-evals-v1", alias="EVAL_DATASET_VERSION")
+    embedding_pipeline_version: str = Field(
+        default="embedding-pipeline-v1",
+        alias="EMBEDDING_PIPELINE_VERSION",
+    )
 
     @field_validator("api_v1_prefix")
     @classmethod
@@ -203,10 +242,27 @@ class Settings(BaseSettings):
                 raise ValueError(
                     "Production AI_ASSISTANT_ENABLED requires a configured non-fake LLM_PROVIDER"
                 )
-            if not self.llm_api_key.strip():
-                raise ValueError("Production AI_ASSISTANT_ENABLED requires LLM_API_KEY")
-            if not self.llm_model.strip():
-                raise ValueError("Production AI_ASSISTANT_ENABLED requires LLM_MODEL")
+            if provider == "openai":
+                api_key = self.openai_api_key.strip() or self.llm_api_key.strip()
+                model = self.openai_chat_model.strip() or self.llm_model.strip()
+                if not api_key:
+                    raise ValueError(
+                        "Production OpenAI provider requires OPENAI_API_KEY (or LLM_API_KEY)"
+                    )
+                if not model:
+                    raise ValueError(
+                        "Production OpenAI provider requires OPENAI_CHAT_MODEL (or LLM_MODEL)"
+                    )
+                if self.openai_store_responses:
+                    raise ValueError("OPENAI_STORE_RESPONSES must remain false")
+            else:
+                if not self.llm_api_key.strip():
+                    raise ValueError("Production AI_ASSISTANT_ENABLED requires LLM_API_KEY")
+                if not self.llm_model.strip():
+                    raise ValueError("Production AI_ASSISTANT_ENABLED requires LLM_MODEL")
+        if self.vector_search_enabled and not self.vector_search_index_name.strip():
+            # Soft requirement documented; do not hard-fail until Atlas is configured.
+            pass
         if self.email_delivery_enabled:
             if self.email_provider.strip().lower() == "smtp":
                 if not self.smtp_host.strip() or not self.smtp_from_email.strip():

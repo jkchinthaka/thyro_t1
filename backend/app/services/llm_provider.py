@@ -1,8 +1,8 @@
-"""LLM provider abstraction — no tools, no chain-of-thought, no secrets."""
+"""LLM provider abstraction — async-capable, no tools, no chain-of-thought."""
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Protocol
 
 from app.content.assistant_policy import (
@@ -11,6 +11,9 @@ from app.content.assistant_policy import (
     PROVIDER_UNAVAILABLE_MESSAGE,
     SYSTEM_POLICY_TEXT,
 )
+from app.core.config import Settings, get_settings
+from app.models.enums import EvidenceCoverage, StructuredResponseCategory
+from app.services.conversation_context import ContextTurn
 from app.services.grounding_validation_service import RetrievedChunk
 
 
@@ -21,17 +24,23 @@ class ProviderAnswer:
     provider: str
     model_name: str
     available: bool
+    response_category: StructuredResponseCategory | None = None
+    evidence_coverage: EvidenceCoverage | None = None
+    follow_up_suggestions: list[str] = field(default_factory=list)
+    failure_category: str | None = None
 
 
 class LLMProvider(Protocol):
     def health_check(self) -> bool: ...
 
-    def generate_grounded_answer(
+    async def generate_grounded_answer(
         self,
         *,
         user_message: str,
         evidence: list[RetrievedChunk],
         max_output_tokens: int,
+        conversation_context: list[ContextTurn] | None = None,
+        language: str = "en",
     ) -> ProviderAnswer: ...
 
 
@@ -39,20 +48,24 @@ class DisabledLLMProvider:
     def health_check(self) -> bool:
         return False
 
-    def generate_grounded_answer(
+    async def generate_grounded_answer(
         self,
         *,
         user_message: str,
         evidence: list[RetrievedChunk],
         max_output_tokens: int,
+        conversation_context: list[ContextTurn] | None = None,
+        language: str = "en",
     ) -> ProviderAnswer:
-        _ = (user_message, evidence, max_output_tokens, SYSTEM_POLICY_TEXT)
+        _ = (user_message, evidence, max_output_tokens, conversation_context, language)
+        _ = SYSTEM_POLICY_TEXT
         return ProviderAnswer(
             text=PROVIDER_UNAVAILABLE_MESSAGE,
             citation_ids=[],
             provider="disabled",
             model_name="none",
             available=False,
+            failure_category="configuration",
         )
 
 
@@ -62,14 +75,16 @@ class FakeLLMProvider:
     def health_check(self) -> bool:
         return True
 
-    def generate_grounded_answer(
+    async def generate_grounded_answer(
         self,
         *,
         user_message: str,
         evidence: list[RetrievedChunk],
         max_output_tokens: int,
+        conversation_context: list[ContextTurn] | None = None,
+        language: str = "en",
     ) -> ProviderAnswer:
-        _ = (user_message, max_output_tokens)
+        _ = (user_message, conversation_context, language)
         if not evidence:
             return ProviderAnswer(
                 text=INSUFFICIENT_EVIDENCE_MESSAGE,
@@ -77,6 +92,8 @@ class FakeLLMProvider:
                 provider="fake",
                 model_name="fake-v1",
                 available=True,
+                response_category=StructuredResponseCategory.INSUFFICIENT_EVIDENCE,
+                evidence_coverage=EvidenceCoverage.INSUFFICIENT,
             )
         top = evidence[0]
         excerpt = top.text[: min(280, max_output_tokens * 4)]
@@ -90,14 +107,26 @@ class FakeLLMProvider:
             provider="fake",
             model_name="fake-v1",
             available=True,
+            response_category=StructuredResponseCategory.EDUCATION,
+            evidence_coverage=EvidenceCoverage.HIGH,
+            follow_up_suggestions=["Ask about approved educational resources"],
         )
 
 
-def get_llm_provider(provider_name: str, *, assistant_enabled: bool) -> LLMProvider:
+def get_llm_provider(
+    provider_name: str,
+    *,
+    assistant_enabled: bool,
+    settings: Settings | None = None,
+) -> LLMProvider:
+    cfg = settings or get_settings()
     name = (provider_name or "disabled").strip().lower()
     if not assistant_enabled or name in {"", "disabled", "none"}:
         return DisabledLLMProvider()
     if name == "fake":
         return FakeLLMProvider()
-    # Unknown production providers are not silently enabled
+    if name == "openai":
+        from app.services.openai_responses_provider import OpenAIResponsesProvider
+
+        return OpenAIResponsesProvider(cfg)
     return DisabledLLMProvider()

@@ -1,6 +1,7 @@
 import { api } from "@/services/api";
 import type {
   ChatAssistantResponse,
+  ChatFeedbackRequest,
   ChatSession,
   ChatSessionDetail,
   ChatSessionListResponse,
@@ -64,6 +65,42 @@ export async function sendMessage(
     const { data } = await api.post<ChatAssistantResponse>(`/chat/sessions/${sessionId}/messages`, {
       content,
     });
+    return data;
+  } catch (error) {
+    throw toAppError(error);
+  }
+}
+
+export async function submitMessageFeedback(
+  assistantMessageId: string,
+  feedback: ChatFeedbackRequest,
+): Promise<void> {
+  try {
+    await api.post(`/chat/messages/${assistantMessageId}/feedback`, feedback);
+  } catch (error) {
+    throw toAppError(error);
+  }
+}
+
+export async function deleteMessageFeedback(assistantMessageId: string): Promise<void> {
+  try {
+    await api.delete(`/chat/messages/${assistantMessageId}/feedback`);
+  } catch (error) {
+    throw toAppError(error);
+  }
+}
+
+export async function deleteAllSessions(): Promise<void> {
+  try {
+    await api.delete("/chat/sessions");
+  } catch (error) {
+    throw toAppError(error);
+  }
+}
+
+export async function exportChat(): Promise<Blob> {
+  try {
+    const { data } = await api.get<Blob>("/chat/export", { responseType: "blob" });
     return data;
   } catch (error) {
     throw toAppError(error);

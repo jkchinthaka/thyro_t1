@@ -1,10 +1,30 @@
 import { BLUE, TEAL } from "@/constants/colors";
 import { Avatar } from "@/components/common";
-import type { ChatMsg } from "@/types/chat";
-import { Heart } from "lucide-react";
+import type { ChatFeedbackRating, ChatMsg } from "@/types/chat";
+import { Copy, Heart } from "lucide-react";
+import { EvidenceCoverageLabel, ResponseModeBadge } from "./ResponseModeBadge";
+import { FeedbackControls } from "./FeedbackControls";
 
-export function ChatBubble({ message, userName }: { message: ChatMsg; userName: string }) {
+export function ChatBubble({
+  message,
+  userName,
+  onOpenSources,
+  onFeedback,
+  onRemoveFeedback,
+}: {
+  message: ChatMsg;
+  userName: string;
+  onOpenSources?: (message: ChatMsg) => void;
+  onFeedback?: (
+    messageId: string,
+    rating: ChatFeedbackRating,
+    reasonCode?: string,
+    comment?: string,
+  ) => Promise<void>;
+  onRemoveFeedback?: (messageId: string) => Promise<void>;
+}) {
   const m = message;
+  const assistantMessageId = typeof m.id === "string" ? m.id : null;
   return (
     <div className={`flex gap-3 ${m.from === "user" ? "flex-row-reverse" : ""}`}>
       {m.from === "ai" ? (
@@ -30,37 +50,37 @@ export function ChatBubble({ message, userName }: { message: ChatMsg; userName: 
         >
           {m.text}
         </div>
-        {m.from === "ai" && m.citations && m.citations.length > 0 ? (
-          <ol className="text-[10px] text-muted-foreground space-y-1 mt-1 list-decimal pl-4">
-            {m.citations.map((c, idx) => (
-              <li key={c.citation_id}>
-                <span className="font-semibold text-foreground">
-                  [{idx + 1}] {c.title}
-                </span>
-                {" · "}
-                {c.source_name} · v{c.document_version}
-                {c.source_url ? (
-                  <>
-                    {" · "}
-                    <a
-                      href={c.source_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-primary hover:underline"
-                    >
-                      Source
-                    </a>
-                  </>
-                ) : null}
-              </li>
-            ))}
-          </ol>
+        {m.from === "ai" && <ResponseModeBadge mode={m.response_mode} />}
+        {m.from === "ai" && <EvidenceCoverageLabel coverage={m.evidence_coverage} />}
+        {m.from === "ai" && m.citations?.length ? (
+          <button
+            type="button"
+            className="text-[11px] font-semibold text-primary hover:underline"
+            onClick={() => onOpenSources?.(m)}
+          >
+            View {m.citations.length} source{m.citations.length === 1 ? "" : "s"}
+          </button>
         ) : null}
-        {m.from === "ai" && m.response_mode && m.response_mode !== "grounded_answer" ? (
-          <span className="text-[10px] uppercase tracking-wide text-amber-700">
-            {m.response_mode.replaceAll("_", " ")}
-          </span>
-        ) : null}
+        {m.from === "ai" && !m.isStreaming && (
+          <div className="flex items-center gap-1">
+            <button
+              type="button"
+              aria-label="Copy answer"
+              onClick={() => void navigator.clipboard?.writeText(m.text)}
+              className="rounded p-1 text-muted-foreground hover:bg-accent"
+            >
+              <Copy className="h-3.5 w-3.5" />
+            </button>
+            {assistantMessageId && onFeedback && onRemoveFeedback && (
+              <FeedbackControls
+                onSubmit={(rating, reasonCode, comment) =>
+                  onFeedback(assistantMessageId, rating, reasonCode, comment)
+                }
+                onRemove={() => onRemoveFeedback(assistantMessageId)}
+              />
+            )}
+          </div>
+        )}
         <span className="text-[10px] text-muted-foreground">{m.time}</span>
       </div>
     </div>

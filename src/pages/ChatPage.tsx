@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
-import { Send, Mic, Paperclip, Plus, Trash2 } from "lucide-react";
+import { Menu, MoreHorizontal, Plus, Send, Square, Trash2 } from "lucide-react";
 import { Card, Btn, LoadingState, ErrorState } from "@/components/common";
-import { ChatBubble, TypingIndicator, ChatSafetyBanner } from "@/components/chat";
+import { ChatBubble, ChatSafetyBanner, SourceDrawer, StreamingBubble } from "@/components/chat";
 import { BLUE, TEAL } from "@/constants/colors";
 import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/context/AuthContext";
@@ -10,12 +10,24 @@ import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import { useToast } from "@/hooks/useToast";
 import {
   createSession,
+  deleteAllSessions,
   deleteSession,
+  deleteMessageFeedback,
+  exportChat,
   getSession,
   listSessions,
   sendMessage,
+  submitMessageFeedback,
+  updateSessionTitle,
 } from "@/services/chatService";
-import type { ChatMessage, ChatMsg, ChatSession } from "@/types/chat";
+import { ChatStreamError, streamMessage } from "@/services/chatStream";
+import type {
+  ChatCitation,
+  ChatFeedbackRating,
+  ChatMessage,
+  ChatMsg,
+  ChatSession,
+} from "@/types/chat";
 import type { AppError } from "@/types/api";
 
 const QUICK_ACTIONS = [
@@ -49,6 +61,8 @@ function toBubble(message: ChatMessage): ChatMsg {
     time: formatTime(message.created_at),
     response_mode: message.response_mode,
     citations: message.citations,
+    evidence_coverage: message.evidence_coverage,
+    follow_up_suggestions: message.follow_up_suggestions,
     safety_notice: message.safety_notice,
   };
 }
@@ -66,14 +80,20 @@ export function ChatPage() {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(true);
   const [sending, setSending] = useState(false);
-  const [typing, setTyping] = useState(false);
+  const [streamText, setStreamText] = useState("");
+  const [lastFailedMessage, setLastFailedMessage] = useState<string | null>(null);
+  const [mobileSessionsOpen, setMobileSessionsOpen] = useState(false);
+  const [sourceCitations, setSourceCitations] = useState<ChatCitation[]>([]);
+  const [sourcesOpen, setSourcesOpen] = useState(false);
+  const [deleteAllSupported, setDeleteAllSupported] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [redirectNotice, setRedirectNotice] = useState<string | null>(null);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const streamAbortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [msgs, typing]);
+  }, [msgs, streamText]);
 
   const refreshSessions = useCallback(async () => {
     const list = await listSessions({ page: 1, page_size: 30 });
@@ -86,6 +106,7 @@ export function ChatPage() {
     setSessionId(detail.session.id);
     setMsgs(detail.messages.map(toBubble));
     setRedirectNotice(null);
+    setMobileSessionsOpen(false);
   }, []);
 
   const bootstrap = useCallback(async () => {
@@ -124,7 +145,8 @@ export function ChatPage() {
     const trimmed = text.trim();
     if (!trimmed || sending) return;
     setSending(true);
-    setTyping(true);
+    setStreamText("");
+    setLastFailedMessage(null);
     setRedirectNotice(null);
     const optimistic: ChatMsg = {
       id: `local-${Date.now()}`,
@@ -134,15 +156,50 @@ export function ChatPage() {
     };
     setMsgs((prev) => [...prev, optimistic]);
     setInput("");
+    const controller = new AbortController();
+    streamAbortRef.current = controller;
     try {
       const id = await ensureSession();
-      const result = await sendMessage(id, trimmed);
+      let accepted = false;
+      let result;
+      try {
+        result = await streamMessage(
+          id,
+          trimmed,
+          {
+            onEvent: (event) => {
+              if (event.event === "message.accepted") accepted = true;
+              if (event.event === "response.delta") {
+                const data = event.data as { delta?: string; content?: string; text?: string };
+                setStreamText(
+                  (current) => current + (data.delta ?? data.content ?? data.text ?? ""),
+                );
+              }
+            },
+          },
+          controller.signal,
+        );
+      } catch (streamError) {
+        if (controller.signal.aborted) throw streamError;
+        if (accepted) throw streamError;
+        result = await sendMessage(id, trimmed);
+      }
       setMsgs((prev) => {
         const withoutOptimistic = prev.filter((m) => m.id !== optimistic.id);
         return [
           ...withoutOptimistic,
           toBubble(result.user_message),
-          toBubble(result.assistant_message),
+          toBubble({
+            ...result.assistant_message,
+            response_mode: result.assistant_message.response_mode ?? result.response_mode,
+            citations: result.assistant_message.citations?.length
+              ? result.assistant_message.citations
+              : result.citations,
+            evidence_coverage:
+              result.assistant_message.evidence_coverage ?? result.evidence_coverage,
+            follow_up_suggestions:
+              result.assistant_message.follow_up_suggestions ?? result.follow_up_suggestions,
+          }),
         ];
       });
       if (result.response_mode === "safety_redirect") {
@@ -152,15 +209,74 @@ export function ChatPage() {
     } catch (err) {
       const appErr = err as AppError;
       setMsgs((prev) => prev.filter((m) => m.id !== optimistic.id));
-      setInput(trimmed);
-      if (appErr?.status === 429) {
+      if (controller.signal.aborted) {
+        setInput(trimmed);
+        toastError("Generation stopped. You can edit and send your message again.");
+      } else if (!navigator.onLine) {
+        setLastFailedMessage(trimmed);
+        toastError("You appear to be offline. Reconnect and retry your message.");
+      } else if (appErr?.status === 429 || (err instanceof ChatStreamError && err.status === 429)) {
+        setLastFailedMessage(trimmed);
         toastError("Too many messages. Please wait a moment and try again.");
+      } else if (
+        (err instanceof ChatStreamError && err.status && err.status >= 500) ||
+        appErr?.status === 503
+      ) {
+        setLastFailedMessage(trimmed);
+        toastError("The answer provider is temporarily unavailable. Please retry shortly.");
       } else {
+        setLastFailedMessage(trimmed);
         toastError(appErr?.message || "Message could not be sent. Please try again.");
       }
     } finally {
-      setTyping(false);
+      streamAbortRef.current = null;
+      setStreamText("");
       setSending(false);
+    }
+  };
+
+  const handleFeedback = async (
+    messageId: string,
+    rating: ChatFeedbackRating,
+    reasonCode?: string,
+    comment?: string,
+  ) => {
+    await submitMessageFeedback(messageId, { rating, reason_code: reasonCode, comment });
+  };
+
+  const handleRename = async (session: ChatSession) => {
+    const title = window.prompt("Rename conversation", session.title)?.trim();
+    if (!title || title === session.title) return;
+    try {
+      await updateSessionTitle(session.id, title);
+      await refreshSessions();
+    } catch (err) {
+      toastError((err as AppError).message || "Could not rename conversation");
+    }
+  };
+
+  const handleExport = async () => {
+    try {
+      const blob = await exportChat();
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "thyrocare-chat-export.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      toastError((err as AppError).message || "Could not export conversations");
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (!window.confirm("Delete all conversations? This cannot be undone.")) return;
+    try {
+      await deleteAllSessions();
+      await handleNewChat();
+    } catch (err) {
+      if ((err as AppError).status === 404) setDeleteAllSupported(false);
+      else toastError((err as AppError).message || "Could not delete conversations");
     }
   };
 
@@ -207,7 +323,9 @@ export function ChatPage() {
   return (
     <>
       <div className="flex gap-4 h-[calc(100vh-130px)] min-h-[420px]">
-        <Card className="w-56 flex-shrink-0 hidden lg:flex flex-col p-3 gap-2">
+        <Card
+          className={`w-56 flex-shrink-0 flex-col p-3 gap-2 ${mobileSessionsOpen ? "fixed inset-y-0 left-0 z-50 flex h-full shadow-xl" : "hidden lg:flex"}`}
+        >
           <h4 className="text-xs font-bold text-muted-foreground uppercase tracking-wider px-2 py-1">
             Recent Chats
           </h4>
@@ -238,6 +356,14 @@ export function ChatPage() {
                 >
                   <Trash2 className="w-3.5 h-3.5" />
                 </button>
+                <button
+                  type="button"
+                  aria-label="Rename conversation"
+                  className="p-1.5 text-muted-foreground hover:text-primary cursor-pointer"
+                  onClick={() => void handleRename(c)}
+                >
+                  <MoreHorizontal className="w-3.5 h-3.5" />
+                </button>
               </div>
             ))
           )}
@@ -250,9 +376,36 @@ export function ChatPage() {
           >
             <Plus className="w-4 h-4" aria-hidden="true" /> New Chat
           </Btn>
+          <button
+            type="button"
+            onClick={() => void handleExport()}
+            className="text-xs font-semibold text-primary hover:underline"
+          >
+            Export conversations
+          </button>
+          {deleteAllSupported && (
+            <button
+              type="button"
+              onClick={() => void handleDeleteAll()}
+              className="text-xs font-semibold text-red-600 hover:underline"
+            >
+              Delete all conversations
+            </button>
+          )}
         </Card>
 
         <Card className="flex-1 flex flex-col p-0 overflow-hidden min-w-0">
+          <div className="flex items-center gap-2 border-b border-border px-3 py-2 lg:hidden">
+            <button
+              type="button"
+              aria-label="Open conversations"
+              onClick={() => setMobileSessionsOpen(true)}
+              className="rounded-lg p-2 hover:bg-accent"
+            >
+              <Menu className="h-4 w-4" />
+            </button>
+            <span className="text-sm font-semibold text-foreground">Conversations</span>
+          </div>
           <ChatSafetyBanner />
           <p className="px-4 py-2 text-[11px] text-muted-foreground border-b border-border leading-relaxed">
             {DISCLAIMER}
@@ -314,15 +467,44 @@ export function ChatPage() {
             aria-label="Chat messages"
           >
             {msgs.length === 0 ? (
-              <p className="text-sm text-muted-foreground">
-                Ask an educational question. Answers use approved sources only when available.
-              </p>
+              <div className="mx-auto mt-12 max-w-md text-center">
+                <h2 className="text-base font-bold text-foreground">Ask an education question</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  I can explain thyroid-care topics using approved sources when available. I cannot
+                  diagnose conditions or interpret lab results.
+                </p>
+              </div>
             ) : (
-              msgs.map((m) => <ChatBubble key={m.id} message={m} userName={userName} />)
+              msgs.map((m) => (
+                <ChatBubble
+                  key={m.id}
+                  message={m}
+                  userName={userName}
+                  onOpenSources={(message) => {
+                    setSourceCitations(message.citations ?? []);
+                    setSourcesOpen(true);
+                  }}
+                  onFeedback={handleFeedback}
+                  onRemoveFeedback={deleteMessageFeedback}
+                />
+              ))
             )}
-            {typing && <TypingIndicator />}
+            {sending && <StreamingBubble text={streamText} />}
             <div ref={bottomRef} />
           </div>
+
+          {lastFailedMessage && (
+            <div className="mx-4 mb-2 flex items-center justify-between gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+              <span>Your last message was not sent.</span>
+              <button
+                type="button"
+                onClick={() => void send(lastFailedMessage)}
+                className="font-bold hover:underline"
+              >
+                Retry
+              </button>
+            </div>
+          )}
 
           <div
             className="px-4 py-2 flex gap-2 overflow-x-auto scrollbar-hide border-t border-border"
@@ -343,15 +525,6 @@ export function ChatPage() {
           </div>
 
           <div className="px-3 sm:px-4 py-3 border-t border-border flex items-center gap-2">
-            <button
-              type="button"
-              className="p-2 rounded-xl hover:bg-accent transition text-muted-foreground cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-              aria-label="Attach file"
-              disabled
-              title="File uploads are not available"
-            >
-              <Paperclip className="w-5 h-5" aria-hidden="true" />
-            </button>
             <label className="sr-only" htmlFor="chat-input">
               Message
             </label>
@@ -362,33 +535,40 @@ export function ChatPage() {
               onKeyDown={(e) => {
                 if (e.key === "Enter") void send(input);
               }}
-              placeholder="Ask about your symptoms, medications, diet..."
+              placeholder="Ask about medications, diet, or follow-up care..."
               className="flex-1 min-w-0 py-2.5 px-4 rounded-xl bg-muted border border-border text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary/30"
               disabled={sending}
               maxLength={4000}
             />
-            <button
-              type="button"
-              className="p-2 rounded-xl hover:bg-accent transition text-muted-foreground cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-              aria-label="Voice input"
-              disabled
-              title="Voice input is not available"
-            >
-              <Mic className="w-5 h-5" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              onClick={() => void send(input)}
-              disabled={!input.trim() || sending}
-              aria-label="Send message"
-              className="w-10 h-10 rounded-xl flex items-center justify-center text-white transition disabled:opacity-40 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 flex-shrink-0"
-              style={{ background: `linear-gradient(135deg, ${BLUE}, ${TEAL})` }}
-            >
-              <Send className="w-4 h-4" aria-hidden="true" />
-            </button>
+            {sending ? (
+              <button
+                type="button"
+                onClick={() => streamAbortRef.current?.abort()}
+                aria-label="Stop generating"
+                className="w-10 h-10 rounded-xl flex items-center justify-center bg-muted text-foreground hover:bg-accent"
+              >
+                <Square className="w-4 h-4" aria-hidden="true" />
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={() => void send(input)}
+                disabled={!input.trim()}
+                aria-label="Send message"
+                className="w-10 h-10 rounded-xl flex items-center justify-center text-white transition disabled:opacity-40 cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 flex-shrink-0"
+                style={{ background: `linear-gradient(135deg, ${BLUE}, ${TEAL})` }}
+              >
+                <Send className="w-4 h-4" aria-hidden="true" />
+              </button>
+            )}
           </div>
         </Card>
       </div>
+      <SourceDrawer
+        citations={sourceCitations}
+        open={sourcesOpen}
+        onClose={() => setSourcesOpen(false)}
+      />
     </>
   );
 }
