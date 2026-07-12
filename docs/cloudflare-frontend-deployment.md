@@ -31,13 +31,15 @@ The Worker serves only the Vite `dist/` SPA. Authentication, profile, and medica
 
 Set in the Cloudflare build environment (not committed):
 
-| Variable            | Required when      | Notes                                                         |
-| ------------------- | ------------------ | ------------------------------------------------------------- |
-| `VITE_API_BASE_URL` | yes for production | `https://thyro-t1.onrender.com/api/v1` (**Never localhost.**) |
-| `VITE_APP_NAME`     | recommended        | `ThyroCare AI`                                                |
-| `VITE_APP_ENV`      | yes for production | `production`                                                  |
+| Variable            | Required when      | Notes                                                                                                        |
+| ------------------- | ------------------ | ------------------------------------------------------------------------------------------------------------ |
+| `VITE_API_BASE_URL` | yes for production | Exactly `https://thyro-t1.onrender.com/api/v1` (**Never localhost.** Never append an extra `.onrender.com`.) |
+| `VITE_APP_NAME`     | recommended        | `ThyroCare AI`                                                                                               |
+| `VITE_APP_ENV`      | yes for production | `production`                                                                                                 |
 
-Vite embeds these into the JS bundle at **build** time. Changing them requires a new build and deploy.
+These must be **Cloudflare build variables** (Vite compile time), not Worker runtime secrets. Do not put MongoDB/JWT/Render secrets in any `VITE_*` variable.
+
+Vite embeds these into the JS bundle at **build** time. Changing them requires a new build and deploy. A malformed value such as `https://thyro-t1.onrender.com.onrender.com/api/v1` breaks all API calls.
 
 See `.env.production.example`. Do not commit `.env.production`.
 

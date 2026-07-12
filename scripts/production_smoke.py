@@ -142,8 +142,8 @@ def main() -> int:
         "/api/v1/medications",
         auth=True,
         body={
-            "name": "Levothyroxine",
-            "dosage_text": "50 mcg",
+            "name": "Smoke Test Supplement A",
+            "dosage_text": "1 unit",
             "frequency": "once_daily",
             "reminder_times": ["08:00"],
             "start_date": "2026-07-01",
@@ -151,7 +151,36 @@ def main() -> int:
             "timezone": "UTC",
         },
     )
-    check("medication create", code == 201, f"code={code}")
+    med_id = payload.get("id") if isinstance(payload, dict) else None
+    med_version = payload.get("version") if isinstance(payload, dict) else None
+    if code != 201:
+        req_id = ""
+        if isinstance(payload, dict):
+            req_id = str(payload.get("request_id") or "")
+            safe_msg = str(payload.get("message") or payload.get("code") or "error")[:120]
+        else:
+            safe_msg = str(payload)[:120]
+        check("medication create", False, f"code={code} request_id={req_id} msg={safe_msg}")
+    else:
+        check("medication create", True, f"code={code}")
+
+    if med_id:
+        code, payload, _ = c.request("GET", f"/api/v1/medications/{med_id}", auth=True)
+        check("medication read", code == 200, f"code={code}")
+
+        code, payload, _ = c.request(
+            "PATCH",
+            f"/api/v1/medications/{med_id}",
+            auth=True,
+            body={
+                "name": "Smoke Test Supplement A Updated",
+                "expected_version": med_version if isinstance(med_version, int) else 1,
+            },
+        )
+        check("medication update", code == 200, f"code={code}")
+
+        code, payload, _ = c.request("DELETE", f"/api/v1/medications/{med_id}", auth=True)
+        check("medication delete", code == 200, f"code={code}")
 
     code, payload, _ = c.request(
         "POST",
