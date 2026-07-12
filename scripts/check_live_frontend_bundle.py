@@ -5,6 +5,7 @@ import re
 import urllib.request
 
 FE = "https://thyrot1.chinthakajayaweera1.workers.dev"
+EXPECTED_API = "https://thyro-t1.onrender.com/api/v1"
 
 
 def fetch(url: str) -> str:
@@ -20,15 +21,19 @@ def main() -> None:
     if not match:
         raise SystemExit(1)
     bundle = fetch(f"{FE}{match.group(0)}")
-    api = re.search(r'VITE_API_BASE_URL:"([^"]+)"', bundle)
-    env = re.search(r'VITE_APP_ENV:"([^"]+)"', bundle)
-    name = re.search(r'VITE_APP_NAME:"([^"]+)"', bundle)
-    print("VITE_API_BASE_URL", api.group(1) if api else "NOT_FOUND")
-    print("VITE_APP_ENV", env.group(1) if env else "NOT_FOUND")
-    print("VITE_APP_NAME", name.group(1) if name else "NOT_FOUND")
-    print("has_render", "thyro-t1.onrender.com" in bundle)
-    print("localhost_8000_present", "localhost:8000" in bundle)
-    print("active_apiBaseUrl_localhost", 'apiBaseUrl:"http://localhost:8000' in bundle)
+    print("expected_api_present", EXPECTED_API in bundle)
+    print("double_onrender", "onrender.com.onrender.com" in bundle)
+    print("localhost_8000_string_present", "localhost:8000" in bundle)
+    print(
+        "apiBaseUrl_localhost_literal",
+        'apiBaseUrl:"http://localhost:8000' in bundle,
+    )
+    print(
+        "google_client_id_embedded",
+        bool(re.search(r"apps\.googleusercontent\.com", bundle)),
+    )
+    print("client_secret_in_bundle", "client_secret" in bundle.lower())
+    print("forgot_route", "/forgot-password" in bundle)
 
 
 if __name__ == "__main__":
