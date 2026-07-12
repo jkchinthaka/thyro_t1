@@ -30,6 +30,39 @@ export interface LoginRequest {
   password: string;
 }
 
+export interface ForgotPasswordRequest {
+  email: string;
+}
+
+export interface ResetPasswordRequest {
+  token: string;
+  new_password: string;
+  confirm_password: string;
+}
+
+export interface VerifyEmailRequest {
+  token: string;
+}
+
+export interface ResendVerificationRequest {
+  email?: string;
+}
+
+export interface ChangePasswordRequest {
+  current_password: string;
+  new_password: string;
+  confirm_password: string;
+}
+
+export interface GoogleAuthRequest {
+  credential: string;
+}
+
+export interface MessageResponse {
+  success: boolean;
+  message: string;
+}
+
 export interface TokenResponse {
   access_token: string;
   token_type: string;
@@ -43,6 +76,7 @@ export interface AuthContextValue {
   isAuthenticated: boolean;
   role: UserRole | null;
   login: (payload: LoginRequest) => Promise<AuthUser>;
+  googleLogin: (credential: string) => Promise<AuthUser>;
   register: (payload: RegisterRequest) => Promise<void>;
   logout: () => Promise<void>;
   refreshSession: () => Promise<boolean>;

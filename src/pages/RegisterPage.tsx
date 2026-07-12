@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ChevronLeft, ArrowRight } from "lucide-react";
@@ -54,7 +54,7 @@ export function RegisterPage() {
         consent_accepted: values.consent,
         disclaimer_accepted: values.disclaimer,
       });
-      success("Account created successfully");
+      success("Account created successfully. Check your email if verification is required.");
       navigate(ROUTES.DASHBOARD, { replace: true });
     } catch (err) {
       const appErr = err as AppError;
@@ -254,8 +254,23 @@ export function RegisterPage() {
                   <input type="checkbox" className="mt-1 rounded" {...register("consent")} />
                   <span className="text-sm text-muted-foreground">
                     I agree to the{" "}
-                    <span className="text-primary font-semibold">Terms of Service</span> and{" "}
-                    <span className="text-primary font-semibold">Privacy Policy</span>
+                    <Link
+                      to={ROUTES.TERMS}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary font-semibold hover:underline"
+                    >
+                      Terms of Service
+                    </Link>{" "}
+                    and{" "}
+                    <Link
+                      to={ROUTES.PRIVACY}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary font-semibold hover:underline"
+                    >
+                      Privacy Policy
+                    </Link>
                   </span>
                 </label>
                 {errors.consent ? (
@@ -267,7 +282,17 @@ export function RegisterPage() {
                   <input type="checkbox" className="mt-1 rounded" {...register("disclaimer")} />
                   <span className="text-sm text-muted-foreground">
                     I understand ThyroCare AI provides supportive information only and is not a
-                    substitute for professional medical advice, diagnosis, or emergency care.
+                    substitute for professional medical advice, diagnosis, or emergency care. See
+                    the{" "}
+                    <Link
+                      to={ROUTES.MEDICAL_DISCLAIMER}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-primary font-semibold hover:underline"
+                    >
+                      medical disclaimer
+                    </Link>
+                    .
                   </span>
                 </label>
                 {errors.disclaimer ? (

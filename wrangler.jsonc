@@ -2,8 +2,9 @@
   "$schema": "./node_modules/wrangler/config-schema.json",
   "name": "thyrot1",
   "compatibility_date": "2026-07-11",
-  // Static SPA only — Cloudflare build command produces ./dist once.
+  // Static SPA served via Worker so CSP / security headers can be injected.
   // Do not add a Wrangler "build" command (avoids a second Vite build).
+  "main": "worker/index.ts",
   "workers_dev": true,
   "preview_urls": false,
   "observability": {
@@ -11,6 +12,7 @@
   },
   "assets": {
     "directory": "./dist",
+    "binding": "ASSETS",
     "not_found_handling": "single-page-application",
   },
 }

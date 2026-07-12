@@ -93,6 +93,8 @@ export const env = Object.freeze({
   appEnvironment,
   isDevelopment,
   isProduction: isProductionApp || isProductionBundle,
+  /** Present only when Google Sign-In is configured for this build. */
+  googleClientId: readEnv("VITE_GOOGLE_CLIENT_ID") ?? "",
 });
 
 export type AppEnv = typeof env;

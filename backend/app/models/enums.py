@@ -18,6 +18,15 @@ class AccountStatus(StrEnum):
     PENDING = "pending"
 
 
+class AuthActionPurpose(StrEnum):
+    EMAIL_VERIFICATION = "email_verification"
+    PASSWORD_RESET = "password_reset"
+
+
+class AuthIdentityProvider(StrEnum):
+    GOOGLE = "google"
+
+
 class MedicationStatus(StrEnum):
     ACTIVE = "active"
     COMPLETED = "completed"

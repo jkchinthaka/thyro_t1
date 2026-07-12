@@ -89,6 +89,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     [applySession],
   );
 
+  const googleLogin = useCallback(
+    async (credential: string) => {
+      const result = await authService.googleLogin({ credential });
+      applySession(result.access_token, result.user);
+      return result.user;
+    },
+    [applySession],
+  );
+
   const register = useCallback(
     async (payload: RegisterRequest) => {
       const result = await authService.register(payload);
@@ -114,11 +123,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       isAuthenticated: status === "authenticated" && user !== null,
       role: user?.role ?? null,
       login,
+      googleLogin,
       register,
       logout,
       refreshSession,
     }),
-    [user, status, login, register, logout, refreshSession],
+    [user, status, login, googleLogin, register, logout, refreshSession],
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

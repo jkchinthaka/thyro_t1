@@ -17,6 +17,26 @@ const LoginPage = lazy(() => import("@/pages/LoginPage").then((m) => ({ default:
 const RegisterPage = lazy(() =>
   import("@/pages/RegisterPage").then((m) => ({ default: m.RegisterPage })),
 );
+const ForgotPasswordPage = lazy(() =>
+  import("@/pages/ForgotPasswordPage").then((m) => ({ default: m.ForgotPasswordPage })),
+);
+const ResetPasswordPage = lazy(() =>
+  import("@/pages/ResetPasswordPage").then((m) => ({ default: m.ResetPasswordPage })),
+);
+const VerifyEmailPage = lazy(() =>
+  import("@/pages/VerifyEmailPage").then((m) => ({ default: m.VerifyEmailPage })),
+);
+const PrivacyPage = lazy(() =>
+  import("@/pages/legal/PrivacyPage").then((m) => ({ default: m.PrivacyPage })),
+);
+const TermsPage = lazy(() =>
+  import("@/pages/legal/TermsPage").then((m) => ({ default: m.TermsPage })),
+);
+const MedicalDisclaimerPage = lazy(() =>
+  import("@/pages/legal/MedicalDisclaimerPage").then((m) => ({
+    default: m.MedicalDisclaimerPage,
+  })),
+);
 const EmergencyPage = lazy(() =>
   import("@/pages/EmergencyPage").then((m) => ({ default: m.EmergencyPage })),
 );
@@ -95,6 +115,9 @@ export const router = createBrowserRouter([
         children: [
           { path: ROUTES.HOME, element: <LandingPage /> },
           { path: ROUTES.EMERGENCY, element: <EmergencyPage /> },
+          { path: ROUTES.PRIVACY, element: <PrivacyPage /> },
+          { path: ROUTES.TERMS, element: <TermsPage /> },
+          { path: ROUTES.MEDICAL_DISCLAIMER, element: <MedicalDisclaimerPage /> },
         ],
       },
       {
@@ -102,6 +125,9 @@ export const router = createBrowserRouter([
         children: [
           { path: ROUTES.LOGIN, element: <LoginPage /> },
           { path: ROUTES.REGISTER, element: <RegisterPage /> },
+          { path: ROUTES.FORGOT_PASSWORD, element: <ForgotPasswordPage /> },
+          { path: ROUTES.RESET_PASSWORD, element: <ResetPasswordPage /> },
+          { path: ROUTES.VERIFY_EMAIL, element: <VerifyEmailPage /> },
         ],
       },
       {

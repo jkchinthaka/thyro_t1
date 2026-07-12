@@ -29,6 +29,8 @@ class CollectionName(StrEnum):
     RESOURCES = "resources"
     NOTIFICATIONS = "notifications"
     AUDIT_LOGS = "audit_logs"
+    AUTH_ACTION_TOKENS = "auth_action_tokens"
+    AUTH_IDENTITIES = "auth_identities"
     SCHEMA_MIGRATIONS = "schema_migrations"
 
 

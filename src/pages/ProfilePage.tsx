@@ -1,12 +1,16 @@
 import { useCallback, useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Camera, Edit2 } from "lucide-react";
 import { Card, Badge, Btn, Input, LoadingState, ErrorState } from "@/components/common";
 import { BLUE, TEAL } from "@/constants/colors";
+import { ROUTES } from "@/constants/routes";
 import { useAuth } from "@/context/AuthContext";
 import { profileFormSchema, type ProfileFormSchemaValues } from "@/schemas/profileSchemas";
+import { changePasswordSchema, type ChangePasswordFormValues } from "@/schemas/authSchemas";
 import { getMyProfile, updateMyProfile } from "@/services/profileService";
+import { changePassword, resendVerification } from "@/services/authService";
 import { useToast } from "@/hooks/useToast";
 import { useDocumentTitle } from "@/hooks/useDocumentTitle";
 import type { AppError } from "@/types/api";
@@ -52,7 +56,8 @@ function labelFor(
 
 export function ProfilePage() {
   useDocumentTitle("Profile");
-  const { user: authUser } = useAuth();
+  const navigate = useNavigate();
+  const { user: authUser, logout, refreshSession } = useAuth();
   const { success, error: showError } = useToast();
   const [darkMode, setDarkMode] = useState(false);
   const [notifications, setNotifications] = useState(true);
@@ -65,6 +70,9 @@ export function ProfilePage() {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [conflict, setConflict] = useState(false);
   const [data, setData] = useState<PatientProfileResponse | null>(null);
+  const [passwordSubmitting, setPasswordSubmitting] = useState(false);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
+  const [resendBusy, setResendBusy] = useState(false);
 
   const {
     register,
@@ -82,6 +90,20 @@ export function ProfilePage() {
       emergency_contact_name: "",
       emergency_contact_phone: "",
       current_medication_summary: "",
+    },
+  });
+
+  const {
+    register: registerPassword,
+    handleSubmit: handlePasswordSubmit,
+    formState: { errors: passwordErrors },
+    reset: resetPasswordForm,
+  } = useForm<ChangePasswordFormValues>({
+    resolver: zodResolver(changePasswordSchema),
+    defaultValues: {
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: "",
     },
   });
 
@@ -140,6 +162,60 @@ export function ProfilePage() {
       }
     } finally {
       setSaving(false);
+    }
+  };
+
+  const onChangePassword = async (values: ChangePasswordFormValues) => {
+    if (passwordSubmitting) return;
+    setPasswordSubmitting(true);
+    setPasswordError(null);
+    try {
+      const result = await changePassword({
+        current_password: values.currentPassword,
+        new_password: values.newPassword,
+        confirm_password: values.confirmPassword,
+      });
+      resetPasswordForm();
+      success(result.message || "Password updated. Please sign in again.");
+      try {
+        await logout();
+      } catch {
+        // Session may already be revoked after password change.
+      }
+      navigate(ROUTES.LOGIN, { replace: true });
+    } catch (err) {
+      const appErr = err as AppError;
+      if (appErr?.status === 401) {
+        showError("Your session expired. Please sign in again.");
+        try {
+          await logout();
+        } catch {
+          // ignore
+        }
+        navigate(ROUTES.LOGIN, { replace: true });
+        return;
+      }
+      const message = appErr?.message || "Unable to change password.";
+      setPasswordError(message);
+      showError(message);
+    } finally {
+      setPasswordSubmitting(false);
+    }
+  };
+
+  const onResendVerification = async () => {
+    if (resendBusy) return;
+    setResendBusy(true);
+    try {
+      const result = await resendVerification();
+      success(result.message || "If verification is required, instructions will be sent.");
+      await refreshSession();
+      await loadProfile();
+    } catch (err) {
+      const appErr = err as AppError;
+      showError(appErr?.message || "Unable to resend verification email.");
+    } finally {
+      setResendBusy(false);
     }
   };
 
@@ -260,6 +336,9 @@ export function ProfilePage() {
               <div className="flex gap-2 mt-2 flex-wrap">
                 <Badge color="blue">{account.role}</Badge>
                 <Badge color="teal">{profile.profile_completion_percentage}% complete</Badge>
+                <Badge color={account.email_verified ? "green" : "amber"}>
+                  {account.email_verified ? "Email verified" : "Email unverified"}
+                </Badge>
                 {profile.rai_treatment_status ? (
                   <Badge color="green">{labelFor(RAI_OPTIONS, profile.rai_treatment_status)}</Badge>
                 ) : null}
@@ -533,45 +612,123 @@ export function ProfilePage() {
         )}
 
         {tab === "settings" && (
-          <Card className="space-y-4" role="tabpanel">
-            {settings.map((s) => (
-              <div
-                key={s.label}
-                className="flex items-center justify-between gap-4 py-3 border-b border-border last:border-0"
+          <Card className="space-y-6" role="tabpanel">
+            <div className="space-y-3">
+              <h3
+                className="text-base font-bold text-foreground"
+                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
               >
-                <div>
-                  <div className="font-semibold text-sm text-foreground">{s.label}</div>
-                  <div className="text-xs text-muted-foreground">{s.sub}</div>
-                </div>
-                <button
+                Email verification
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Status:{" "}
+                <span className="font-semibold text-foreground">
+                  {account.email_verified ? "Verified" : "Not verified"}
+                </span>
+              </p>
+              {!account.email_verified ? (
+                <Btn
                   type="button"
-                  role="switch"
-                  aria-checked={s.state}
-                  aria-label={s.label}
-                  onClick={() => s.set(!s.state)}
-                  className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
-                    s.state ? "bg-primary" : "bg-muted"
-                  }`}
+                  size="sm"
+                  variant="ghost"
+                  disabled={resendBusy}
+                  aria-busy={resendBusy}
+                  onClick={() => void onResendVerification()}
                 >
-                  <span
-                    className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${
-                      s.state ? "translate-x-7" : "translate-x-1"
-                    }`}
-                    aria-hidden="true"
-                  />
-                </button>
-              </div>
-            ))}
-            <div className="pt-2">
-              <Btn
-                variant="danger"
-                size="sm"
-                type="button"
-                disabled
-                title="Coming in a later phase"
+                  {resendBusy ? "Sending…" : "Resend verification email"}
+                </Btn>
+              ) : null}
+            </div>
+
+            <div className="border-t border-border pt-6 space-y-4">
+              <h3
+                className="text-base font-bold text-foreground"
+                style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}
               >
-                Delete Account
-              </Btn>
+                Change password
+              </h3>
+              <form
+                className="space-y-4 max-w-md"
+                onSubmit={handlePasswordSubmit(onChangePassword)}
+                noValidate
+              >
+                <Input
+                  label="Current password"
+                  type="password"
+                  autoComplete="current-password"
+                  error={passwordErrors.currentPassword?.message}
+                  {...registerPassword("currentPassword")}
+                />
+                <Input
+                  label="New password"
+                  type="password"
+                  autoComplete="new-password"
+                  error={passwordErrors.newPassword?.message}
+                  {...registerPassword("newPassword")}
+                />
+                <Input
+                  label="Confirm new password"
+                  type="password"
+                  autoComplete="new-password"
+                  error={passwordErrors.confirmPassword?.message}
+                  {...registerPassword("confirmPassword")}
+                />
+                {passwordError ? (
+                  <p className="text-sm text-red-600" role="alert">
+                    {passwordError}
+                  </p>
+                ) : null}
+                <Btn
+                  type="submit"
+                  size="sm"
+                  disabled={passwordSubmitting}
+                  aria-busy={passwordSubmitting}
+                >
+                  {passwordSubmitting ? "Updating…" : "Update password"}
+                </Btn>
+              </form>
+            </div>
+
+            <div className="border-t border-border pt-4 space-y-4">
+              {settings.map((s) => (
+                <div
+                  key={s.label}
+                  className="flex items-center justify-between gap-4 py-3 border-b border-border last:border-0"
+                >
+                  <div>
+                    <div className="font-semibold text-sm text-foreground">{s.label}</div>
+                    <div className="text-xs text-muted-foreground">{s.sub}</div>
+                  </div>
+                  <button
+                    type="button"
+                    role="switch"
+                    aria-checked={s.state}
+                    aria-label={s.label}
+                    onClick={() => s.set(!s.state)}
+                    className={`relative w-12 h-6 rounded-full transition-colors cursor-pointer flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                      s.state ? "bg-primary" : "bg-muted"
+                    }`}
+                  >
+                    <span
+                      className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                        s.state ? "translate-x-7" : "translate-x-1"
+                      }`}
+                      aria-hidden="true"
+                    />
+                  </button>
+                </div>
+              ))}
+              <div className="pt-2">
+                <Btn
+                  variant="danger"
+                  size="sm"
+                  type="button"
+                  disabled
+                  title="Coming in a later phase"
+                >
+                  Delete Account
+                </Btn>
+              </div>
             </div>
           </Card>
         )}

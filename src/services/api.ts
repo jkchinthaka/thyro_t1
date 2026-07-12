@@ -44,6 +44,11 @@ function shouldSkipRefresh(url?: string): boolean {
   return (
     url.includes("/auth/login") ||
     url.includes("/auth/register") ||
+    url.includes("/auth/google") ||
+    url.includes("/auth/forgot-password") ||
+    url.includes("/auth/reset-password") ||
+    url.includes("/auth/verify-email") ||
+    url.includes("/auth/resend-verification") ||
     url.includes("/auth/refresh") ||
     url.includes("/auth/logout")
   );

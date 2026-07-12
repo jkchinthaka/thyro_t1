@@ -203,6 +203,15 @@ class AuthService:
             )
             raise ForbiddenException(ACCOUNT_UNAVAILABLE)
 
+        if not user.password_auth_enabled:
+            await self.audit.record(
+                AuditActions.LOGIN_FAILED,
+                actor_user_id=user.id,
+                entity_id=user.id,
+                changes_summary="password_auth_disabled",
+            )
+            raise UnauthorizedException(GENERIC_INVALID)
+
         if (
             user.account_status == AccountStatus.PENDING
             and self.settings.require_email_verification

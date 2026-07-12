@@ -21,6 +21,7 @@ class UserDocument(SoftDeletableDocument):
     role: UserRole = UserRole.PATIENT
     account_status: AccountStatus = AccountStatus.PENDING
     email_verified: bool = False
+    password_auth_enabled: bool = True
     last_login_at: datetime | None = None
     failed_login_count: int = Field(default=0, ge=0)
     locked_until: datetime | None = None

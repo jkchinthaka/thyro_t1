@@ -89,6 +89,42 @@ INDEX_SPECS: tuple[IndexSpec, ...] = (
         expire_after_seconds=0,
         rationale="TTL cleanup of expired refresh tokens",
     ),
+    # auth_action_tokens
+    IndexSpec(
+        CollectionName.AUTH_ACTION_TOKENS.value,
+        "ux_auth_action_tokens_token_hash",
+        [("token_hash", ASCENDING)],
+        unique=True,
+        rationale="Lookup hashed email-verification / password-reset tokens",
+    ),
+    IndexSpec(
+        CollectionName.AUTH_ACTION_TOKENS.value,
+        "ix_auth_action_tokens_user_purpose",
+        [("user_id", ASCENDING), ("purpose", ASCENDING)],
+        rationale="Invalidate prior active tokens per user and purpose",
+    ),
+    IndexSpec(
+        CollectionName.AUTH_ACTION_TOKENS.value,
+        "ttl_auth_action_tokens_expires_at",
+        [("expires_at", ASCENDING)],
+        expire_after_seconds=0,
+        rationale="TTL cleanup for expired auth action tokens",
+    ),
+    # auth_identities
+    IndexSpec(
+        CollectionName.AUTH_IDENTITIES.value,
+        "ux_auth_identities_provider_subject",
+        [("provider", ASCENDING), ("provider_subject", ASCENDING)],
+        unique=True,
+        rationale="One Google subject maps to one identity",
+    ),
+    IndexSpec(
+        CollectionName.AUTH_IDENTITIES.value,
+        "ux_auth_identities_user_provider",
+        [("user_id", ASCENDING), ("provider", ASCENDING)],
+        unique=True,
+        rationale="At most one Google identity per user",
+    ),
     # medications
     IndexSpec(
         CollectionName.MEDICATIONS.value,

@@ -46,6 +46,64 @@ class LoginRequest(BaseModel):
     password: str = Field(min_length=1, max_length=128)
 
 
+class ForgotPasswordRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    email: EmailStr
+
+
+class ResetPasswordRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    token: str = Field(min_length=20, max_length=512)
+    new_password: str = Field(min_length=1, max_length=128)
+    confirm_password: str = Field(min_length=1, max_length=128)
+
+    @model_validator(mode="after")
+    def passwords_match(self) -> ResetPasswordRequest:
+        if self.new_password != self.confirm_password:
+            raise ValueError("Passwords do not match")
+        from app.core.passwords import validate_password_policy
+
+        validate_password_policy(self.new_password)
+        return self
+
+
+class VerifyEmailRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    token: str = Field(min_length=20, max_length=512)
+
+
+class ResendVerificationRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    email: EmailStr | None = None
+
+
+class ChangePasswordRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    current_password: str = Field(min_length=1, max_length=128)
+    new_password: str = Field(min_length=1, max_length=128)
+    confirm_password: str = Field(min_length=1, max_length=128)
+
+    @model_validator(mode="after")
+    def passwords_match(self) -> ChangePasswordRequest:
+        if self.new_password != self.confirm_password:
+            raise ValueError("Passwords do not match")
+        from app.core.passwords import validate_password_policy
+
+        validate_password_policy(self.new_password)
+        return self
+
+
+class GoogleAuthRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    credential: str = Field(min_length=20, max_length=8192)
+
+
 class AuthUserPublic(PublicIdSchema):
     full_name: str
     email: str

@@ -81,6 +81,54 @@ class Settings(BaseSettings):
         alias="REQUIRE_EMAIL_VERIFICATION",
     )
 
+    # Phase 13A — email delivery / recovery / Google
+    email_delivery_enabled: bool = Field(default=False, alias="EMAIL_DELIVERY_ENABLED")
+    email_provider: str = Field(default="smtp", alias="EMAIL_PROVIDER")
+    smtp_host: str = Field(default="", alias="SMTP_HOST")
+    smtp_port: int = Field(default=587, alias="SMTP_PORT")
+    smtp_username: str = Field(default="", alias="SMTP_USERNAME")
+    smtp_password: str = Field(default="", alias="SMTP_PASSWORD")
+    smtp_use_tls: bool = Field(default=True, alias="SMTP_USE_TLS")
+    smtp_from_email: str = Field(default="", alias="SMTP_FROM_EMAIL")
+    smtp_from_name: str = Field(default="ThyroCare AI", alias="SMTP_FROM_NAME")
+    frontend_public_url: str = Field(
+        default="http://localhost:5173",
+        alias="FRONTEND_PUBLIC_URL",
+    )
+    email_verification_enabled: bool = Field(default=False, alias="EMAIL_VERIFICATION_ENABLED")
+    email_verification_token_ttl_hours: int = Field(
+        default=24,
+        alias="EMAIL_VERIFICATION_TOKEN_TTL_HOURS",
+    )
+    password_reset_enabled: bool = Field(default=False, alias="PASSWORD_RESET_ENABLED")
+    password_reset_token_ttl_minutes: int = Field(
+        default=30,
+        alias="PASSWORD_RESET_TOKEN_TTL_MINUTES",
+    )
+    google_auth_enabled: bool = Field(default=False, alias="GOOGLE_AUTH_ENABLED")
+    google_client_id: str = Field(default="", alias="GOOGLE_CLIENT_ID")
+    auth_rate_limit_forgot_password: str = Field(
+        default="5/minute",
+        alias="AUTH_RATE_LIMIT_FORGOT_PASSWORD",
+    )
+    auth_rate_limit_reset_password: str = Field(
+        default="10/minute",
+        alias="AUTH_RATE_LIMIT_RESET_PASSWORD",
+    )
+    auth_rate_limit_verify_email: str = Field(
+        default="10/minute",
+        alias="AUTH_RATE_LIMIT_VERIFY_EMAIL",
+    )
+    auth_rate_limit_resend_verification: str = Field(
+        default="3/minute",
+        alias="AUTH_RATE_LIMIT_RESEND_VERIFICATION",
+    )
+    auth_rate_limit_change_password: str = Field(
+        default="5/minute",
+        alias="AUTH_RATE_LIMIT_CHANGE_PASSWORD",
+    )
+    auth_rate_limit_google: str = Field(default="10/minute", alias="AUTH_RATE_LIMIT_GOOGLE")
+
     # Phase 11 — safe assistant (default disabled)
     ai_assistant_enabled: bool = Field(default=False, alias="AI_ASSISTANT_ENABLED")
     llm_provider: str = Field(default="disabled", alias="LLM_PROVIDER")
@@ -159,6 +207,16 @@ class Settings(BaseSettings):
                 raise ValueError("Production AI_ASSISTANT_ENABLED requires LLM_API_KEY")
             if not self.llm_model.strip():
                 raise ValueError("Production AI_ASSISTANT_ENABLED requires LLM_MODEL")
+        if self.email_delivery_enabled:
+            if self.email_provider.strip().lower() == "smtp":
+                if not self.smtp_host.strip() or not self.smtp_from_email.strip():
+                    raise ValueError(
+                        "EMAIL_DELIVERY_ENABLED with SMTP requires SMTP_HOST and SMTP_FROM_EMAIL"
+                    )
+        if self.google_auth_enabled and not self.google_client_id.strip():
+            raise ValueError("GOOGLE_AUTH_ENABLED requires GOOGLE_CLIENT_ID")
+        if not self.frontend_public_url.strip():
+            raise ValueError("FRONTEND_PUBLIC_URL is required")
 
 
 @lru_cache

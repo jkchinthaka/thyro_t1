@@ -102,6 +102,15 @@ class MemoryCollection:
                     from pymongo.errors import DuplicateKeyError
 
                     raise DuplicateKeyError("E11000 duplicate")
+        if "provider" in payload and "provider_subject" in payload:
+            for existing in self.docs:
+                if (
+                    existing.get("provider") == payload["provider"]
+                    and existing.get("provider_subject") == payload["provider_subject"]
+                ):
+                    from pymongo.errors import DuplicateKeyError
+
+                    raise DuplicateKeyError("E11000 duplicate identity")
         if "medication_id" in payload and "scheduled_for" in payload:
             for existing in self.docs:
                 if (
@@ -149,6 +158,23 @@ class MemoryCollection:
             modified_count = modified
 
         return _Result()
+
+    async def find_one_and_update(
+        self,
+        query: dict[str, Any],
+        update: dict[str, Any],
+        *,
+        return_document: bool = False,
+    ) -> dict[str, Any] | None:
+        for doc in self.docs:
+            if self._matches(doc, query):
+                if "$set" in update:
+                    doc.update(update["$set"])
+                if "$inc" in update:
+                    for key, amount in update["$inc"].items():
+                        doc[key] = int(doc.get(key, 0)) + int(amount)
+                return deepcopy(doc) if return_document else None
+        return None
 
     async def update_many(self, query: dict[str, Any], update: dict[str, Any]) -> Any:
         modified = 0
